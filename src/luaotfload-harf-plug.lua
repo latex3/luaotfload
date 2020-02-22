@@ -189,20 +189,21 @@ local function itemize(head, fontid, direction)
 
   for n, id, subtype in direct.traverse(head) do
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
-    local skip = false
+    local skip = lastskip
 
     if id == glyph_t then
       if is_char(n) and getfont(n) == fontid then
         code = getchar(n)
+        skip = false
       else
         skip = true
       end
     elseif id == glue_t and subtype == spaceskip_t then
       code = 0x0020 -- SPACE
-      skip = lastskip
     elseif id == disc_t then
       if uses_font(n, fontid) then
         code = 0x00AD -- SOFT HYPHEN
+        skip = false
       else
         skip = true
       end
@@ -217,10 +218,8 @@ local function itemize(head, fontid, direction)
         -- Pop the last direction from the stack.
         currdir = tableremove(dirstack)
       end
-      skip = lastskip
     elseif id == localpar_t then
       currdir = getdir(n)
-      skip = lastskip
     end
 
     if not skip and texlig then

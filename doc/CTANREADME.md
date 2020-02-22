@@ -1,8 +1,8 @@
 # The Luaotfload Package
 
-VERSION: 3.1301-dev
+VERSION: 3.1302-dev
 
-DATE: 2020-02-02
+DATE: 2020-02-23
 
 
 ## Description

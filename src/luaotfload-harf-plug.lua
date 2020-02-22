@@ -313,7 +313,7 @@ function shape(head, node, run)
 
   local fontdata = font.getfont(fontid)
   local hbdata = fontdata.hb
-  local spec = hbdata.spec
+  local spec = fontdata.specification
   local features = spec.hb_features
   local options = spec.features.raw
   local hbshared = hbdata.shared
@@ -848,10 +848,6 @@ local function shape_run(head, current, run)
   if not run.skip then
     -- Font loaded with our loader and an HarfBuzz face is present, do our
     -- shaping.
-    local fontid = run.font
-    local fontdata = font.getfont(fontid)
-    local options = fontdata.specification.features.raw
-
     local glyphs, offset
     head, glyphs, offset = shape(head, current, run)
     return offset, tonodes(head, current, run, glyphs)

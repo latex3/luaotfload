@@ -338,7 +338,6 @@ local function scalefont(data, spec)
     },
     hb = {
       scale = scale,
-      spec = spec,
       palette = palette,
       shared = data,
       hscale = hscale,

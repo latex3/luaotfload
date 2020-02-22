@@ -157,11 +157,11 @@ local function get_glyph_color (font_id, char)
     local properties = tfmdata and tfmdata.properties
     local font_color = properties and properties.color_rgb
     local font_transparent = properties and properties.color_a
-    if type(font_color) == "table" and type(font_transparent) == "table" then
+    if type(font_color) == "table" then
         local char_tbl = tfmdata.characters[char]
         char = char_tbl and (char_tbl.index or char)
         font_color = char and font_color[char] or font_color.default
-        font_transparent = char and font_transparent[char] or font_transparent.default
+        font_transparent = font_transparent and (char and font_transparent[char] or font_transparent.default)
     end
     return font_color, font_transparent
 end

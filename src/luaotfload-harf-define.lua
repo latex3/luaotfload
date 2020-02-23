@@ -219,20 +219,6 @@ local function sanitize(psname)
   return psname:gsub('[][\0-\32\127-\255(){}<>/%%]', '-')
 end
 
--- Ligatures. The value is a character "ligature" table as described in the
--- manual.
-local tlig ={
-  [0x2013] = { [0x002D] = { char = 0x2014 } }, -- [---]
-  [0x002D] = { [0x002D] = { char = 0x2013 } }, -- [--]
-  [0x0060] = { [0x0060] = { char = 0x201C } }, -- [``]
-  [0x0027] = { [0x0027] = { char = 0x201D } }, -- ['']
-  [0x0021] = { [0x0060] = { char = 0x00A1 } }, -- [!`]
-  [0x003F] = { [0x0060] = { char = 0x00BF } }, -- [?`]
-  [0x002C] = { [0x002C] = { char = 0x201E } }, -- [,,]
-  [0x003C] = { [0x003C] = { char = 0x00AB } }, -- [<<]
-  [0x003E] = { [0x003E] = { char = 0x00BB } }, -- [>>]
-}
-
 local function scalefont(data, spec)
   if not data then return data, spec end
   local size = spec.size
@@ -282,20 +268,6 @@ local function scalefont(data, spec)
     local count = hbface:ot_color_palette_get_count()
     if paletteidx <= count then
       palette = hbface:ot_color_palette_get_colors(paletteidx)
-    end
-  end
-
-  local slantfactor = nil
-  if features.slant then
-    slantfactor = tonumber(features.slant) * 1000
-  end
-
-  if features.tlig then
-    for char in next, characters do
-      local ligatures = tlig[char]
-      if ligatures then
-        characters[char].ligatures = ligatures
-      end
     end
   end
 

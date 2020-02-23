@@ -160,13 +160,65 @@ otfregister {
     end,
   },
 }
-  -- if features.tlig then
-  --   for char in next, characters do
-  --     local ligatures = tlig[char]
-  --     if ligatures then
-  --       characters[char].ligatures = ligatures
-  --     end
-  --   end
-  -- end
+
+-- Legacy TeX Input Method Disguised as Font Ligatures hack.
+--
+-- Single replacements, keyed by character to replace. Handled separately
+-- because TeX ligaturing mechanism does not support one-to-one replacements.
+local trep = {
+  [0x0022] = 0x201D, -- ["]
+  [0x0027] = 0x2019, -- [']
+  [0x0060] = 0x2018, -- [`]
+}
+
+-- Ligatures. The value is a character "ligature" table as described in the
+-- manual.
+local tlig ={
+  [0x2013] = { [0x002D] = { char = 0x2014 } }, -- [---]
+  [0x002D] = { [0x002D] = { char = 0x2013 } }, -- [--]
+  [0x0060] = { [0x0060] = { char = 0x201C } }, -- [``]
+  [0x0027] = { [0x0027] = { char = 0x201D } }, -- ['']
+  [0x0021] = { [0x0060] = { char = 0x00A1 } }, -- [!`]
+  [0x003F] = { [0x0060] = { char = 0x00BF } }, -- [?`]
+  [0x002C] = { [0x002C] = { char = 0x201E } }, -- [,,]
+  [0x003C] = { [0x003C] = { char = 0x00AB } }, -- [<<]
+  [0x003E] = { [0x003E] = { char = 0x00BB } }, -- [>>]
+}
+
+otfregister {
+  name = 'tlig',
+  description = 'Traditional TeX ligatures',
+  default = false,
+  manipulators = {
+    plug = function(tfmdata, _, value)
+      local characters = tfmdata.characters
+      for codepoint, ligatures in next, tlig do
+        local char = characters[codepoint]
+        if char then
+          char.ligatures = ligatures
+        end
+      end
+    end,
+  },
+  processors = {
+    plug = function(head, font)
+      local n = head
+      while n do
+        local c, id = is_char(n, font)
+        local rep = trep[c]
+        if rep then
+          setchar(n, rep)
+        elseif id == disc_t then
+          local pre, post, replace = getdisc(n)
+          pre = szssprocessor(pre, font)
+          post = szssprocessor(post, font)
+          replace = szssprocessor(replace, font)
+          setdisc(n, pre, post, replace)
+        end
+        n = getnext(n)
+      end
+    end,
+  },
+}
 
 --- vim:sw=2:ts=2:expandtab:tw=71

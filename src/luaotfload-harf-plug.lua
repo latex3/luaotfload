@@ -166,22 +166,11 @@ end
 
 local process
 
--- Legacy TeX Input Method Disguised as Font Ligatures hack.
---
--- Single replacements, keyed by character to replace. Handled separately
--- because TeX ligaturing mechanism does not support one-to-one replacements.
-local trep = {
-  [0x0022] = 0x201D, -- ["]
-  [0x0027] = 0x2019, -- [']
-  [0x0060] = 0x2018, -- [`]
-}
-
 local function itemize(head, fontid, direction)
   local fontdata = font.getfont(fontid)
   local hbdata   = fontdata and fontdata.hb
   local spec     = fontdata and fontdata.specification
   local options  = spec and spec.features.raw
-  local texlig   = options and options.tlig
 
   local runs, codes = {}, {}
   local dirstack = {}
@@ -222,13 +211,6 @@ local function itemize(head, fontid, direction)
       end
     elseif id == localpar_t then
       currdir = getdir(n)
-    end
-
-    if not skip and texlig then
-      local replacement = trep[code]
-      if replacement then
-        code = replacement
-      end
     end
 
     codes[#codes + 1] = code

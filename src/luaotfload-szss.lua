@@ -80,4 +80,61 @@ otfregister {
   },
 }
 
+-- harf-only features (for node they are implemented in the fontloader
+
+otfregister {
+  name = 'slant',
+  description = 'Fake slant',
+  default = false,
+  manipulators = {
+    plug = function(tfmdata, _, value, ...)
+      value = tonumber(value)
+      if not value then
+        error[[Invalid slant value]]
+      end
+      tfmdata.slant = value * 1000
+    end,
+  },
+}
+
+otfregister {
+  name = 'extend',
+  description = 'Fake bold',
+  default = false,
+  manipulators = {
+    plug = function(tfmdata, _, value)
+      value = tonumber(value)
+      if not value then
+        error[[Invalid extend value]]
+      end
+      tfmdata.extend = value * 1000
+      tfmdata.hb.hscale = tfmdata.units_per_em * value
+    end,
+  },
+}
+
+otfregister {
+  name = 'squeeze',
+  description = 'Fake squeeze',
+  default = false,
+  manipulators = {
+    plug = function(tfmdata, _, value)
+      value = tonumber(value)
+      if not value then
+        error[[Invalid squeeze value]]
+      end
+      tfmdata.squeeze = value * 1000
+      tfmdata.hb.vscale = tfmdata.units_per_em * value
+    end,
+  },
+}
+  -- if features.tlig then
+  --   for char in next, characters do
+  --     local ligatures = tlig[char]
+  --     if ligatures then
+  --       characters[char].ligatures = ligatures
+  --     end
+  --   end
+  -- end
+
 --- vim:sw=2:ts=2:expandtab:tw=71

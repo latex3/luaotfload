@@ -285,20 +285,6 @@ local function scalefont(data, spec)
     slantfactor = tonumber(features.slant) * 1000
   end
 
-  local hscale = upem
-  local extendfactor = nil
-  if features.extend then
-    extendfactor = tonumber(features.extend) * 1000
-    hscale = hscale * tonumber(features.extend)
-  end
-
-  local vscale = upem
-  local squeezefactor = nil
-  if features.squeeze then
-    squeezefactor = tonumber(features.squeeze) * 1000
-    vscale = vscale * tonumber(features.squeeze)
-  end
-
   if features.tlig then
     for char in next, characters do
       local ligatures = tlig[char]
@@ -322,8 +308,6 @@ local function scalefont(data, spec)
     tounicode = 1,
     nomath = true,
     format = data.fonttype,
-    slant = slantfactor,
-    extend = extendfactor,
     squeeze = squeezefactor,
     characters = characters,
     parameters = {
@@ -340,8 +324,8 @@ local function scalefont(data, spec)
       scale = scale,
       palette = palette,
       shared = data,
-      hscale = hscale,
-      vscale = vscale,
+      hscale = upem,
+      vscale = upem,
     },
     specification = spec,
     shared = {},

@@ -324,15 +324,15 @@ luaotfload.main = function ()
 
     initialize "features"     --- font request and feature handling
 
+    if harfstatus then
+        loadmodule "harf-define"
+        loadmodule "harf-plug"
+    end
     loadmodule "letterspace"  --- extra character kerning
     loadmodule "embolden"     --- fake bold
     loadmodule "notdef"       --- missing glyph handling
     loadmodule "suppress"     --- suppress ligatures by adding ZWNJ
     loadmodule "szss"       --- missing glyph handling
-    if harfstatus then
-        loadmodule "harf-define"
-        loadmodule "harf-plug"
-    end
     initialize "auxiliary"    --- additional high-level functionality
     loadmodule "tounicode"
 

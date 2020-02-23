@@ -25,6 +25,11 @@ local gsub = string.gsub
 local hb = luaotfload.harfbuzz
 local scriptlang_to_harfbuzz = require'luaotfload-scripts'.to_harfbuzz
 
+local harf_settings = luaotfload.harf or {}
+luaotfload.harf = harf_settings
+
+harf_settings.default_buf_flags = hb.Buffer.FLAGS_DEFAULT or 0
+
 local hbfonts = {}
 
 local cfftag  = hb.Tag.new("CFF ")
@@ -326,6 +331,7 @@ local function scalefont(data, spec)
       shared = data,
       hscale = upem,
       vscale = upem,
+      buf_flags = harf_settings.default_buf_flags,
     },
     specification = spec,
     shared = {},

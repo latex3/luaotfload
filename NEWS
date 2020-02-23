@@ -3,6 +3,7 @@ Change History
 XXXX-XX-XX luaotfload v3.13
     * a missing U+1E9E (Capital ß) in a font is replaced by 
       SS instead of giving a missing character.
+    * extended the color handling to be compatible with the luacolor package  
     
 2020-02-02 luaotfload v3.12
     * new experimental feature multiscript

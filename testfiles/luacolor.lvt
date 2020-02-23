@@ -1,0 +1,21 @@
+\input{regression-test}
+\documentclass{report}
+\usepackage{xcolor,fontspec}
+
+\setmainfont{texgyreheros}[Color=green]
+\usepackage{luacolor,fontspec}
+\directlua{
+  luaotfload.add_colorscheme("my_scheme", {
+    ["FF0000"] = {"b"},
+    ["0000FF"] = {"z"},
+  })
+}
+\newfontface\colorglyphs{texgyretermes}[RawFeature={color=my_scheme}]
+\newfontface\colorfont{texgyrechorus}[RawFeature={color=FF0000}]
+\begin{document}
+\START \showoutput
+
+blubzzz {\colorglyphs blubzzz} {\colorfont blubzzz}
+
+{\color{green}blubzzz {\colorglyphs blubzzz} {\colorfont blubzzz}}
+\end{document}

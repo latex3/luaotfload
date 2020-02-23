@@ -1,6 +1,6 @@
 
-packageversion= "3.1301-dev"
-packagedate   = "2020-02-02"
+packageversion= "3.1302-dev"
+packagedate   = "2020-02-23"
 fontloaderdate= "2020-01-26"
 packagedesc   = "harf"
 
@@ -108,7 +108,8 @@ if os.env["CONTEXTPATH"] then
   end
 else
   -- travis or somewhere else ...
-  excludetests = {"luatex-ja","aux-resolve-fontname"}
+  -- luacolor will fail until update ...
+  excludetests = {"luatex-ja","aux-resolve-fontname","luacolor"}
 end
 
 ---------------------------------------------

@@ -1,0 +1,11 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+\begin{document}
+\font\lmrI "Latin Modern Roman:mode=harf"
+\font\lmrII "Latin Modern Roman:mode=harf,slant=1"
+\font\lmrIII "Latin Modern Roman:mode=harf,extend=1.1"
+\font\lmrIV "Latin Modern Roman:mode=harf,squeeze=1.5"
+\font\lmrV "Latin Modern Roman:mode=harf,slant=1,extend=2,squeeze=0.5"
+\lmrI abc \lmrII def \lmrIII ghi \lmrIV jkl \lmrV mno
+\end{document}

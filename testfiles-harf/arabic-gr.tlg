@@ -19,11 +19,10 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TRT
-....\kern-0.00488 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 -3520:+627200
-....\kern-1.60156 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 -3840:+627200
+....\kern-1.60645 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201D5 +0:-196160
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120236 +0:+1600
@@ -405,11 +404,10 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TRT
-....\kern-0.00488 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 -3520:+627200
-....\kern-1.60156 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 -3840:+627200
+....\kern-1.60645 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201D5 +0:-196160
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120236 +0:+1600
@@ -1545,12 +1543,11 @@ Completed box being shipped out [1]
 ....\hbox(0.0+0.0)x15.0, direction TRT
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اُ" 064F +140800:+635520
-....\kern-0.00488 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "رْ" 0652 +128320:+412800
-....\kern1.16699 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "رْ" 0652 +128000:+412800
+....\kern1.16211 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0631 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\pdfliteral page <lua data reference ...>

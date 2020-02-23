@@ -83,23 +83,8 @@ otfregister {
 -- harf-only features (for node they are implemented in the fontloader
 
 otfregister {
-  name = 'slant',
-  description = 'Fake slant',
-  default = false,
-  manipulators = {
-    plug = function(tfmdata, _, value, ...)
-      value = tonumber(value)
-      if not value then
-        error[[Invalid slant value]]
-      end
-      tfmdata.slant = value * 1000
-    end,
-  },
-}
-
-otfregister {
   name = 'extend',
-  description = 'Fake bold',
+  description = 'Fake extend',
   default = false,
   manipulators = {
     plug = function(tfmdata, _, value)
@@ -109,6 +94,37 @@ otfregister {
       end
       tfmdata.extend = value * 1000
       tfmdata.hb.hscale = tfmdata.units_per_em * value
+      local parameters = tfmdata.parameters
+      parameters.slant = parameters.slant * value
+      parameters.space = parameters.space * value
+      parameters.space_stretch = parameters.space_stretch * value
+      parameters.space_shrink = parameters.space_shrink * value
+      parameters.quad = parameters.quad * value
+      parameters.extra_space = parameters.extra_space * value
+      local done = {}
+      for _, char in next, tfmdata.characters do
+        if char.width and not done[char] then
+          char.width = char.width * value
+          done[char] = true
+        end
+      end
+    end,
+  },
+}
+
+otfregister {
+  name = 'slant',
+  description = 'Fake slant',
+  default = false,
+  manipulators = {
+    plug = function(tfmdata, _, value)
+      value = tonumber(value)
+      if not value then
+        error[[Invalid slant value]]
+      end
+      tfmdata.slant = value * 1000
+      local parameters = tfmdata.parameters
+      parameters.slant = parameters.slant + value * 65536
     end,
   },
 }
@@ -125,6 +141,22 @@ otfregister {
       end
       tfmdata.squeeze = value * 1000
       tfmdata.hb.vscale = tfmdata.units_per_em * value
+      local parameters = tfmdata.parameters
+      parameters.slant = parameters.slant / value
+      parameters.x_height = parameters.x_height * value
+      parameters[8] = parameters[8] * value
+      local done = {}
+      for _, char in next, tfmdata.characters do
+        if not done[char] then
+          if char.height then
+            char.height = char.height * value
+          end
+          if char.depth then
+            char.depth = char.depth * value
+          end
+          done[char] = true
+        end
+      end
     end,
   },
 }

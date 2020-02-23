@@ -622,6 +622,7 @@ local function tonodes(head, node, run, glyphs)
   local space = fontdata.parameters.space
   local characters = fontdata.characters
   local hbdata = fontdata.hb
+  local hfactor = (fontdata.extend or 1000) / 1000
   local palette = hbdata.palette
   local hbshared = hbdata.shared
   local hbface = hbshared.face
@@ -832,7 +833,7 @@ local function tonodes(head, node, run, glyphs)
             setprop(node, endactual_p, true)
           end
           local x_advance = glyph.x_advance
-          local width = fontglyph.width
+          local width = fontglyph.width * hfactor
           if width ~= x_advance then
             -- The engine always uses the glyph width from the font, so we need
             -- to insert a kern node if the x advance is different.

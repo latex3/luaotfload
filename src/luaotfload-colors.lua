@@ -227,9 +227,9 @@ local function node_colorize (head, toplevel, current_color, current_transparent
     end
 
     if toplevel then
-        local nn = nodetail(n_list)
+        local nn = nodetail(head)
         head, nn, current_color = color_whatsit(head, nn, color_stack, current_color, nil, true)
-        head, nn, current_transparent = color_whatsit(head, nn, transparent_stack, current_color, nil, true)
+        head, nn, current_transparent = color_whatsit(head, nn, transparent_stack, current_transparent, nil, true)
     end
 
     setattribute(head, color_attr, 1)

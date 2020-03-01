@@ -177,7 +177,7 @@ local function node_colorize (head, toplevel, current_color, current_transparent
     while n do
         local n_id = getid(n)
 
-        if n_id == hlist_t or n_id == vlist_t then
+        if n_id == hlist_t then
             local n_list = getlist(n)
             if getattribute(n_list, color_attr) then
                 head, n, current_color = color_whatsit(head, n, color_stack, current_color, nil)
@@ -299,8 +299,7 @@ add_color_callback = function ( )
                         color_callback_name)
         add_to_callback("hpack_filter",
                         function (head, groupcode)
-                            if  groupcode == "hbox"          or
-                                groupcode == "adjusted_hbox" or
+                            if  groupcode == "adjusted_hbox" or
                                 groupcode == "align_set"     then
                                 head = color_handler(head)
                             end

@@ -126,7 +126,6 @@ local vlist_t           = nodetype("vlist")
 local whatsit_t         = nodetype("whatsit")
 local disc_t            = nodetype("disc")
 local colorstack_t      = node.subtype("pdf_colorstack")
-local mlist_to_hlist    = node.mlist_to_hlist
 
 local color_callback
 local color_attr        = luatexbase.new_attribute("luaotfload_color_attribute")
@@ -287,12 +286,6 @@ local color_callback_name      = "luaotfload.color_handler"
 local color_callback_activated = 0
 local add_to_callback          = luatexbase.add_to_callback
 
---- unit -> bool
-local function mlist_to_hlist_initial ()
-    local cdesc = luatexbase.callback_descriptions "mlist_to_hlist"
-    return cdesc and cdesc[1] == color_callback_name
-end
-
 --- unit -> unit
 add_color_callback = function ( )
     color_callback = config.luaotfload.run.color_callback
@@ -314,11 +307,8 @@ add_color_callback = function ( )
                             return head
                         end,
                         color_callback_name)
-        add_to_callback("mlist_to_hlist",
-                        function (head, display_type, need_penalties)
-                            if mlist_to_hlist_initial () then
-                                head = mlist_to_hlist(head, display_type, need_penalties)
-                            end
+        add_to_callback("post_mlist_to_hlist_filter",
+                        function (head, display_type)
                             if display_type == "text" then
                                 return head
                             end

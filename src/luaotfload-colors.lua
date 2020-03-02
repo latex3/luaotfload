@@ -47,6 +47,7 @@ local getfont               = nodedirect.getfont
 local getchar               = nodedirect.getchar
 local getlist               = nodedirect.getlist
 local getdisc               = nodedirect.getdisc
+local getleader             = nodedirect.getleader
 local getsubtype            = nodedirect.getsubtype
 local getnext               = nodedirect.getnext
 local nodetail              = nodedirect.tail
@@ -125,6 +126,7 @@ local hlist_t           = nodetype("hlist")
 local vlist_t           = nodetype("vlist")
 local whatsit_t         = nodetype("whatsit")
 local disc_t            = nodetype("disc")
+local glue_t            = nodetype("glue")
 local colorstack_t      = node.subtype("pdf_colorstack")
 
 local color_callback
@@ -196,6 +198,20 @@ local function node_colorize (head, toplevel, current_color, current_transparent
             local n_pre, n_post, n_replace = getdisc(n)
             n_replace, current_color, current_transparent = node_colorize(n_replace, false, current_color, current_transparent)
             setdisc(n, n_pre, n_post, n_replace)
+
+        elseif n_id == glue_t then
+            if getsubtype(n) >= 100 then
+                local n_leader = getleader(n)
+                if getid(n_leader) == hlist_t then
+                    -- firstly, reset colors
+                    head, n, current_color = color_whatsit(head, n, color_stack, current_color, nil)
+                    head, n, current_transparent = color_whatsit(head, n, transparent_stack, current_transparent, nil)
+                    -- toplevel is set to true
+                    local n_list = getlist(n_leader)
+                    n_list, current_color, current_transparent = node_colorize(n_list, true, current_color, current_transparent)
+                    setfield(n_leader, "head", n_list)
+                end
+            end
 
         elseif n_id == glyph_t then
             --- colorization is restricted to those fonts

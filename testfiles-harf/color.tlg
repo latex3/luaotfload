@@ -21,7 +21,7 @@ Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 Inserting `luaotfload.color_handler' at position 1 in `post_linebreak_filter'.
 Inserting `luaotfload.color_handler' at position 2 in `hpack_filter'.
-Inserting `luaotfload.color_handler' at position 1 in `mlist_to_hlist'.
+Inserting `luaotfload.color_handler' at position 1 in `post_mlist_to_hlist_filter'.
 Completed box being shipped out [1]
 \vbox(633.0+0.03)x407.0, direction TLT
 .\glue 16.0

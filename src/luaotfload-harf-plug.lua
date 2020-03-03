@@ -878,7 +878,7 @@ local function shape_run(head, current, run)
   end
 end
 
-function process(head, font, direction)
+function process(head, font, _attr, direction)
   local newhead, current = head, head
   local runs = itemize(head, font, direction)
 

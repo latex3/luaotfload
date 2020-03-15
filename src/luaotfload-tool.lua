@@ -42,7 +42,7 @@ This file is a wrapper for the luaotfload font names module
 (luaotfload-database.lua). It is part of the luaotfload bundle, please
 see the luaotfload documentation for more info. Report bugs to
 
-    \url{https://github.com/lualatex/luaotfload/issues}.
+    \url{https://github.com/latex3/luaotfload/issues}.
 
 --doc]]--
 
@@ -340,7 +340,7 @@ local about = [[
 %s:
         Luaotfload font management and diagnostic utility.
         License: GNU GPL v2.0.
-        Report problems to <https://github.com/lualatex/luaotfload/issues>
+        Report problems to <https://github.com/latex3/luaotfload/issues>
 ]]
 
 local function version_msg ( )

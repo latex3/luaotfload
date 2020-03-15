@@ -307,9 +307,9 @@ else
     local https = require "ssl.https"
 
     local gh_api_root     = [[https://api.github.com]]
-    local release_url     = [[https://github.com/lualatex/luaotfload/releases]]
-    local luaotfload_repo = [[lualatex/luaotfload]]
-    local user_agent      = [[lualatex/luaotfload integrity check]]
+    local release_url     = [[https://github.com/latex3/luaotfload/releases]]
+    local luaotfload_repo = [[latex3/luaotfload]]
+    local user_agent      = [[latex3/luaotfload integrity check]]
     local shortbytes = 8
 
     local function gh_shortrevision (rev)
@@ -681,7 +681,7 @@ local function diagnose (job)
                         github:
 
                             × http://www.ctan.org/pkg/luaotfload 
-                            × https://github.com/lualatex/luaotfload/releases
+                            × https://github.com/latex3/luaotfload/releases
 
                         If you are uncertain as to how to proceed, then
                         ask on the lualatex mailing list:

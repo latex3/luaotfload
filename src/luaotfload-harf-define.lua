@@ -116,6 +116,7 @@ local function loadfont(spec)
     -- too slow.
     local glyphcount = hbface:get_glyph_count()
     local glyphs = {}
+    local autoitalic = slant ~= 0 and 20 or nil -- the magic 20 is taken from ConTeXt where it came from Dohyun Kim. We keep it to be metric compatible as far as possible
     for gid = 0, glyphcount - 1 do
       local width = hbfont:get_glyph_h_advance(gid)
       local height, depth, italic = nil, nil, nil
@@ -123,8 +124,9 @@ local function loadfont(spec)
       if extents then
         height = extents.y_bearing
         depth = extents.y_bearing + extents.height
-        if extents.x_bearing < 0 then
-          italic = -extents.x_bearing
+        local right_bearing = extents.x_bearing + extents.width - width
+        if autoitalic and right_bearing > -autoitalic then
+          italic = right_bearing + autoitalic
         end
       end
       glyphs[gid] = {

@@ -201,6 +201,7 @@ otfregister {
     end,
   },
   processors = {
+    position=1,
     plug = function(head, font)
       local n = head
       while n do

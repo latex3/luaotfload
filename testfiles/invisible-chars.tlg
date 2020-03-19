@@ -9,7 +9,7 @@ Completed box being shipped out [1]
 ...\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
-..\vbox(550.0+0.0)x345.0, glue set 516.18488fil, direction TLT
+..\vbox(550.0+0.0)x345.0, glue set 498.38681fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 0.0
 ...\hbox(12.2+8.76)x345.0, glue set 314.72fil, direction TLT
@@ -35,6 +35,23 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\amiri ي
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\lineskip) 1.0
+...\hbox(8.04+8.76)x345.0, glue set 314.72fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\kern-5.84 (font)
+....\amiri  
+....\amiri ي
+....\kern-5.84 (font)
+....\amiri  
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

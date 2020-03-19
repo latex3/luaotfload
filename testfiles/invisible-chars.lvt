@@ -6,6 +6,10 @@
 \amiri
 \char"200Dي\char"200D
 
+\font\amiri={file:amiri-regular.ttf:invisible=remove} at 20pt
+\amiri
+\char"200Dي\char"200D
+
 \font\amiri={file:amiri-regular.ttf:} at 20pt
 \amiri
 \char"200Dي\char"200D

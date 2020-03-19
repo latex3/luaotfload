@@ -30,6 +30,9 @@ local protect_glyph      = node.direct.protect_glyph
 local remove             = node.direct.remove
 local setfont            = node.direct.setfont
 local traverse_char      = node.direct.traverse_char
+local setchar            = node.direct.setchar
+local getwidth           = node.direct.getwidth
+local setmove            = luaotfload.fontloader.nodes.injections.setmove
 
 -- According to DerivedCoreProperties.txt, Default_Ignorable_Code_Point
 -- is generated from:
@@ -53,7 +56,7 @@ local ignorable_codepoints do
     end
     return table
   end
-  local entry = lpeg.Cg(codepoint * ';' * (1-lpeg.P';')^0 * ';Cf;' * lpeg.Cc(true))^-1 * (1-lpeg.P'\n')^0 * '\n'
+  local entry = lpeg.Cg(codepoint * ';' * (1-lpeg.P';')^0 * ';Cf;' * lpeg.Cc'ignore')^-1 * (1-lpeg.P'\n')^0 * '\n'
   local file = lpeg.Cf(
       lpeg.Ct''
     * entry^0
@@ -61,8 +64,8 @@ local ignorable_codepoints do
   local f = io.open(kpse.find_file"UnicodeData.txt")
   ignorable_codepoints = file:match(f:read'*a')
   f:close()
-  entry = lpeg.Cg(codepoint_range * sep * ('Other_Default_Ignorable_Code_Point' * lpeg.Cc(true)
-                                               + 'Variation_Selector' * lpeg.Cc(true)
+  entry = lpeg.Cg(codepoint_range * sep * ('Other_Default_Ignorable_Code_Point' * lpeg.Cc'ignore'
+                                               + 'Variation_Selector' * lpeg.Cc'ignore'
                                                + 'White_Space' * lpeg.Cc(nil)
                                                + 'Prepended_Concatenation_Mark' * lpeg.Cc(nil)
                                           ) * ' # ' * (1-lpeg.P'Lo'))^-1 * (1-lpeg.P'\n')^0 * '\n'
@@ -155,14 +158,26 @@ otfregister {
   }
 }
 
-function fonts.handlers.otf.handlers.gsub_remove(head,char,dataset,sequence,replacement)
-  local next
-  head, next = remove(head, char)
-  flush_node(char)
-  if not head and not next then -- Avoid a double free if we were alone
-    head = nodenew(kern_id)
+function fonts.handlers.otf.handlers.gsub_remove(head,char,dataset,sequence,kind,rlmode,skiphash,step,injection)
+  local replacement
+  if kind ~= 'ignore' then
+    replacement = false
+  else
+    replacement = tonumber(dataset[1])
   end
-  return head, next, true, true
+  if replacement then
+    setchar(char, replacement)
+    setmove(char, 1, rlmode, -getwidth(char), injection)
+    return head, char, true
+  else
+    local next
+    head, next = remove(head, char)
+    flush_node(char)
+    if not head and not next then -- Avoid a double free if we were alone
+      head = nodenew(kern_id)
+    end
+    return head, next, true, true
+  end
 end
 
 local sequence = {
@@ -177,12 +192,24 @@ local sequence = {
   }},
   type = "gsub_remove",
 }
-local function invisibleinitialiser(tfmdata, value)
+local function invisibleinitialiser(tfmdata, value, features)
   local resources = tfmdata.resources
   local sequences = resources and resources.sequences
+  if value ~= 'remove' and not tonumber(value) then
+    features.invisible = 32
+  end
   if sequences then
-    -- Now we get to the interesting part: At which point should our new sequence be inserted? Let's do it at the end, then they are still seen by all features.
-    insert(sequences, sequence)
+    local alreadydone
+    for i=1,#sequences do
+      if sequence == sequences[i] then
+        alreadydone = true
+        break
+      end
+    end
+    if not alreadydone then
+      -- Now we get to the interesting part: At which point should our new sequence be inserted? Let's do it at the end, then they are still seen by all features.
+      insert(sequences, sequence)
+    end
   end
 end
 local invisibleinitialiserharf if harfbuzz then

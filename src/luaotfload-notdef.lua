@@ -24,14 +24,20 @@ local getwhd             = node.direct.getwhd
 local insert             = table.insert
 local insert_after       = node.direct.insert_after
 local kern_id            = node.id'kern'
+local disc_id            = node.id'disc'
 local nodenew            = node.direct.new
+local nodecopy           = node.direct.copy
 local otfregister        = fonts.constructors.features.otf.register
 local protect_glyph      = node.direct.protect_glyph
 local remove             = node.direct.remove
 local setfont            = node.direct.setfont
 local traverse_char      = node.direct.traverse_char
+local traverse_id        = node.direct.traverse_id
 local setchar            = node.direct.setchar
 local getwidth           = node.direct.getwidth
+local setkern            = node.direct.setkern
+local setattributelist   = node.direct.setattributelist
+local getattributelist   = node.direct.getattributelist
 local setmove            = luaotfload.fontloader.nodes.injections.setmove
 
 -- According to DerivedCoreProperties.txt, Default_Ignorable_Code_Point
@@ -158,74 +164,76 @@ otfregister {
   }
 }
 
-function fonts.handlers.otf.handlers.gsub_remove(head,char,dataset,sequence,kind,rlmode,skiphash,step,injection)
-  local replacement
-  if kind ~= 'ignore' then
-    replacement = false
-  else
-    replacement = tonumber(dataset[1])
+local cached_kern = setmetatable({}, {__index = function(t, i)
+  local n = nodenew(kern_id)
+  setkern(n, i)
+  setattributelist(n, nil)
+  t[i] = n
+  return n
+end})
+local font_invisible_replacement = setmetatable({}, {__index = function(t, fid)
+  local fontdata = font.getfont(fid)
+  local replacement = fontdata.shared.features.invisible
+  if replacement == "remove" then
+    t[fid] = false
+    return false
   end
-  if replacement then
-    setchar(char, replacement)
-    setmove(char, 1, rlmode, -getwidth(char), injection)
-    return head, char, true
+  replacement = tonumber(replacement) or 32
+  local char = fontdata.characters[replacement]
+  if char then
+    t[fid] = {replacement, cached_kern[-char.width]}
+    return t[fid]
   else
-    local next
-    head, next = remove(head, char)
-    flush_node(char)
-    if not head and not next then -- Avoid a double free if we were alone
-      head = nodenew(kern_id)
-    end
-    return head, next, true, true
+    t[fid] = false
+    return false
+  end
+end})
+
+ignorable_replacement = {}
+
+local delayed_remove do
+  local delayed
+  function delayed_remove(n)
+    flush_node(delayed)
+    delayed = n
   end
 end
 
-local sequence = {
-  features = {invisible = {["*"] = {["*"] = true}}},
-  flags = {false, false, false, false},
-  name = "invisible",
-  order = {"invisible"},
-  nofsteps = 1,
-  steps = {{
-    coverage = ignorable_codepoints,
-    index = 1,
-  }},
-  type = "gsub_remove",
-}
-local function invisibleinitialiser(tfmdata, value, features)
-  local resources = tfmdata.resources
-  local sequences = resources and resources.sequences
-  if value ~= 'remove' and not tonumber(value) then
-    features.invisible = 32
-  end
-  if sequences then
-    local alreadydone
-    for i=1,#sequences do
-      if sequence == sequences[i] then
-        alreadydone = true
-        break
+local function ignorablehandler(head, fid, ...) -- FIXME: The arguments are probably wrong
+  local fontparam = font_invisible_replacement[fid]
+  local replacement = fontparam and fontparam[1]
+  local font_kern = fontparam and fontparam[2]
+  for n, c, f in traverse_char(head) do if f == fid then
+    local lookup = ignorable_codepoints[c]
+    if lookup then
+      if replacement then
+        setchar(n, replacement)
+        if font_kern then
+          local k = nodecopy(font_kern)
+          setattributelist(k, getattributelist(n))
+          head = insert_after(head, n, nodecopy(font_kern))
+        end
+      else
+        local after
+        head, after = remove(head, n)
+        delayed_remove(n)
       end
     end
-    if not alreadydone then
-      -- Now we get to the interesting part: At which point should our new sequence be inserted? Let's do it at the end, then they are still seen by all features.
-      insert(sequences, sequence)
-    end
+  end end
+  delayed_remove()
+  for n in traverse_id(head, disc_id) do
+    local a, b, c = getdisc(n)
+    setdisc(ignorablehandler(a, fid), ignorablehandler(b, fid), ignorablehandler(c, fid))
   end
+  return head
 end
-local invisibleinitialiserharf if harfbuzz then
+
+if harfbuzz then
   local harf_settings = luaotfload.harf
   local preserve_flag = harfbuzz.Buffer.FLAG_PRESERVE_DEFAULT_IGNORABLES or 0
   local remove_flag = harfbuzz.Buffer.FLAG_REMOVE_DEFAULT_IGNORABLES or 0
   local dotted_circle_flag = harfbuzz.Buffer.FLAG_DO_NOT_INSERT_DOTTED_CIRCLE or 0
   harf_settings.default_buf_flags = (harf_settings.default_buf_flags & ~remove_flag) | preserve_flag | dotted_circle_flag
-  function invisibleinitialiserharf(tfmdata, value)
-    if not tfmdata.hb then return end
-    local hb = tfmdata.hb
-    hb.buf_flags = hb.buf_flags & ~preserve_flag
-    if value == "remove" then
-      hb.buf_flags = hb.buf_flags | remove_flag
-    end
-  end
   local function dottedcircleinitialize(tfmdata, value)
     if not tfmdata.hb then return end
     local hb = tfmdata.hb
@@ -244,9 +252,9 @@ otfregister {
   name = 'invisible',
   description = 'Remove invisible control characters',
   default = true,
-  initializers = {
-    node = invisibleinitialiser,
-    plug = invisibleinitialiserharf,
+  processors = {
+    node = ignorablehandler,
+    plug = ignorablehandler,
   },
 }
 

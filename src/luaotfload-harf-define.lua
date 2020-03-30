@@ -308,7 +308,9 @@ local function scalefont(data, spec)
       buf_flags = harf_settings.default_buf_flags,
     },
     specification = spec,
-    shared = {},
+    shared = {
+      features = features,
+    },
     properties = {},
     resources = {
       unicodes = data.name_to_char,

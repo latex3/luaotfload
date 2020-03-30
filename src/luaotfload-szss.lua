@@ -185,6 +185,23 @@ local tlig ={
   [0x003E] = { [0x003E] = { char = 0x00BB } }, -- [>>]
 }
 
+local function tligprocessor(head, font)
+  local n = head
+  while n do
+    local c, id = is_char(n, font)
+    local rep = trep[c]
+    if rep then
+      setchar(n, rep)
+    elseif id == disc_t then
+      local pre, post, replace = getdisc(n)
+      tligprocessor(pre, font)
+      tligprocessor(post, font)
+      tligprocessor(replace, font)
+    end
+    n = getnext(n)
+  end
+end
+
 otfregister {
   name = 'tlig',
   description = 'Traditional TeX ligatures',
@@ -202,23 +219,7 @@ otfregister {
   },
   processors = {
     position=1,
-    plug = function(head, font)
-      local n = head
-      while n do
-        local c, id = is_char(n, font)
-        local rep = trep[c]
-        if rep then
-          setchar(n, rep)
-        elseif id == disc_t then
-          local pre, post, replace = getdisc(n)
-          pre = szssprocessor(pre, font)
-          post = szssprocessor(post, font)
-          replace = szssprocessor(replace, font)
-          setdisc(n, pre, post, replace)
-        end
-        n = getnext(n)
-      end
-    end,
+    plug = tligprocessor,
   },
 }
 

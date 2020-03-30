@@ -406,7 +406,7 @@ function shape(head, node, run)
           local discindex = nil
           local disc = node
           for j = cluster + 1, nextcluster do
-            if codes[j] == 0x00AD then
+            if getid(disc) == disc_t then
               discindex = j
               break
             end

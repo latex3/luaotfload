@@ -164,13 +164,6 @@ otfregister {
   }
 }
 
-local cached_kern = setmetatable({}, {__index = function(t, i)
-  local n = nodenew(kern_id)
-  setkern(n, i)
-  setattributelist(n, nil)
-  t[i] = n
-  return n
-end})
 local font_invisible_replacement = setmetatable({}, {__index = function(t, fid)
   local fontdata = font.getfont(fid)
   local replacement = fontdata.shared.features.invisible
@@ -181,7 +174,7 @@ local font_invisible_replacement = setmetatable({}, {__index = function(t, fid)
   replacement = tonumber(replacement) or 32
   local char = fontdata.characters[replacement]
   if char then
-    t[fid] = {replacement, cached_kern[-char.width]}
+    t[fid] = {replacement, -char.width}
     return t[fid]
   else
     t[fid] = false
@@ -209,9 +202,10 @@ local function ignorablehandler(head, fid, ...) -- FIXME: The arguments are prob
       if replacement then
         setchar(n, replacement)
         if font_kern then
-          local k = nodecopy(font_kern)
+          local k = nodenew(kern_id)
+          setkern(k, font_kern)
           setattributelist(k, getattributelist(n))
-          head = insert_after(head, n, nodecopy(font_kern))
+          head = insert_after(head, n, k)
         end
       else
         local after

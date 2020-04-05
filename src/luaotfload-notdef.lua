@@ -182,6 +182,131 @@ local font_invisible_replacement = setmetatable({}, {__index = function(t, fid)
   end
 end})
 
+local push, pop do
+  local function checkprop(n)
+    local p = node.direct.getproperty(n)
+    return p and p.zwnj
+  end
+  local list = {}
+  function push(head)
+    head = node.direct.todirect(head)
+    local l = {}
+    list[#list+1] = l
+    for n in node.direct.traverse(head) do
+      if checkprop(n) then
+        head = node.direct.remove(head, n)
+        l[#l+1] = n
+      elseif node.getid(n) == node.id'disc' then
+        local pre, post, replace = node.direct.getdisc(n)
+        for nn in node.direct.traverse(pre) do
+          if checkprop(nn) then
+            local after
+            pre, after = node.direct.remove(pre, n)
+            l[#l+1] = {nn, n, 1}
+          end
+        end
+        for nn in node.direct.traverse(post) do
+          if checkprop(nn) then
+            post = node.direct.remove(post, n)
+            l[#l+1] = {nn, n, 2}
+          end
+        end
+        for nn in node.direct.traverse(replace) do
+          if checkprop(nn) then
+            replace = node.direct.remove(replace, n)
+            l[#l+1] = {nn, n, 3}
+          end
+        end
+        node.direct.setdisc(n, pre, post, replace)
+      end
+    end
+    return head
+  end
+  local getsetdisc = {
+    {node.direct.getpre, node.direct.setpre},
+    {node.direct.getpost, node.direct.setpost},
+    {node.direct.getreplace, node.direct.setreplace},
+  }
+  local function pop(head)
+    head = node.direct.todirect(head)
+    local l = list[#list]
+    list[#list] = nil
+    for i = #l,1,-1 do
+      local e = l[i]
+      local n = tonumber(e)
+      local disc, thishead, sethead
+      if n then
+        thishead = head
+      else
+        local getset = getsetdisc[e[3]]
+        disc, n, sethead = e[2], e[1], getset[2]
+        thishead = getset[1](disc)
+      end
+      local prev, next = node.direct.getboth(e)
+      if prev or not next then
+        thishead = node.direct.insert_after(thishead, prev, e)
+      else
+        thishead = node.direct.insert_before(thishead, next, e)
+      end
+      if sethead then
+        sethead(disc, thishead)
+      else
+        head = thishead
+      end
+    end
+    return head
+  end
+  fonts.handlers.otf.handlers.marked_push = push
+  fonts.handlers.otf.handlers.marked_pop = pop
+end
+local sequence1 = {
+  features = {myfeat = {["*"] = {["*"] = true}}},
+  flags = {false, false, false, false},
+  name = "myfeat",
+  order = {"myfeat"},
+  type = "marked_push",
+}
+local sequence2 = {
+  features = {myfeat = {["*"] = {["*"] = true}}},
+  flags = {false, false, false, false},
+  name = "myfeat",
+  order = {"myfeat"},
+  type = "marked_pop",
+}
+local function pushpopinitialiser(tfmdata, value, features)
+  local resources = tfmdata.resources
+  local sequences = resources and resources.sequences
+  local first_gpos, last_gpos
+  if sequences then
+    local alreadydone
+    for i=1,#sequences do
+      local sequence = sequences[i]
+      if sequence1 == sequence then
+        return
+      elseif sequence.type:sub(1,5) == "gpos_" then
+        if not first_gpos then
+          first_gpos = i
+        end
+        last_gpos = i
+      end
+    end
+    if first_gpos then
+      insert(sequences, last_gpos+1, sequence2)
+      insert(sequences, first_gpos, sequence1)
+    end
+  end
+end
+
+otfregister {
+  name = 'semiignored-node',
+  description = 'Allow adding nodes which break ligatures but do not affect kerning',
+  default = true, -- Should basically never be disabled manually
+  initializers = {
+    node = pushpopinitialiser,
+    -- plug = ? -- TODO: Manually handle in luaotfload-harf-plug.lua
+  },
+}
+
 ignorable_replacement = {}
 
 local delayed_remove do

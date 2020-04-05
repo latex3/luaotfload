@@ -62,7 +62,7 @@ local ignorable_codepoints do
     end
     return table
   end
-  local entry = lpeg.Cg(codepoint * ';' * (1-lpeg.P';')^0 * ';Cf;' * lpeg.Cc'ignore')^-1 * (1-lpeg.P'\n')^0 * '\n'
+  local entry = lpeg.Cg(codepoint * ';' * (1-lpeg.P';')^0 * ';Cf;' * lpeg.Cc(true))^-1 * (1-lpeg.P'\n')^0 * '\n'
   local file = lpeg.Cf(
       lpeg.Ct''
     * entry^0
@@ -70,8 +70,8 @@ local ignorable_codepoints do
   local f = io.open(kpse.find_file"UnicodeData.txt")
   ignorable_codepoints = file:match(f:read'*a')
   f:close()
-  entry = lpeg.Cg(codepoint_range * sep * ('Other_Default_Ignorable_Code_Point' * lpeg.Cc'ignore'
-                                               + 'Variation_Selector' * lpeg.Cc'ignore'
+  entry = lpeg.Cg(codepoint_range * sep * ('Other_Default_Ignorable_Code_Point' * lpeg.Cc(true)
+                                               + 'Variation_Selector' * lpeg.Cc(true)
                                                + 'White_Space' * lpeg.Cc(nil)
                                                + 'Prepended_Concatenation_Mark' * lpeg.Cc(nil)
                                           ) * ' # ' * (1-lpeg.P'Lo'))^-1 * (1-lpeg.P'\n')^0 * '\n'

@@ -260,7 +260,7 @@ local function makesub(run, codes, nodelist)
   if nodelist == 0 then -- FIXME: This shouldn't happen
     nodelist = nil
   end
-  nodelist, glyphs = shape(nodelist, nodelist, subrun)
+  nodelist, nodelist, glyphs = shape(nodelist, nodelist, subrun)
   return { glyphs = glyphs, run = subrun, head = nodelist }
 end
 
@@ -283,7 +283,8 @@ local function printnodes(label, head, after)
 end
 -- Main shaping function that calls HarfBuzz, and does some post-processing of
 -- the output.
-function shape(head, node, run)
+function shape(head, firstnode, run)
+  local node = firstnode
   local codes = run.codes
   local offset = run.start
   local nodeindex = offset
@@ -510,6 +511,9 @@ function shape(head, node, run)
               local predisc = getprev(disc)
               setnext(predisc, rep)
               setprev(rep, predisc)
+              if firstnode == startnode then
+                firstnode = disc
+              end
               if startnode == head then
                 head = disc
               else
@@ -540,10 +544,10 @@ function shape(head, node, run)
         end
       end
     end
-    return head, glyphs, run.len - len
+    return head, firstnode, glyphs, run.len - len
   end
 
-  return head, {}, 0
+  return head, firstnode, {}, 0
 end
 
 local function color_to_rgba(color)
@@ -871,7 +875,7 @@ local function shape_run(head, current, run)
     -- Font loaded with our loader and an HarfBuzz face is present, do our
     -- shaping.
     local glyphs, offset
-    head, glyphs, offset = shape(head, current, run)
+    head, current, glyphs, offset = shape(head, current, run)
     return offset, tonodes(head, current, run, glyphs)
   else
     return 0, head, run.after

@@ -181,8 +181,12 @@ local function itemize(head, fontid, direction)
   for n, id, subtype in direct.traverse(head) do
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
     local skip = lastskip
+    local props = properties[n]
 
-    if id == glyph_t then
+    if props and props.zwnj then
+      code = 0x200C
+      -- skip = false -- Not sure about this, but lastskip should be a bit faster
+    elseif id == glyph_t then
       if is_char(n) and getfont(n) == fontid then
         code = getchar(n)
         skip = false
@@ -407,7 +411,8 @@ function shape(head, firstnode, run)
           local discindex = nil
           local disc = node
           for j = cluster + 1, nextcluster do
-            if getid(disc) == disc_t then
+            local props = properties[disc]
+            if (not (props and props.zwnj)) and getid(disc) == disc_t then
               discindex = j
               break
             end
@@ -666,7 +671,8 @@ local function tonodes(head, node, run, glyphs)
       freenode(oldnode)
       nodeindex = nodeindex + 1
     else
-      if id == glyph_t then
+      if lastprops and lastprops.zwnj and nodeindex == glyph.cluster + 1 then
+      elseif id == glyph_t then
         local done
         local fontglyph = fontglyphs[gid]
         local character = characters[char]

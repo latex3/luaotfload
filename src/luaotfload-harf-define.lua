@@ -366,9 +366,19 @@ fonts.readers.harf = function(spec)
 end
 
 luatexbase.add_to_callback('find_opentype_file', function(name)
-  return name:gsub('^harfloaded:', '')
+  local path = luaotfload.fontloader.resolvers.findfile(name)
+  if path then
+    return path
+  else
+    return name:gsub('^harfloaded:', '')
+  end
 end, 'luaotfload.harf.strip_prefix')
 
 luatexbase.add_to_callback('find_truetype_file', function(name)
-  return name:gsub('^harfloaded:', '')
+  local path = luaotfload.fontloader.resolvers.findfile(name)
+  if path then
+    return path
+  else
+    return name:gsub('^harfloaded:', '')
+  end
 end, 'luaotfload.harf.strip_prefix')

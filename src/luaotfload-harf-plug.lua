@@ -775,8 +775,14 @@ local function tonodes(head, node, run, glyphs)
           -- glyph, keep the node char unchanged. Helps with primitives that
           -- take characters as input but actually work on glyphs, like
           -- `\rpcode`.
-          if character.commands or not oldcharacter
-                                or character.index ~= oldcharacter.index then
+          if not oldcharacter then
+            if gid == 0 then
+              local new = copynode(node)
+              head, node = insertafter(head, node, new)
+            end
+            setchar(node, char)
+          elseif character.commands
+              or character.index ~= oldcharacter.index then
             setchar(node, char)
           end
           local xoffset = (rtl and -glyph.x_offset or glyph.x_offset) * scale

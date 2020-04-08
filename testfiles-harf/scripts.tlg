@@ -82,10 +82,13 @@ Completed box being shipped out [1]
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\TU/amiri-regular.ttf(1)/m/n/10 "=" 003D +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
+....\TU/amiri-regular.ttf(1)/m/n/10 "τ" 03C4 +0:+0
 ....\TU/amiri-regular.ttf(1)/m/n/10 "τ" 120000 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "ε" 03B5 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\TU/amiri-regular.ttf(1)/m/n/10 "ε" 120000 +0:+0
 ....\pdfliteral page <lua data reference ...>
+....\TU/amiri-regular.ttf(1)/m/n/10 "χ" 03C7 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\TU/amiri-regular.ttf(1)/m/n/10 "χ" 120000 +0:+0
 ....\pdfliteral page <lua data reference ...>
@@ -238,6 +241,9 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/amiri-regular.ttf(1)/m/n/10 "1" 0031 +0:+0
 ...\glue 0.0 plus 1.0fil
+Missing character: There is no τ (U+03C4) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
+Missing character: There is no ε (U+03B5) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
+Missing character: There is no χ (U+03C7) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
 Completed box being shipped out [2]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0

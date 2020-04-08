@@ -192,29 +192,29 @@ local push, pop do
     head = node.direct.todirect(head)
     local l = {}
     list[#list+1] = l
-    for n in node.direct.traverse(head) do
+    for n, id in node.direct.traverse(head) do
       if checkprop(n) then
         head = node.direct.remove(head, n)
         l[#l+1] = n
-      elseif node.getid(n) == node.id'disc' then
+      elseif id == disc_id then
         local pre, post, replace = node.direct.getdisc(n)
         for nn in node.direct.traverse(pre) do
           if checkprop(nn) then
             local after
-            pre, after = node.direct.remove(pre, n)
-            l[#l+1] = {nn, n, 1}
+            pre, after = node.direct.remove(pre, nn)
+            l[#l+1] = {nn, n, 'pre'}
           end
         end
         for nn in node.direct.traverse(post) do
           if checkprop(nn) then
-            post = node.direct.remove(post, n)
-            l[#l+1] = {nn, n, 2}
+            post = node.direct.remove(post, nn)
+            l[#l+1] = {nn, n, 'post'}
           end
         end
         for nn in node.direct.traverse(replace) do
           if checkprop(nn) then
-            replace = node.direct.remove(replace, n)
-            l[#l+1] = {nn, n, 3}
+            replace = node.direct.remove(replace, nn)
+            l[#l+1] = {nn, n, 'replace'}
           end
         end
         node.direct.setdisc(n, pre, post, replace)
@@ -222,34 +222,30 @@ local push, pop do
     end
     return head
   end
-  local getsetdisc = {
-    {node.direct.getpre, node.direct.setpre},
-    {node.direct.getpost, node.direct.setpost},
-    {node.direct.getreplace, node.direct.setreplace},
-  }
+  local getfield, setfield = node.direct.getfield, node.direct.setfield
   local function pop(head)
     head = node.direct.todirect(head)
     local l = list[#list]
     list[#list] = nil
+    table.print(l)
     for i = #l,1,-1 do
       local e = l[i]
       local n = tonumber(e)
-      local disc, thishead, sethead
+      local disc, thishead
       if n then
         thishead = head
       else
-        local getset = getsetdisc[e[3]]
-        disc, n, sethead = e[2], e[1], getset[2]
-        thishead = getset[1](disc)
+        disc, n = e[2], e[1]
+        thishead = getfield(disc, e[3])
       end
-      local prev, next = node.direct.getboth(e)
+      local prev, next = node.direct.getboth(n)
       if prev or not next then
-        thishead = node.direct.insert_after(thishead, prev, e)
+        thishead = node.direct.insert_after(thishead, prev, n)
       else
-        thishead = node.direct.insert_before(thishead, next, e)
+        thishead = node.direct.insert_before(thishead, next, n)
       end
-      if sethead then
-        sethead(disc, thishead)
+      if disc then
+        setfield(disc, e[3], thishead)
       else
         head = thishead
       end
@@ -260,17 +256,17 @@ local push, pop do
   fonts.handlers.otf.handlers.marked_pop = pop
 end
 local sequence1 = {
-  features = {myfeat = {["*"] = {["*"] = true}}},
+  features = {["semiignored-node"] = {["*"] = {["*"] = true}}},
   flags = {false, false, false, false},
-  name = "myfeat",
-  order = {"myfeat"},
+  name = "semiignored-node",
+  order = {"semiignored-node"},
   type = "marked_push",
 }
 local sequence2 = {
-  features = {myfeat = {["*"] = {["*"] = true}}},
+  features = {["semiignored-node"] = {["*"] = {["*"] = true}}},
   flags = {false, false, false, false},
-  name = "myfeat",
-  order = {"myfeat"},
+  name = "semiignored-node",
+  order = {"semiignored-node"},
   type = "marked_pop",
 }
 local function pushpopinitialiser(tfmdata, value, features)

@@ -1,0 +1,7 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage[T1]{fontenc}
+\begin{document}
+\font\cuprum=cprmn8t
+\cuprum test
+\end{document}

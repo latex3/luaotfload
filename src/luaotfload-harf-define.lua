@@ -365,10 +365,13 @@ fonts.readers.harf = function(spec)
   return scalefont(loadfont(spec), spec)
 end
 
+local find_file = kpse.find_file
 luatexbase.add_to_callback('find_opentype_file', function(name)
-  return name:gsub('^harfloaded:', '')
+  return find_file(name, 'opentype fonts')
+      or name:gsub('^harfloaded:', '')
 end, 'luaotfload.harf.strip_prefix')
 
 luatexbase.add_to_callback('find_truetype_file', function(name)
-  return name:gsub('^harfloaded:', '')
+  return find_file(name, 'truetype fonts')
+      or name:gsub('^harfloaded:', '')
 end, 'luaotfload.harf.strip_prefix')

@@ -12,7 +12,7 @@
   end, 'Harf glyph_info callback -- testing variant')
   luatexbase.add_to_callback('glyph_not_found', function(id, char)
     texio.write_nl(string.format('Missing character: There is no \csstring\%s (U+\csstring\%04X) in font \csstring\%s!',
-                   utf8.char(char), char, font.getfont(id).specification.specification:gsub(";fallback=.*",";fallback=...")))
+                   utf8.char(char), char, font.getfont(id).specification.specification:gsub(";fallback=\csstring\%d*",";fallback=...")))
   end, 'Harf glyph_not_found callback -- testing variant')
 }
 

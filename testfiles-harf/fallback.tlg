@@ -73,6 +73,6 @@ Completed box being shipped out [1]
 ...\glue 0.0 plus 1.0fil
 ...\TU/lmr/m/n/10 "1" 0031 +0:+0^^I[lmroman10-regular]:+tlig;
 ...\glue 0.0 plus 1.0fil
-Missing character: There is no ฐ (U+0E10) in font [DejaVuSans.ttf]:mode=harf;-fallback;script=thai;-multiscript;fallback=8!
-Missing character: There is no ู (U+0E39) in font [DejaVuSans.ttf]:mode=harf;-fallback;script=thai;-multiscript;fallback=8!
+Missing character: There is no ฐ (U+0E10) in font [DejaVuSans.ttf]:mode=harf;-fallback;script=thai;-multiscript;fallback=...!
+Missing character: There is no ู (U+0E39) in font [DejaVuSans.ttf]:mode=harf;-fallback;script=thai;-multiscript;fallback=...!
 2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (fallback.aux)

@@ -44,14 +44,14 @@ echo graphics xcolor graphics-def pgf
 
 # fonts support - perhaps take here luaotfload out of the list ...
 # or is it installed as dependency anyway?
-echo fontspec microtype unicode-math luaotfload
+echo fontspec microtype unicode-math luaotfload ttfutils
 
 # fonts
 echo sourcecodepro Asana-Math  ebgaramond  tex-gyre  amsfonts gnu-freefont
 echo opensans fira tex-gyre-math junicode lm  lm-math amiri ipaex xits
 echo libertine coelacanth fontawesome stix2-otf dejavu
 echo luatexko unfonts-core cjk-ko iwona libertinus-fonts fandol
-echo cm-unicode noto
+echo cm-unicode noto cuprum
 
 # languages
 echo luatexja arabluatex babel babel-english

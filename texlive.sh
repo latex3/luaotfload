@@ -61,7 +61,7 @@ echo luatexja arabluatex babel babel-english
 echo amsmath lualatex-math
 
 # a few more packages
-echo luacode environ adjustbox collectbox ms varwidth geometry url ulem
+echo luacode environ adjustbox collectbox ms varwidth geometry url ulem lua-ul
 
 # some packages for the documentation
 echo caption fancyvrb hyperref inconsolata listings luatex85 mdwtools

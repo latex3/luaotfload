@@ -69,16 +69,15 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
 -- l3build check settings
 
-
 local has_hbengine = os.execute(os.type == "unix"
                                   and "command -v luahbtex > /dev/null"
                                   or "where /q luahbtex") == 0 or nil
 assert(has_hbengine, "luahbtex is required for latex-dev")                                  
 
---luaotfloadspecial = 1
 
-checkformat   = "latex-dev" -- in tl2020 this can be perhaps latex-dev and latex 
+checkformat   = master_branch and "latex" or "latex-dev"
 
+stdengine     = "luatex"
 checkengines = {"luatex"}
 
 checkconfigs = {

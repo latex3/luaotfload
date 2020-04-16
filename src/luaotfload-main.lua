@@ -36,7 +36,6 @@ local osgettimeofday              = os.gettimeofday
 config                            = config     or { }
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
-luaotfload.log                    = luaotfload.log or { }
 local logreport
 luaotfload.version                = ProvidesLuaModule.version
 luaotfload.loaders                = { }
@@ -120,14 +119,13 @@ local type             = type
 --doc]]--
 
 local function make_loader_name (prefix, name)
-    local msg = luaotfload.log and luaotfload.log.report
-             or function (stream, lvl, cat, ...)
-                 if lvl > 1 then --[[not pressing]] return end
-                 texio.write_nl ("log",
-                                 string.format ("luaotfload | %s : ",
-                                                tostring (cat)))
-                 texio.write (string.format (...))
-             end
+    local msg = logreport or function (stream, lvl, cat, ...)
+                  if lvl > 1 then --[[not pressing]] return end
+                  texio.write_nl ("log",
+                                  string.format ("luaotfload | %s : ",
+                                                 tostring (cat)))
+                  texio.write (string.format (...))
+                end
     if not name then
         msg ("both", 0, "load",
              "Fatal error: make_loader_name (%q, %q).",
@@ -163,7 +161,7 @@ local function make_loader (prefix, load_helper)
         timing_info.t_load [name] = t_end - t_0
         if not ok then
             io.write "\n"
-            local msg = luaotfload.log and luaotfload.log.report or print
+            local msg = logreport or print
             msg ("both", 0, "load", "FATAL ERROR")
             msg ("both", 0, "load", "  × Failed to load %q module %q.",
                  tostring (prefix), tostring (name))
@@ -196,9 +194,9 @@ end
 --doc]]--
 
 local function dummy_loader (name)
-    luaotfload.log.report ("log", 3, "load",
-                           "Skipping module %q on purpose.",
-                           name)
+    logreport ("log", 3, "load",
+               "Skipping module %q on purpose.",
+               name)
 end
 
 local context_environment = setmetatable({}, {__index = _G})
@@ -212,22 +210,22 @@ local function context_isolated_load(name)
 end
 
 local function context_loader (name, path)
-    luaotfload.log.report ("log", 3, "load",
-                           "Loading module %q from Context.",
-                           name)
+    logreport ("log", 3, "load",
+               "Loading module %q from Context.",
+               name)
     local t_0 = osgettimeofday ()
     local modname = make_loader_name (false, name)
     local modpath = modname
     if path then
         if lfs.isdir (path) then
-            luaotfload.log.report ("log", 3, "load",
-                                   "Prepending path %q.",
-                                   path)
+            logreport ("log", 3, "load",
+                       "Prepending path %q.",
+                       path)
             modpath = file.join (path, modname)
         else
-            luaotfload.log.report ("both", 0, "load",
-                                   "Non-existant path %q specified, ignoring.",
-                                   path)
+            logreport ("both", 0, "load",
+                       "Non-existant path %q specified, ignoring.",
+                       path)
         end
     end
     local ret = context_isolated_load (modpath)
@@ -239,8 +237,8 @@ local function context_loader (name, path)
         --- yields a non-zero exit code. This isn’t per se indicating that
         --- something isn’t right, but against HH’s coding practices. We’ll
         --- silently ignore this ever happening on lower log levels.
-        luaotfload.log.report ("log", 4, "load",
-                               "Module %q returned %q.", ret)
+        logreport ("log", 4, "load",
+                   "Module %q returned %q.", ret)
     end
     return ret
 end
@@ -302,10 +300,13 @@ luaotfload.main = function ()
         luaotfload.harfbuzz = harfbuzz
     end
 
+    local log       = loadmodule "log" --- Enable logging as soon as possible
+    luaotfload.log = log
+    logreport = log.report
+
     local init      = loadmodule "init" --- fontloader initialization
     init (function ()
 
-        logreport = luaotfload.log.report
         initialize "parsers"         --- fonts.conf and syntax
         initialize "configuration"   --- configuration options
     end)

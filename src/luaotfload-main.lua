@@ -37,6 +37,7 @@ config                            = config     or { }
 luaotfload                        = luaotfload or { }
 local luaotfload                  = luaotfload
 luaotfload.log                    = luaotfload.log or { }
+local logreport
 luaotfload.version                = ProvidesLuaModule.version
 luaotfload.loaders                = { }
 luaotfload.min_luatex_version     = { 0, 95, 0 }
@@ -255,7 +256,6 @@ local function install_loaders ()
 
     function loaders.initialize (name)
         local tmp       = loadmodule (name)
-        local logreport = luaotfload.log.report
         local init = type(tmp) == "table" and tmp.init or tmp
         if init and type (init) == "function" then
             local t_0 = osgettimeofday ()
@@ -305,11 +305,10 @@ luaotfload.main = function ()
     local init      = loadmodule "init" --- fontloader initialization
     init (function ()
 
+        logreport = luaotfload.log.report
         initialize "parsers"         --- fonts.conf and syntax
         initialize "configuration"   --- configuration options
     end)
-
-    local logreport = luaotfload.log.report
 
     initialize "loaders"         --- Font loading; callbacks
     initialize "database"        --- Font management.

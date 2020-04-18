@@ -29,7 +29,9 @@ because we lack a user interface to toggle per-subsystem tracing.
 local module_name       = "luaotfload" --- prefix for messages
 local debug             = debug
 
-local log               = {}
+luaotfload              = luaotfload or { }
+luaotfload.log          = luaotfload.log or { }
+local log               = luaotfload.log
 
 local ioopen            = io.open
 local iowrite           = io.write
@@ -43,32 +45,38 @@ local stringformat      = string.format
 local stringsub         = string.sub
 local tableconcat       = table.concat
 local texiowrite_nl     = texio.write_nl
+local texiowrite        = texio.write
 local type              = type
 
 local dummyfunction     = function () end
 
-local texjob = tex and (tex.jobname or tex.formatname)
+local texjob = false
+if tex and (tex.jobname or tex.formatname) then
+    --- TeX
+    texjob = true
+end
 
 local loglevel = 0 --- default
 local logout   = "log"
 
 --- int -> bool
-function log.set_loglevel (n)
+local function set_loglevel (n)
     if type(n) == "number" then
         loglevel = n
     end
     return true
 end
+log.set_loglevel   = set_loglevel
 
 --- unit -> int
-function log.get_loglevel ( )
+local function get_loglevel ( )
     return loglevel
 end
+log.get_loglevel   = get_loglevel
 
 local writeln  --- pointer to terminal/log writer
 local statusln --- terminal writer that reuses the current line
-local first_status --- indicate the begin of a status region
-local status_level --- indicate that status messages should be printed as full lines
+local first_status = true --- indicate the begin of a status region
 
 local log_msg = [[
 logging output redirected to %s
@@ -90,15 +98,23 @@ local function choose_logfile ( )
     return false
 end
 
-function log.set_logout (s, finalizers)
+local function set_logout (s, finalizers)
     if s == "stdout" then
         logout = "redirect"
     elseif s == "file" then --- inject custom logger
         logout = "redirect"
         local chan = choose_logfile ()
         chan:write (stringformat ("logging initiated at %s",
-                                  osdate ("%Y-%m-%d %H:%M:%S"))) --- i. e. osdate "%F %T"
-        local function writefile_nl (...)
+                                  osdate ("%Y-%m-%d %H:%M:%S", --- i. e. osdate "%F %T"
+                                          ostime ())))
+        local writefile = function (...)
+            if select ("#", ...) == 2 then
+                chan:write (select (2, ...))
+            else
+                chan:write (select (1, ...))
+            end
+        end
+        local writefile_nl= function (...)
             chan:write "\n"
             if select ("#", ...) == 2 then
                 chan:write (select (2, ...))
@@ -109,14 +125,17 @@ function log.set_logout (s, finalizers)
 
         local writeln_orig = writeln
 
+        texiowrite    = writefile
         texiowrite_nl = writefile_nl
         writeln       = writefile_nl
         statusln      = dummyfunction
 
         finalizers[#finalizers+1] = function ()
             chan:write (stringformat ("\nlogging finished at %s\n",
-                                      osdate ("%Y-%m-%d %H:%M:%S"))) --- i. e. osdate "%F %T"
+                                      osdate ("%Y-%m-%d %H:%M:%S", --- i. e. osdate "%F %T"
+                                              ostime ())))
             chan:close ()
+            texiowrite    = texio.write
             texiowrite_nl = texio.write_nl
             writeln       = writeln_orig
         end
@@ -124,6 +143,8 @@ function log.set_logout (s, finalizers)
     end
     return finalizers
 end
+
+log.set_logout = set_logout
 
 local format_error_handler
 if debug then
@@ -172,15 +193,19 @@ io.stderr:setvbuf "no"
 
 local kill_line = "\r\x1b[K"
 
-if texjob then
+if texjob == true then
     --- We imitate the texio.* functions so the output is consistent.
     function writeln (str)
         iowrite "\n"
         iowrite(str)
     end
     function statusln (str)
-        iowrite(first_status and "\n" or kill_line)
-        iowrite(str)
+        if first_status == false then
+            iowrite (kill_line)
+        else
+            iowrite "\n"
+        end
+        iowrite (str)
     end
 else
     function writeln (str)
@@ -188,7 +213,7 @@ else
         iowrite "\n"
     end
     function statusln (str)
-        if not first_status then
+        if first_status == false then
             iowrite (kill_line)
         end
         iowrite (str)
@@ -238,7 +263,7 @@ local level_ids = { common  = 1, loading = 2, search  = 3 }
 
 --doc]]--
 
-local function report(mode, lvl, ...)
+local report = function (mode, lvl, ...)
     if type(lvl) == "string" then
         lvl = level_ids[lvl]
     end
@@ -261,9 +286,8 @@ log.report = report
 --[[doc--
 
     status_logger -- Overwrites the most recently printed line of the
-    terminal if not set to a fixed level. Its purpose is to provide
-    feedback without spamming stdout with irrelevant messages,
-    i.e. when building the database.
+    terminal. Its purpose is to provide feedback without spamming
+    stdout with irrelevant messages, i.e. when building the database.
 
     Status logging must be initialized by calling status_start() and
     properly reset via status_stop().
@@ -279,45 +303,55 @@ log.report = report
 
 --doc]]--
 
-function log.names_status(mode, ...)
-    if status_level then
-        return report(mode, status_level, ...)
+local status_logger = function (mode, ...)
+    if mode == "log" then
+        basic_logger (...)
     else
-        if mode == "log" then
+        if mode == "both" and logout ~= "redirect" then
             basic_logger (...)
+            stdout (statusln, ...)
         else
-            if mode == "both" and logout ~= "redirect" then
-                basic_logger (...)
-                stdout (statusln, ...)
-            else
-                stdout (statusln, ...)
-            end
-            first_status = false
+            stdout (statusln, ...)
         end
+        first_status = false
     end
 end
 
 --[[doc--
 
-    status_start -- Initialize status logging. If the loglevel is in the
-        specified range the status_level is set to false to linewise
-        logging, otherwise the level for status essages is set to the upper
-        bound. It also resets the first line state which causing the next
-        line printed using the status logger to not kill the current line.
+    status_start -- Initialize status logging. This installs the status
+        logger if the loglevel is in the specified range, and the normal
+        logger otherwise.  It also resets the first line state which
+        causing the next line printed using the status logger to not kill
+        the current line.
 
 --doc]]--
 
-function log.names_status_start (low, high)
+local status_writer
+local status_low  = 99
+local status_high = 99
+
+local function status_start (low, high)
     first_status = true
+    status_low   = low
+    status_high  = high
 
     if os.type == "windows" --- Assume broken terminal.
     or os.getenv "TERM" == "dumb"
     then
-        status_level = high
+        status_writer = function (mode, ...)
+            report (mode, high, ...)
+        end
         return
     end
 
-    use_status = low > loglevel or loglevel >= high and high
+    if low <= loglevel and loglevel < high then
+        status_writer = status_logger
+    else
+        status_writer = function (mode, ...)
+            report (mode, high, ...)
+        end
+    end
 end
 
 --[[doc--
@@ -327,14 +361,18 @@ end
 
 --doc]]--
 
-function log.names_status_stop(...)
-    if not first_status then
-        log.names_status(...)
-        if not texjob then
+local status_stop = function (...)
+    if first_status == false then
+        status_writer(...)
+        if texjob == false then
             writeln ""
         end
     end
 end
+
+log.names_status = function (...) status_writer (...) end
+log.names_status_start = status_start
+log.names_status_stop  = status_stop
 
 --[[doc--
 
@@ -348,9 +386,9 @@ end
 
 --doc]]--
 
-function texio.reporter (message)
+local function texioreporter (message)
     report ("log", 2, message)
 end
 
-return log
+texio.reporter = texioreporter
 --- vim:shiftwidth=4:expandtab:ft=lua

@@ -227,7 +227,6 @@ local push, pop do
     head = node.direct.todirect(head)
     local l = list[#list]
     list[#list] = nil
-    table.print(l)
     for i = #l,1,-1 do
       local e = l[i]
       local n = tonumber(e)

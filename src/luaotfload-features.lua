@@ -582,6 +582,26 @@ end
 
 luaotfload.apply_default_features = apply_default_features
 
+do
+    local function mathparaminitializer(tfmdata, value, features)
+        if not next(tfmdata.mathparameters) then return end
+        if value == 'auto' then
+            if features.script == 'math' then return end
+        end
+        tfmdata.mathparameters = {}
+    end
+    fonts.constructors.features.otf.register {
+        name = 'nomathparam',
+        description = 'Set Math parameters based on this font',
+        default = 'auto',
+        initializers = {
+            base = mathparaminitializer,
+            node = mathparaminitializer,
+          -- plug = mathparaminitializer,
+        },
+    }
+end
+
 return function ()
     if not fonts and fonts.handlers then
         report ("log", 0, "features",

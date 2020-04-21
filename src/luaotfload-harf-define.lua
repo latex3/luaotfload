@@ -18,6 +18,7 @@ do -- block to avoid to many local variables error
  end  
 end
 
+local unpack = string.unpack
 local stringlower = string.lower
 local stringupper = string.upper
 local gsub = string.gsub
@@ -37,12 +38,39 @@ local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
+local gpostag = hb.Tag.new("GPOS")
 
 local invalid_l         = hb.Language.new()
 local invalid_s         = hb.Script.new()
 
+local get_designsize do
+  -- local lpeg = lpeg or require'lpeg'
+  -- local size_patt = 'size' * lpeg.C(2)/function(s)
+  --   local first, second = string.byte(s)
+  --   return (first << 8) | second
+  -- end
+  local factor = 6578.176 -- =803/125*2^10=7227/7200/10*2^16
+  function get_designsize(face)
+    local buf = face:get_table(gpostag):get_data()
+    if #buf == 0 then return 655360 end
+    local major, feature_off = unpack(">HxxxxH", buf)
+    assert(major == 1, "Unsupported major version of GPOS table")
+    local feature_count = unpack(">H", buf, feature_off + 1)
+    for off = feature_off + 3, feature_off + 6*feature_count, 6 do
+      local tag = buf:sub(off, off + 3)
+      if tag == 'size' then
+        local off = feature_off + 1 + unpack(">H", buf, off + 4)
+        local off = off + unpack(">H", buf, off)
+        local design_size = unpack(">H", buf, off) -- unpack(">HHHHH", buf, off))
+        return math.floor(design_size * factor)
+      end
+    end
+    return 655360
+  end
+end
+
 local containers = luaotfload.fontloader.containers
-local hbcacheversion = 1.0
+local hbcacheversion = 1.1
 local facecache = containers.define("fonts", "hb", hbcacheversion, true)
 
 local function loadfont(spec)
@@ -97,8 +125,8 @@ local function loadfont(spec)
       local post = hbface:get_table(posttag)
       local length = post:get_length()
       local data = post:get_data()
-      if length >= 32 and string.unpack(">i4", data) <= 0x00030000 then
-        local italicangle = string.unpack(">i4", data, 5) / 2^16
+      if length >= 32 and unpack(">i4", data) <= 0x00030000 then
+        local italicangle = unpack(">i4", data, 5) / 2^16
         if italicangle ~= 0 then
           slant = -math.tan(italicangle * math.pi / 180) * 65536.0
         end
@@ -153,10 +181,10 @@ local function loadfont(spec)
       local os2 = hbface:get_table(os2tag)
       local length = os2:get_length()
       local data = os2:get_data()
-      if length >= 96 and string.unpack(">H", data) > 1 then
+      if length >= 96 and unpack(">H", data) > 1 then
         -- We don’t need much of the table, so we read from hard-coded offsets.
-        xheight = string.unpack(">H", data, 87)
-        capheight = string.unpack(">H", data, 89)
+        xheight = unpack(">H", data, 87)
+        capheight = unpack(">H", data, 89)
       end
     end
 
@@ -181,6 +209,7 @@ local function loadfont(spec)
     cached = {
       date = date,
       size = size,
+      designsize = get_designsize(hbface),
       gid_offset = 0x120000,
       upem = upem,
       fonttype = fonttype,
@@ -234,7 +263,7 @@ local function scalefont(data, spec)
   local gid_offset = data.gid_offset
 
   if size < 0 then
-    size = -655.36 * size
+    size = size * data.designsize // -1000
   end
 
   -- We shape in font units (at UPEM) and then scale output with the desired
@@ -277,7 +306,7 @@ local function scalefont(data, spec)
     name = spec.specification,
     filename = 'harfloaded:' .. spec.resolved,
     subfont = spec.sub or 1,
-    designsize = size,
+    designsize = data.designsize,
     psname = sanitize(data.psname),
     fullname = data.fullname,
     index = spec.index,

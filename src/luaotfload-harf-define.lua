@@ -43,6 +43,11 @@ local gpostag = hb.Tag.new("GPOS")
 local invalid_l         = hb.Language.new()
 local invalid_s         = hb.Script.new()
 
+local floor = math.floor
+local function round(x)
+  return floor(x + 0.5)
+end
+
 local get_designsize do
   -- local lpeg = lpeg or require'lpeg'
   -- local size_patt = 'size' * lpeg.C(2)/function(s)
@@ -62,7 +67,7 @@ local get_designsize do
         local off = feature_off + 1 + unpack(">H", buf, off + 4)
         local off = off + unpack(">H", buf, off)
         local design_size = unpack(">H", buf, off) -- unpack(">HHHHH", buf, off))
-        return math.floor(design_size * factor)
+        return round(design_size * factor)
       end
     end
     return 655360
@@ -263,7 +268,7 @@ local function scalefont(data, spec)
   local gid_offset = data.gid_offset
 
   if size < 0 then
-    size = size * data.designsize // -1000
+    size = round(size * data.designsize / -1000)
   end
 
   -- We shape in font units (at UPEM) and then scale output with the desired

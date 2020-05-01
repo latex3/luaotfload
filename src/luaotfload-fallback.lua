@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = {
     name          = "luaotfload-fallback",
-    version       = "3.1302-dev",     --TAGVERSION
-    date          = "2020-02-23", --TAGDATE
+    version       = "3.13",     --TAGVERSION
+    date          = "2020-05-01", --TAGDATE
     description   = "luaotfload submodule / fallback",
     license       = "GPL v2.0",
     author        = "Marcel Krüger"

@@ -1,4 +1,4 @@
-%% Copyright (C) 2009-2018
+%% Copyright (C) 2009-2020
 %%
 %%      by  Elie Roux      <elie.roux@telecom-bretagne.eu>
 %%      and Khaled Hosny   <khaledhosny@eglug.org>
@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2020-02-23 v3.1302-dev}
+  \setdocumentdate   {2020-05-01 v3.13}
   \setdocumentauthor {LaTeX3 Project\\
                       Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer · Marcel Krüger\\
                       Home: \hyperlink {https://github.com/latex3/luaotfload}}
@@ -64,6 +64,18 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \beginsection{Changes}
 \beginsubsection {New in version 3.13 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
+\item A\marginpar{\mbox{}\hfill \textbf{Change!}} problem with text fonts with minimal math table has been fixed \gitissue{148}:
+     In new luaotfload versions, math parameters will only be loaded for fonts with \texttt{script=math}.
+     If you do want to set math parameters for fonts with other scripts, add \texttt{-nomathparam}.
+     We strongly recommend against setting math parameters for text fonts because
+     these would overwrite parameters from actual math fonts.
+\item A bug in harf-mode that could lead to missing chars and freezing was corrected \gitissue{141}.
+\item A font size problem in harf-mode has been fixed \gitissue{147}.
+\item An error if the main function was called twice has been fixed \gitissue{145}.
+\item Allow .ttf fonts to be loaded with a map file with luahbtex \gitissue{142} \gitissue{143}.
+\item Fonts installed for a single user on windows are now found \gitissue{138}.
+\item A problem with wrong \TeX-ligatures in harf mode has been fixed \gitissue{139}.
+\item The debugging output has been changed \gitissue{131}.
 \item A missing \enquote{capital sharp s} (U+1E9E) in a font is replaced by SS instead of giving a missing character message:
       ^^^^1e9e or {\sffamily ^^^^1e9e}
 \item The color handling has been improved so that it is now compatible with the luacolor package.

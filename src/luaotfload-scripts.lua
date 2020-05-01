@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-script",
-    version       = "3.1302-dev",       --TAGVERSION
-    date          = "2020-02-23", --TAGDATE
+    version       = "3.13",       --TAGVERSION
+    date          = "2020-05-01", --TAGDATE
     description   = "luaotfload submodule / Script helpers",
     license       = "CC0 1.0 Universal",
     author        = "Marcel Krüger"

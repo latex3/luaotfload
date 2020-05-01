@@ -1,8 +1,8 @@
 # The Luaotfload Package
 
-VERSION: 3.1302-dev
+VERSION: 3.13
 
-DATE: 2020-02-23
+DATE: 2020-05-01
 
 
 ## Description
@@ -23,10 +23,9 @@ Please see the documentation luaotfload.pdf for more information.
 ## Maintenance
 
 This package is currently maintained at 
-<https://github.com/u-fischer/luaotfload>. 
+<https://github.com/latex3/luaotfload>. 
  
-Issues can be reported at the issue tracker or at the old issue tracker on 
-<http://github.com/lualatex/luaotfload>. 
+Issues can be reported at the issue tracker.
 
 The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See
 <http://www.tug.org/mailman/listinfo/lualatex-dev> for details.
@@ -58,7 +57,7 @@ The following people have contributed to this package.
     If you want to install manually: there is a tds-zip file which can be unpacked in a texmf tree. 
 
 2.  If you want to try the development version download the texmf folder in the development branch. 
-    at <https://github.com/u-fischer/luaotfload>
+    at <https://github.com/latex3/luaotfload>
     
 3.  Manual installation:
     * luaotfload-tool.lua belongs in scripts/luatex/luaotfload

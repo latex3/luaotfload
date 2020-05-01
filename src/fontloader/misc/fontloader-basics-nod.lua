@@ -96,7 +96,6 @@ nuts.tonut               = tonut
 nuts.getattr             = direct.get_attribute
 nuts.getboth             = direct.getboth
 nuts.getchar             = direct.getchar
-nuts.getcomponents       = direct.getcomponents
 nuts.getdirection        = direct.getdirection
 nuts.getdisc             = direct.getdisc
 nuts.getreplace          = direct.getreplace
@@ -137,7 +136,6 @@ nuts.isglyph             = direct.is_glyph
 nuts.copy                = direct.copy
 nuts.copy_list           = direct.copy_list
 nuts.copy_node           = direct.copy
-nuts.delete              = direct.delete
 nuts.end_of_math         = direct.end_of_math
 nuts.flush               = direct.flush
 nuts.flush_list          = direct.flush_list
@@ -196,9 +194,8 @@ local getnext       = nuts.getnext
 local setlink       = nuts.setlink
 local getfield      = nuts.getfield
 local setfield      = nuts.setfield
-local getcomponents = nuts.getcomponents
-local setcomponents = nuts.setcomponents
-
+local getsubtype    = nuts.getsubtype
+local isglyph       = nuts.isglyph
 local find_tail     = nuts.tail
 local flush_list    = nuts.flush_list
 local flush_node    = nuts.flush_node
@@ -206,40 +203,72 @@ local traverse_id   = nuts.traverse_id
 local copy_node     = nuts.copy_node
 
 local glyph_code    = nodes.nodecodes.glyph
+local ligature_code = nodes.glyphcodes.ligature
 
-function nuts.copy_no_components(g,copyinjection)
-    local components = getcomponents(g)
-    if components then
-        setcomponents(g)
-        local n = copy_node(g)
-        if copyinjection then
-            copyinjection(n,g)
-        end
-        setcomponents(g,components)
-        -- maybe also upgrade the subtype but we don't use it anyway
-        return n
-    else
-        local n = copy_node(g)
-        if copyinjection then
-            copyinjection(n,g)
-        end
-        return n
-    end
-end
+do
 
-function nuts.copy_only_glyphs(current)
-    local head     = nil
-    local previous = nil
-    for n in traverse_id(glyph_code,current) do
-        n = copy_node(n)
-        if head then
-            setlink(previous,n)
+    local get_components = node.direct.getcomponents
+    local set_components = node.direct.setcomponents
+
+    local function copy_no_components(g,copyinjection)
+        local components = get_components(g)
+        if components then
+            set_components(g)
+            local n = copy_node(g)
+            if copyinjection then
+                copyinjection(n,g)
+            end
+            set_components(g,components)
+            -- maybe also upgrade the subtype but we don't use it anyway
+            return n
         else
-            head = n
+            local n = copy_node(g)
+            if copyinjection then
+                copyinjection(n,g)
+            end
+            return n
         end
-        previous = n
     end
-    return head
+
+    local function copy_only_glyphs(current)
+        local head     = nil
+        local previous = nil
+        for n in traverse_id(glyph_code,current) do
+            n = copy_node(n)
+            if head then
+                setlink(previous,n)
+            else
+                head = n
+            end
+            previous = n
+        end
+        return head
+    end
+
+    local function count_components(start,marks)
+        local char = isglyph(start)
+        if char then
+            if getsubtype(start) == ligature_code then
+                local n = 0
+                local components = get_components(start)
+                while components do
+                    n = n + count_components(components,marks)
+                    components = getnext(components)
+                end
+                return n
+            elseif not marks[char] then
+                return 1
+            end
+        end
+        return 0
+    end
+
+    nuts.set_components     = set_components
+    nuts.get_components     = get_components
+    nuts.copy_only_glyphs   = copy_only_glyphs
+    nuts.copy_no_components = copy_no_components
+    nuts.count_components   = count_components
+
 end
 
 nuts.uses_font = direct.uses_font

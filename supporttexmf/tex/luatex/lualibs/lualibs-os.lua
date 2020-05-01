@@ -459,7 +459,7 @@ end
 local d
 
 function os.timezone(delta)
-    d = d or tonumber(tonumber(date("%H")-date("!%H")))
+    d = d or ((tonumber(date("%H")) or 0) - (tonumber(date("!%H")) or 0))
     if delta then
         if d > 0 then
             return format("+%02i:00",d)
@@ -635,6 +635,14 @@ function os.validdate(year,month,day)
         end
     end
     return year, month, day
+end
+
+function os.date(fmt,...)
+    if not fmt then
+        -- otherwise differences between unix, mingw and msvc
+        fmt = "%Y-%m-%d %H:%M"
+    end
+    return date(fmt,...)
 end
 
 local osexit   = os.exit

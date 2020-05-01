@@ -701,13 +701,17 @@ local format_left = function(f)
     end
 end
 
-local format_q = function()
+local format_q = JITSUPPORTED and function()
     n = n + 1
     -- lua 5.3 has a different q than lua 5.2 (which does a tostring on numbers)
  -- return format("(a%s ~= nil and format('%%q',a%s) or '')",n,n)
     return format("(a%s ~= nil and format('%%q',tostring(a%s)) or '')",n,n)
  -- return format("(a%s ~= nil and escapedquotes(tostring(a%s)) or '')",n,n)
+end or function()
+    n = n + 1
+    return format("(a%s ~= nil and format('%%q',a%s) or '')",n,n)
 end
+
 
 local format_Q = function() -- fast escaping
     n = n + 1
@@ -1269,7 +1273,6 @@ local function make(t,str)
             f = function() return str end
         end
     end
- -- if jit then jit.on(f,true) end
     t[str] = f
     return f
 end

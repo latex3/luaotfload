@@ -257,7 +257,9 @@ if non_generic_context.luatex_fonts.skip_loading ~= true then
 
         loadmodule('font-vfc.lua')
 
-        -- This is the bulk of opentype code.
+        -- This is the bulk of opentype code. The color and variable font support (as for
+        -- emoji) can (and might) actually go away here because it has never been used
+        -- outside context so in retrospect there was no need for it being generic.
 
         loadmodule('font-otr.lua')
         loadmodule('font-oti.lua')

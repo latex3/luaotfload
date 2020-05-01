@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Sun Feb  2 22:31:00 2020
+-- merge date  : 2020-05-01 15:49
 
 do -- begin closure to overcome local limits and interference
 
@@ -1700,13 +1700,13 @@ function table.fromhash(t)
  end
  return hsh
 end
-local noquotes,hexify,handle,compact,inline,functions,metacheck
+local noquotes,hexify,handle,compact,inline,functions,metacheck,accurate
 local reserved=table.tohash { 
  'and','break','do','else','elseif','end','false','for','function','if',
  'in','local','nil','not','or','repeat','return','then','true','until','while',
- 'NaN','goto',
+ 'NaN','goto','const',
 }
-local function is_simple_table(t,hexify) 
+local function is_simple_table(t,hexify,accurate) 
  local nt=#t
  if nt>0 then
   local n=0
@@ -1725,6 +1725,8 @@ local function is_simple_table(t,hexify)
     if tv=="number" then
      if hexify then
       tt[i]=format("0x%X",v)
+     elseif accurate then
+      tt[i]=format("%q",v)
      else
       tt[i]=v 
      end
@@ -1745,6 +1747,8 @@ local function is_simple_table(t,hexify)
     if tv=="number" then
      if hexify then
       tt[i+1]=format("0x%X",v)
+     elseif accurate then
+      tt[i+1]=format("%q",v)
      else
       tt[i+1]=v 
      end
@@ -1816,6 +1820,8 @@ local function do_serialize(root,name,depth,level,indexed)
     if tv=="number" then
      if hexify then
       handle(format("%s 0x%X,",depth,v))
+     elseif accurate then
+      handle(format("%s %q,",depth,v))
      else
       handle(format("%s %s,",depth,v)) 
      end
@@ -1825,7 +1831,7 @@ local function do_serialize(root,name,depth,level,indexed)
      if next(v)==nil then
       handle(format("%s {},",depth))
      elseif inline then 
-      local st=is_simple_table(v,hexify)
+      local st=is_simple_table(v,hexify,accurate)
       if st then
        handle(format("%s { %s },",depth,concat(st,", ")))
       else
@@ -1853,12 +1859,16 @@ local function do_serialize(root,name,depth,level,indexed)
     if tk=="number" then
      if hexify then
       handle(format("%s [0x%X]=0x%X,",depth,k,v))
+     elseif accurate then
+      handle(format("%s [%s]=%q,",depth,k,v))
      else
       handle(format("%s [%s]=%s,",depth,k,v)) 
      end
     elseif tk=="boolean" then
      if hexify then
       handle(format("%s [%s]=0x%X,",depth,k and "true" or "false",v))
+     elseif accurate then
+      handle(format("%s [%s]=%q,",depth,k and "true" or "false",v))
      else
       handle(format("%s [%s]=%s,",depth,k and "true" or "false",v)) 
      end
@@ -1866,12 +1876,16 @@ local function do_serialize(root,name,depth,level,indexed)
     elseif noquotes and not reserved[k] and lpegmatch(propername,k) then
      if hexify then
       handle(format("%s %s=0x%X,",depth,k,v))
+     elseif accurate then
+      handle(format("%s %s=%q,",depth,k,v))
      else
       handle(format("%s %s=%s,",depth,k,v)) 
      end
     else
      if hexify then
       handle(format("%s [%q]=0x%X,",depth,k,v))
+     elseif accurate then
+      handle(format("%s [%q]=%q,",depth,k,v))
      else
       handle(format("%s [%q]=%s,",depth,k,v)) 
      end
@@ -1880,6 +1894,8 @@ local function do_serialize(root,name,depth,level,indexed)
     if tk=="number" then
      if hexify then
       handle(format("%s [0x%X]=%q,",depth,k,v))
+     elseif accurate then
+      handle(format("%s [%q]=%q,",depth,k,v))
      else
       handle(format("%s [%s]=%q,",depth,k,v))
      end
@@ -1896,6 +1912,8 @@ local function do_serialize(root,name,depth,level,indexed)
      if tk=="number" then
       if hexify then
        handle(format("%s [0x%X]={},",depth,k))
+      elseif accurate then
+       handle(format("%s [%q]={},",depth,k))
       else
        handle(format("%s [%s]={},",depth,k))
       end
@@ -1908,11 +1926,13 @@ local function do_serialize(root,name,depth,level,indexed)
       handle(format("%s [%q]={},",depth,k))
      end
     elseif inline then
-     local st=is_simple_table(v,hexify)
+     local st=is_simple_table(v,hexify,accurate)
      if st then
       if tk=="number" then
        if hexify then
         handle(format("%s [0x%X]={ %s },",depth,k,concat(st,", ")))
+       elseif accurate then
+        handle(format("%s [%q]={ %s },",depth,k,concat(st,", ")))
        else
         handle(format("%s [%s]={ %s },",depth,k,concat(st,", ")))
        end
@@ -1934,6 +1954,8 @@ local function do_serialize(root,name,depth,level,indexed)
     if tk=="number" then
      if hexify then
       handle(format("%s [0x%X]=%s,",depth,k,v and "true" or "false"))
+     elseif accurate then
+      handle(format("%s [%q]=%s,",depth,k,v and "true" or "false"))
      else
       handle(format("%s [%s]=%s,",depth,k,v and "true" or "false"))
      end
@@ -1953,6 +1975,8 @@ local function do_serialize(root,name,depth,level,indexed)
       if tk=="number" then
        if hexify then
         handle(format("%s [0x%X]=load(%q),",depth,k,f))
+       elseif accurate then
+        handle(format("%s [%q]=load(%q),",depth,k,f))
        else
         handle(format("%s [%s]=load(%q),",depth,k,f))
        end
@@ -1970,6 +1994,8 @@ local function do_serialize(root,name,depth,level,indexed)
     if tk=="number" then
      if hexify then
       handle(format("%s [0x%X]=%q,",depth,k,tostring(v)))
+     elseif accurate then
+      handle(format("%s [%q]=%q,",depth,k,tostring(v)))
      else
       handle(format("%s [%s]=%q,",depth,k,tostring(v)))
      end
@@ -1993,6 +2019,7 @@ local function serialize(_handle,root,name,specification)
  if type(specification)=="table" then
   noquotes=specification.noquotes
   hexify=specification.hexify
+  accurate=specification.accurate
   handle=_handle or specification.handle or print
   functions=specification.functions
   compact=specification.compact
@@ -3399,7 +3426,7 @@ function os.uuid()
 end
 local d
 function os.timezone(delta)
- d=d or tonumber(tonumber(date("%H")-date("!%H")))
+ d=d or ((tonumber(date("%H")) or 0)-(tonumber(date("!%H")) or 0))
  if delta then
   if d>0 then
    return format("+%02i:00",d)
@@ -3524,6 +3551,12 @@ function os.validdate(year,month,day)
   end
  end
  return year,month,day
+end
+function os.date(fmt,...)
+ if not fmt then
+  fmt="%Y-%m-%d %H:%M"
+ end
+ return date(fmt,...)
 end
 local osexit=os.exit
 local exitcode=nil

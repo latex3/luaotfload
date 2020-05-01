@@ -184,6 +184,15 @@ local cffreaders = {
     readulong,
 }
 
+directives.register("fonts.streamreader",function()
+    cffreaders = {
+        readbyte,
+        readushort,
+        readuint,
+        readulong,
+    }
+end)
+
 -- The header contains information about its own size.
 
 local function readheader(f)

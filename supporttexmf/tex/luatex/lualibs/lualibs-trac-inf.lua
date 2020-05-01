@@ -45,42 +45,59 @@ end
 local ticks   = clock
 local seconds = function(n) return n or 0 end
 
--- if FFISUPPORTED and ffi and os.type == "windows" then
---
---     local okay, kernel = pcall(ffi.load,"kernel32")
---
---     if kernel then
---
---         local tonumber = ffi.number or tonumber
---
---         ffi.cdef[[
---             int QueryPerformanceFrequency(int64_t *lpFrequency);
---             int QueryPerformanceCounter(int64_t *lpPerformanceCount);
---         ]]
---
---         local target = ffi.new("__int64[1]")
---
---         ticks = function()
---             if kernel.QueryPerformanceCounter(target) == 1 then
---                 return tonumber(target[0])
---             else
---                 return 0
---             end
---         end
---
---         local target = ffi.new("__int64[1]")
---
---         seconds = function(ticks)
---             if kernel.QueryPerformanceFrequency(target) == 1 then
---                 return ticks / tonumber(target[0])
---             else
---                 return 0
---             end
---         end
---
---     end
---
--- end
+if os.type ~= "windows" then
+
+    -- doesn't work well yet on unix (system time vs process time so a mtxrun
+    -- timing with nested call gives the wrong result)
+
+elseif lua.getpreciseticks then
+
+    ticks   = lua.getpreciseticks
+    seconds = lua.getpreciseseconds
+
+elseif FFISUPPORTED then
+
+    -- Do we really care when not in luametatex? For now we do, so:
+
+    local okay, kernel = pcall(ffi.load,"kernel32")
+
+    if kernel then
+
+        local tonumber = ffi.number or tonumber
+
+        ffi.cdef[[
+            int QueryPerformanceFrequency(int64_t *lpFrequency);
+            int QueryPerformanceCounter(int64_t *lpPerformanceCount);
+        ]]
+
+        local target = ffi.new("__int64[1]")
+
+        ticks = function()
+            if kernel.QueryPerformanceCounter(target) == 1 then
+                return tonumber(target[0])
+            else
+                return 0
+            end
+        end
+
+        local target = ffi.new("__int64[1]")
+
+        seconds = function(ticks)
+            if kernel.QueryPerformanceFrequency(target) == 1 then
+                return ticks / tonumber(target[0])
+            else
+                return 0
+            end
+        end
+
+    end
+
+else
+
+    -- excessive timing costs some 1-2 percent runtime
+
+end
+
 
 local function starttiming(instance,reset)
     local timer = timers[instance or "notimer"]
@@ -211,12 +228,12 @@ function statistics.show()
      -- end)
         if LUATEXENGINE == "luametatex" then
             register("used engine", function()
-                return format("%s version %s, functionality level %s, format id %s",
-                    LUATEXENGINE, LUATEXVERSION, LUATEXFUNCTIONALITY, LUATEXFORMATID)
+                return format("%s version: %s, functionality level: %s, format id: %s, compiler: %s",
+                    LUATEXENGINE, LUATEXVERSION, LUATEXFUNCTIONALITY, LUATEXFORMATID, status.used_compiler)
             end)
         else
             register("used engine", function()
-                return format("%s version %s with functionality level %s, banner: %s",
+                return format("%s version: %s, functionality level: %s, banner: %s",
                     LUATEXENGINE, LUATEXVERSION, LUATEXFUNCTIONALITY, lower(status.banner))
             end)
         end
@@ -224,7 +241,7 @@ function statistics.show()
             return format("%s of %s + %s", status.cs_count, status.hash_size,status.hash_extra)
         end)
         register("callbacks", statistics.callbacks)
-        if TEXENGINE == "luajittex" and JITSUPPORTED then
+        if JITSUPPORTED then
             local jitstatus = jit.status
             if jitstatus then
                 local jitstatus = { jitstatus() }
@@ -262,7 +279,7 @@ end
 
 function statistics.memused() -- no math.round yet -)
     local round = math.round or math.floor
-    return format("%s MB, ctx: %s MB, max: %s MB)",
+    return format("%s MB, ctx: %s MB, max: %s MB",
         round(collectgarbage("count")/1000),
         round(status.luastate_bytes/1000000),
         status.luastate_bytes_max and round(status.luastate_bytes_max/1000000) or "unknown"

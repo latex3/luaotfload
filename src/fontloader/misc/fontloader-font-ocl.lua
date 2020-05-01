@@ -49,6 +49,10 @@ if context then
 
 else
 
+    -- Actually we don't need a generic branch at all because (according the the
+    -- internet) other macro packages rely on hb for emoji etc and never used this
+    -- feature of the font loader. So maybe I should just remove this from generic.
+
     local tounicode = fonts.mappings.tounicode16
 
     function otf.getactualtext(s)
@@ -401,7 +405,7 @@ local function pdftovirtual(tfmdata,pdfshapes,kind) -- kind = png|svg
                 -- The down and right will change too (we can move that elsewhere). We have
                 -- a different treatment in lmtx but the next kind of works. These images are
                 -- a mess anyway as in svg the bbox can be messed up absent). A png image
-                -- needs the x/y. I might normalize this once we moev to lmtx exlusively.
+                -- needs the x/y. I might normalize this once we move to lmtx exlusively.
                 character.commands = {
                     not unicode and actualb or { "pdf", "page", (getactualtext(unicode)) },
                     -- lmtx (when we deal with depth in vfimage, currently disabled):

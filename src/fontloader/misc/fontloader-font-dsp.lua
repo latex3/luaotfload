@@ -3237,7 +3237,8 @@ function readers.sbix(f,fontdata,specification)
                 return b.ppem < a.ppem
             end
         end)
-        local glyphs = { }
+        local glyphs  = { }
+        local delayed = CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 or fonts.handlers.typethree
         for i=1,nofstrikes do
             local strike       = strikes[i]
             local strikeppem   = strike.ppem
@@ -3254,13 +3255,28 @@ function readers.sbix(f,fontdata,specification)
                     local datasize = nextoffset - glyphoffset
                     if datasize > 0 then
                         setposition(f,strikeoffset + glyphoffset)
+                        local x      = readshort(f)
+                        local y      = readshort(f)
+                        local tag    = readtag(f) -- or just skip, we never needed it till now
+                        local size   = datasize - 8
+                        local data   = nil
+                        local offset = nil
+                        if delayed then
+                            offset = getposition(f)
+                            data   = nil
+                        else
+                            data   = readstring(f,size)
+                            size   = nil
+                        end
                         shapes[i] = {
-                            x    = readshort(f),
-                            y    = readshort(f),
-                            tag  = readtag(f), -- maybe for tracing
-                            data = readstring(f,datasize-8),
-                            ppem = strikeppem, -- not used, for tracing
-                            ppi  = strikeppi,  -- not used, for tracing
+                            x    = x,
+                            y    = y,
+                            o    = offset,
+                            s    = size,
+                            data = data,
+                         -- tag  = tag, -- maybe for tracing
+                         -- ppem = strikeppem, -- not used, for tracing
+                         -- ppi  = strikeppi,  -- not used, for tracing
                         }
                         done = done + 1
                         if done == nofglyphs then
@@ -3462,32 +3478,48 @@ do
 
             local default = { width = 0, height = 0 }
             local glyphs  = fontdata.glyphs
+            local delayed = CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 or fonts.handlers.typethree
 
             for index, subtable in sortedhash(shapes) do
                 if type(subtable) == "table" then
                     local data    = nil
+                    local size    = nil
                     local metrics = default
                     local format  = subtable.format
                     local offset  = subtable.offsets[index]
                     setposition(f,offset)
                     if format == 17 then
                         metrics = getsmallmetrics(f)
-                        data    = readstring(f,readulong(f))
+                        size    = true
                     elseif format == 18 then
                         metrics = getbigmetrics(f)
-                        data    = readstring(f,readulong(f))
+                        size    = true
                     elseif format == 19 then
                         metrics = subtable.metrics
-                        data    = readstring(f,readulong(f))
+                        size    = true
                     else
                         -- forget about it
+                    end
+                    if size then
+                        size = readulong(f)
+                        if delayed then
+                            offset = getposition(f)
+                            data   = nil
+                        else
+                            offset = nil
+                            data   = readstring(f,size)
+                            size   = nil
+                        end
+                    else
+                        offset = nil
                     end
                     local x = metrics.width
                     local y = metrics.height
                     shapes[index] = {
-                        -- maybe some metrics
                         x    = x,
                         y    = y,
+                        o    = offset,
+                        s    = size,
                         data = data,
                     }
                     -- I'll look into this in more details when needed
@@ -3498,12 +3530,11 @@ do
                         local height = width * y/x
                         glyph.boundingbox = { 0, 0, width, height }
                     end
-
                 else
                     shapes[index] = {
                         x    = 0,
                         y    = 0,
-                        data = "",
+                        data = "", -- or just nil
                     }
                 end
             end

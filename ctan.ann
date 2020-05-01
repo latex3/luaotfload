@@ -14,3 +14,4 @@
     * a missing U+1E9E (Capital ß) in a font is replaced by 
       SS instead of giving a missing character.
     * extended the color handling to be compatible with the luacolor package  
+    * sync with context files from 2020-04-30

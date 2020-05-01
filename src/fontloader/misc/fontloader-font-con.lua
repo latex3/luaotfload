@@ -1139,6 +1139,7 @@ hashmethods.normal = function(list)
                     m = m + 1
                     t[m] = k .. '=' .. tostring(v)
                 end
+                sort(t)
                 s[n] = k .. '={' .. concat(t,",") .. "}"
             else
                 s[n] = k .. '=' .. tostring(v)

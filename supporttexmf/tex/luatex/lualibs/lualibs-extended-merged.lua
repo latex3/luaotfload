@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Sun Feb  2 22:30:49 2020
+-- merge date  : 2020-05-01 15:49
 
 do -- begin closure to overcome local limits and interference
 
@@ -417,9 +417,12 @@ local format_left=function(f)
   return format("a%s..utfpadding(a%s,%i)",n,n,-f)
  end
 end
-local format_q=function()
+local format_q=JITSUPPORTED and function()
  n=n+1
  return format("(a%s ~= nil and format('%%q',tostring(a%s)) or '')",n,n)
+end or function()
+ n=n+1
+ return format("(a%s ~= nil and format('%%q',a%s) or '')",n,n)
 end
 local format_Q=function() 
  n=n+1
@@ -1410,92 +1413,160 @@ function tables.encapsulate(core,capsule,protect)
   } )
  end
 end
-local f_hashed_string=formatters["[%Q]=%Q,"]
-local f_hashed_number=formatters["[%Q]=%s,"]
-local f_hashed_boolean=formatters["[%Q]=%l,"]
-local f_hashed_table=formatters["[%Q]="]
-local f_indexed_string=formatters["[%s]=%Q,"]
-local f_indexed_number=formatters["[%s]=%s,"]
-local f_indexed_boolean=formatters["[%s]=%l,"]
-local f_indexed_table=formatters["[%s]="]
-local f_ordered_string=formatters["%Q,"]
-local f_ordered_number=formatters["%s,"]
-local f_ordered_boolean=formatters["%l,"]
-function table.fastserialize(t,prefix)
- local r={ type(prefix)=="string" and prefix or "return" }
- local m=1
- local function fastserialize(t,outer) 
-  local n=#t
-  m=m+1
-  r[m]="{"
-  if n>0 then
-   local v=t[0]
-   if v then
-    local tv=type(v)
-    if tv=="string" then
-     m=m+1 r[m]=f_indexed_string(0,v)
-    elseif tv=="number" then
-     m=m+1 r[m]=f_indexed_number(0,v)
-    elseif tv=="table" then
-     m=m+1 r[m]=f_indexed_table(0)
-     fastserialize(v)
-    elseif tv=="boolean" then
-     m=m+1 r[m]=f_indexed_boolean(0,v)
-    end
-   end
-   for i=1,n do
-    local v=t[i]
-    local tv=type(v)
-    if tv=="string" then
-     m=m+1 r[m]=f_ordered_string(v)
-    elseif tv=="number" then
-     m=m+1 r[m]=f_ordered_number(v)
-    elseif tv=="table" then
-     fastserialize(v)
-    elseif tv=="boolean" then
-     m=m+1 r[m]=f_ordered_boolean(v)
-    end
-   end
-  end
-  for k,v in next,t do
-   local tk=type(k)
-   if tk=="number" then
-    if k>n or k<0 then
+if JITSUPPORTED then
+ local f_hashed_string=formatters["[%Q]=%Q,"]
+ local f_hashed_number=formatters["[%Q]=%s,"]
+ local f_hashed_boolean=formatters["[%Q]=%l,"]
+ local f_hashed_table=formatters["[%Q]="]
+ local f_indexed_string=formatters["[%s]=%Q,"]
+ local f_indexed_number=formatters["[%s]=%s,"]
+ local f_indexed_boolean=formatters["[%s]=%l,"]
+ local f_indexed_table=formatters["[%s]="]
+ local f_ordered_string=formatters["%Q,"]
+ local f_ordered_number=formatters["%s,"]
+ local f_ordered_boolean=formatters["%l,"]
+ function table.fastserialize(t,prefix)
+  local r={ type(prefix)=="string" and prefix or "return" }
+  local m=1
+  local function fastserialize(t,outer) 
+   local n=#t
+   m=m+1
+   r[m]="{"
+   if n>0 then
+    local v=t[0]
+    if v then
      local tv=type(v)
      if tv=="string" then
-      m=m+1 r[m]=f_indexed_string(k,v)
+      m=m+1 r[m]=f_indexed_string(0,v)
      elseif tv=="number" then
-      m=m+1 r[m]=f_indexed_number(k,v)
+      m=m+1 r[m]=f_indexed_number(0,v)
      elseif tv=="table" then
-      m=m+1 r[m]=f_indexed_table(k)
+      m=m+1 r[m]=f_indexed_table(0)
       fastserialize(v)
+      m=m+1 r[m]=f_indexed_table(0)
      elseif tv=="boolean" then
-      m=m+1 r[m]=f_indexed_boolean(k,v)
+      m=m+1 r[m]=f_indexed_boolean(0,v)
      end
     end
-   else
-    local tv=type(v)
-    if tv=="string" then
-     m=m+1 r[m]=f_hashed_string(k,v)
-    elseif tv=="number" then
-     m=m+1 r[m]=f_hashed_number(k,v)
-    elseif tv=="table" then
-     m=m+1 r[m]=f_hashed_table(k)
-     fastserialize(v)
-    elseif tv=="boolean" then
-     m=m+1 r[m]=f_hashed_boolean(k,v)
+    for i=1,n do
+     local v=t[i]
+     local tv=type(v)
+     if tv=="string" then
+      m=m+1 r[m]=f_ordered_string(v)
+     elseif tv=="number" then
+      m=m+1 r[m]=f_ordered_number(v)
+     elseif tv=="table" then
+      fastserialize(v)
+     elseif tv=="boolean" then
+      m=m+1 r[m]=f_ordered_boolean(v)
+     end
     end
    end
+   for k,v in next,t do
+    local tk=type(k)
+    if tk=="number" then
+     if k>n or k<0 then
+      local tv=type(v)
+      if tv=="string" then
+       m=m+1 r[m]=f_indexed_string(k,v)
+      elseif tv=="number" then
+       m=m+1 r[m]=f_indexed_number(k,v)
+      elseif tv=="table" then
+       m=m+1 r[m]=f_indexed_table(k)
+       fastserialize(v)
+      elseif tv=="boolean" then
+       m=m+1 r[m]=f_indexed_boolean(k,v)
+      end
+     end
+    else
+     local tv=type(v)
+     if tv=="string" then
+      m=m+1 r[m]=f_hashed_string(k,v)
+     elseif tv=="number" then
+      m=m+1 r[m]=f_hashed_number(k,v)
+     elseif tv=="table" then
+      m=m+1 r[m]=f_hashed_table(k)
+      fastserialize(v)
+     elseif tv=="boolean" then
+      m=m+1 r[m]=f_hashed_boolean(k,v)
+     end
+    end
+   end
+   m=m+1
+   if outer then
+    r[m]="}"
+   else
+    r[m]="},"
+   end
+   return r
   end
-  m=m+1
-  if outer then
-   r[m]="}"
-  else
-   r[m]="},"
-  end
-  return r
+  return concat(fastserialize(t,true))
  end
- return concat(fastserialize(t,true))
+else
+ local f_v=formatters["[%q]=%q,"]
+ local f_t=formatters["[%q]="]
+ local f_q=formatters["%q,"]
+ function table.fastserialize(t,prefix) 
+  local r={ type(prefix)=="string" and prefix or "return" }
+  local m=1
+  local function fastserialize(t,outer) 
+   local n=#t
+   m=m+1
+   r[m]="{"
+   if n>0 then
+    local v=t[0]
+    if v then
+     m=m+1
+     r[m]="[0]='"
+     if type(v)=="table" then
+      fastserialize(v)
+     else
+      r[m]=format("%q,",v)
+     end
+    end
+    for i=1,n do
+     local v=t[i]
+     m=m+1
+     if type(v)=="table" then
+      r[m]=format("[%i]=",i)
+      fastserialize(v)
+     else
+      r[m]=format("[%i]=%q,",i,v)
+     end
+    end
+   end
+   for k,v in next,t do
+    local tk=type(k)
+    if tk=="number" then
+     if k>n or k<0 then
+      m=m+1
+      if type(v)=="table" then
+       r[m]=format("[%i]=",k)
+       fastserialize(v)
+      else
+       r[m]=format("[%i]=%q,",k,v)
+      end
+     end
+    else
+     m=m+1
+     if type(v)=="table" then
+      r[m]=format("[%q]=",k)
+      fastserialize(v)
+     else
+      r[m]=format("[%q]=%q,",k,v)
+     end
+    end
+   end
+   m=m+1
+   if outer then
+    r[m]="}"
+   else
+    r[m]="},"
+   end
+   return r
+  end
+  return concat(fastserialize(t,true))
+ end
 end
 function table.deserialize(str)
  if not str or str=="" then
@@ -1589,27 +1660,27 @@ function table.twowaymapper(t)
  return t
 end
 local f_start_key_idx=formatters["%w{"]
-local f_start_key_num=formatters["%w[%s]={"]
+local f_start_key_num=JITSUPPORTED and formatters["%w[%s]={"] or formatters["%w[%q]={"]
 local f_start_key_str=formatters["%w[%q]={"]
 local f_start_key_boo=formatters["%w[%l]={"]
 local f_start_key_nop=formatters["%w{"]
 local f_stop=formatters["%w},"]
-local f_key_num_value_num=formatters["%w[%s]=%s,"]
-local f_key_str_value_num=formatters["%w[%Q]=%s,"]
-local f_key_boo_value_num=formatters["%w[%l]=%s,"]
-local f_key_num_value_str=formatters["%w[%s]=%Q,"]
+local f_key_num_value_num=JITSUPPORTED and formatters["%w[%s]=%s,"] or formatters["%w[%s]=%q,"]
+local f_key_str_value_num=JITSUPPORTED and formatters["%w[%Q]=%s,"] or formatters["%w[%Q]=%q,"]
+local f_key_boo_value_num=JITSUPPORTED and formatters["%w[%l]=%s,"] or formatters["%w[%l]=%q,"]
+local f_key_num_value_str=JITSUPPORTED and formatters["%w[%s]=%Q,"] or formatters["%w[%q]=%Q,"]
 local f_key_str_value_str=formatters["%w[%Q]=%Q,"]
 local f_key_boo_value_str=formatters["%w[%l]=%Q,"]
-local f_key_num_value_boo=formatters["%w[%s]=%l,"]
+local f_key_num_value_boo=JITSUPPORTED and formatters["%w[%s]=%l,"] or formatters["%w[%q]=%l,"]
 local f_key_str_value_boo=formatters["%w[%Q]=%l,"]
 local f_key_boo_value_boo=formatters["%w[%l]=%l,"]
-local f_key_num_value_not=formatters["%w[%s]={},"]
+local f_key_num_value_not=JITSUPPORTED and formatters["%w[%s]={},"] or formatters["%w[%q]={},"]
 local f_key_str_value_not=formatters["%w[%Q]={},"]
 local f_key_boo_value_not=formatters["%w[%l]={},"]
-local f_key_num_value_seq=formatters["%w[%s]={ %, t },"]
+local f_key_num_value_seq=JITSUPPORTED and formatters["%w[%s]={ %, t },"] or formatters["%w[%q]={ %, t },"]
 local f_key_str_value_seq=formatters["%w[%Q]={ %, t },"]
 local f_key_boo_value_seq=formatters["%w[%l]={ %, t },"]
-local f_val_num=formatters["%w%s,"]
+local f_val_num=JITSUPPORTED and formatters["%w%s,"] or formatters["%w%q,"]
 local f_val_str=formatters["%w%Q,"]
 local f_val_boo=formatters["%w%l,"]
 local f_val_not=formatters["%w{},"]
@@ -3178,6 +3249,37 @@ local function resettiming(instance)
 end
 local ticks=clock
 local seconds=function(n) return n or 0 end
+if os.type~="windows" then
+elseif lua.getpreciseticks then
+ ticks=lua.getpreciseticks
+ seconds=lua.getpreciseseconds
+elseif FFISUPPORTED then
+ local okay,kernel=pcall(ffi.load,"kernel32")
+ if kernel then
+  local tonumber=ffi.number or tonumber
+  ffi.cdef[[
+            int QueryPerformanceFrequency(int64_t *lpFrequency);
+            int QueryPerformanceCounter(int64_t *lpPerformanceCount);
+        ]]
+  local target=ffi.new("__int64[1]")
+  ticks=function()
+   if kernel.QueryPerformanceCounter(target)==1 then
+    return tonumber(target[0])
+   else
+    return 0
+   end
+  end
+  local target=ffi.new("__int64[1]")
+  seconds=function(ticks)
+   if kernel.QueryPerformanceFrequency(target)==1 then
+    return ticks/tonumber(target[0])
+   else
+    return 0
+   end
+  end
+ end
+else
+end
 local function starttiming(instance,reset)
  local timer=timers[instance or "notimer"]
  local it=timer.timing
@@ -3289,12 +3391,12 @@ function statistics.show()
   end)
   if LUATEXENGINE=="luametatex" then
    register("used engine",function()
-    return format("%s version %s, functionality level %s, format id %s",
-     LUATEXENGINE,LUATEXVERSION,LUATEXFUNCTIONALITY,LUATEXFORMATID)
+    return format("%s version: %s, functionality level: %s, format id: %s, compiler: %s",
+     LUATEXENGINE,LUATEXVERSION,LUATEXFUNCTIONALITY,LUATEXFORMATID,status.used_compiler)
    end)
   else
    register("used engine",function()
-    return format("%s version %s with functionality level %s, banner: %s",
+    return format("%s version: %s, functionality level: %s, banner: %s",
      LUATEXENGINE,LUATEXVERSION,LUATEXFUNCTIONALITY,lower(status.banner))
    end)
   end
@@ -3302,7 +3404,7 @@ function statistics.show()
    return format("%s of %s + %s",status.cs_count,status.hash_size,status.hash_extra)
   end)
   register("callbacks",statistics.callbacks)
-  if TEXENGINE=="luajittex" and JITSUPPORTED then
+  if JITSUPPORTED then
    local jitstatus=jit.status
    if jitstatus then
     local jitstatus={ jitstatus() }
@@ -3336,7 +3438,7 @@ function statistics.show()
 end
 function statistics.memused() 
  local round=math.round or math.floor
- return format("%s MB, ctx: %s MB, max: %s MB)",
+ return format("%s MB, ctx: %s MB, max: %s MB",
   round(collectgarbage("count")/1000),
   round(status.luastate_bytes/1000000),
   status.luastate_bytes_max and round(status.luastate_bytes_max/1000000) or "unknown"

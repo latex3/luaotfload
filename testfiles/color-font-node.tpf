@@ -1,0 +1,137 @@
+%PDF-1.5
+%Ã’¡‘≈ÿ–ƒ∆
+3 0 obj
+<< /Length 562 >>        
+stream
+/Span << /ActualText <feff0041> >> BDC
+q
+0.000 0.502 0.000 rg
+BT
+/F26 29.88792 Tf
+1 0 0 1 148.712 697.955 Tm [<0135>]TJ
+1.000 0.000 1.000 rg
+1 0 0 1 148.712 697.955 Tm [<0020>]TJ
+ET
+Q
+EMC
+/Span << /ActualText <feff0042> >> BDC
+q
+0.000 0.502 0.000 rg
+BT
+/F26 29.88792 Tf
+1 0 0 1 168.91 697.955 Tm [<0136>]TJ
+1.000 0.000 1.000 rg
+1 0 0 1 168.91 697.955 Tm [<0021>]TJ
+ET
+Q
+EMC
+/Span << /ActualText <feff0043> >> BDC
+q
+0.000 0.502 0.000 rg
+BT
+/F26 29.88792 Tf
+1 0 0 1 188.451 697.955 Tm [<0137>]TJ
+1.000 0.000 1.000 rg
+1 0 0 1 188.451 697.955 Tm [<0022>]TJ
+ET
+Q
+EMC
+endstream
+endobj
+2 0 obj
+<< /Type /Page /Contents 3 0 R /Resources 1 0 R /MediaBox [ 0 0 595.276 841.89 ] /Parent 5 0 R >>
+endobj
+1 0 obj
+<< /Font << /F26 4 0 R >> /ProcSet [ /PDF /Text ] >>
+endobj
+6 0 obj
+[ 32 [ 675.8 653.8 728.5 ] 309 [ 675.8 653.8 728.5 ] ]
+endobj
+8 0 obj
+<< /Length 39 >>         
+[BINARY STREAM]
+endobj
+9 0 obj
+<< /Length 9382 >>       
+[BINARY STREAM]
+endobj
+7 0 obj
+<< /Type /FontDescriptor /FontName /CLKXYS+koeielettersot /Flags 4 /FontBBox [ 0 -28 1000 642 ] /Ascent 536 /CapHeight 642 /Descent -28 /ItalicAngle 0 /StemV 99 /XHeight 513 /FontFile2 9 0 R /CIDSet 8 0 R >>
+endobj
+10 0 obj
+<< /Length 747 >>        
+stream
+%!PS-Adobe-3.0 Resource-CMap
+%%DocumentNeededResources: ProcSet (CIDInit)
+%%IncludeResource: ProcSet (CIDInit)
+%%BeginResource: CMap (TeX-CLKXYS-koeielettersot-0)
+%%Title: (TeX-CLKXYS-koeielettersot-0 TeX CLKXYS-koeielettersot 0)
+%%Version: 1.000
+%%EndComments
+/CIDInit /ProcSet findresource begin
+12 dict begin
+begincmap
+/CIDSystemInfo
+<< /Registry (TeX)
+/Ordering (CLKXYS-koeielettersot)
+/Supplement 0
+>> def
+/CMapName /TeX-Identity-CLKXYS-koeielettersot def
+/CMapType 2 def
+1 begincodespacerange
+<0000> <FFFF>
+endcodespacerange
+0 beginbfrange
+endbfrange
+6 beginbfchar
+<0020> <0041>
+<0021> <0042>
+<0022> <0043>
+<0135> <0041>
+<0136> <0042>
+<0137> <0043>
+endbfchar
+endcmap
+CMapName currentdict /CMap defineresource pop
+end
+end
+%%EndResource
+%%EOF
+endstream
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type0 /Encoding /Identity-H /BaseFont /CLKXYS+koeielettersot /DescendantFonts [ 11 0 R ] /ToUnicode 10 0 R >>
+endobj
+11 0 obj
+<< /Type /Font /Subtype /CIDFontType2 /CIDToGIDMap /Identity /BaseFont /CLKXYS+koeielettersot /FontDescriptor 7 0 R /W 6 0 R /CIDSystemInfo << /Registry (Adobe) /Ordering (Identity) /Supplement 0 >> >>
+endobj
+5 0 obj
+<< /Type /Pages  /Count 1 /Kids [ 2 0 R ] >>
+endobj
+12 0 obj
+<< /Type /Catalog /Pages 5 0 R >>
+endobj
+13 0 obj
+<< /Producer (LuaTeX) /Creator (TeX) /Trapped /False >>
+endobj
+xref
+0 14
+0000000000 65535 f 
+0000000754 00000 n 
+0000000641 00000 n 
+0000000020 00000 n 
+0000011461 00000 n 
+0000011829 00000 n 
+0000000822 00000 n 
+0000010431 00000 n 
+0000000892 00000 n 
+0000000990 00000 n 
+0000010654 00000 n 
+0000011611 00000 n 
+0000011889 00000 n 
+0000011939 00000 n 
+trailer
+<< /Size 14 /Root 12 0 R /Info 13 0 R >>
+startxref
+12011
+%%EOF

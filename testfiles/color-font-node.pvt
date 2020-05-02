@@ -1,0 +1,15 @@
+\input{regression-test}
+\documentclass{article}
+
+\directlua{fonts.handlers.otf.registerpalette("demo", {
+        { g = 0 },
+        { g =0.5 },
+        { r = 1  },
+        { r = 1, b= 1},
+    }
+    )}
+
+\begin{document}\pagestyle{empty}
+\font\cow={file:koeielettersot.ttf:mode=node;colr=demo;} at 30pt
+    \cow ABC
+\end{document}    

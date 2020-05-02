@@ -1,5 +1,5 @@
 
-packageversion= "3.13"
+packageversion= "3.14-dev"
 packagedate   = "2020-05-01"
 fontloaderdate= "2020-04-30"
 packagedesc   = "harf"

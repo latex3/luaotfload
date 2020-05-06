@@ -1,0 +1,10 @@
+
+\input{regression-test}
+\documentclass{article}
+
+\font\fontB={file:BungeeColor1.ttf:mode=node;+colr;+ccmp;+dist;}
+\begin{document}
+\pdfextension save
+\pdfextension restore
+{\fontB ABC}
+\end{document}

@@ -5,7 +5,7 @@ if not modules then modules = { } end modules ['font-ocl'] = {
     copyright = "PRAGMA ADE / ConTeXt Development Team",
     license   = "see context related readme files"
 }
-
+-- patched version 2020-05-06 UF (colr/restorefix -- 
 -- todo : user list of colors
 
 if CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 then

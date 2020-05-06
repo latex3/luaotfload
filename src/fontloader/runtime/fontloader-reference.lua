@@ -32531,10 +32531,11 @@ local function initializeoverlay(tfmdata,kind,value)
       local s=#colorlist
       local goback=w~=0 and leftcommand[w] or nil 
       local t={
+       start,
        not u and actualb or { "pdf","page",(getactualtext(tounicode(u))) },
        push,
       }
-      local n=2
+      local n=3
       local l=nil
       for i=1,s do
        local entry=colorlist[i]

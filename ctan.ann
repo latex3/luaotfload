@@ -1,17 +1,3 @@
-2020-05-01 luaotfload v3.13
-    * A problem with text fonts with minimal math table has been fixed (issue 148.)
-      In new luaotfload versions, math parameters will only be loaded for fonts with `script=math`.
-      If you do want to set math parameters for fonts with other scripts, add `-nomathparam`.
-      We strongly recommend against setting math parameters for text fonts because
-      these would overwrite parameters from actual math fonts.
-    * A bug in harf-mode that could lead to missing chars and freezing was corrected (issue 141).
-    * A font size problem in harf-mode has been fixed (issue 147).
-    * An error if the main function was called twice has been fixed (issue 145).
-    * Allow .ttf fonts to be loaded with a map file with luahbtex (issue 142) (issue 143).
-    * Fonts installed for a single user on windows are now found (issue 138).
-    * A problem with wrong \TeX-ligatures in harf mode has been fixed (issue 139).
-    * The debugging output has been changed (issue 131).
-    * a missing U+1E9E (Capital ß) in a font is replaced by 
-      SS instead of giving a missing character.
-    * extended the color handling to be compatible with the luacolor package  
-    * sync with context files from 2020-04-30
+2020-05-06 luaotfload v3.14
+    * bug fix for luaotfload-tool, luaotfload-tool --list=basename failed (texlive list)
+    * fontloader patched to resolve issue #124

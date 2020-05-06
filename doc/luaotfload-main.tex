@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2020-05-01 v3.14-dev}
+  \setdocumentdate   {2020-05-06 v3.14}
   \setdocumentauthor {LaTeX3 Project\\
                       Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer · Marcel Krüger\\
                       Home: \hyperlink {https://github.com/latex3/luaotfload}}
@@ -62,6 +62,11 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.14 (by Ulrike Fischer/Marcel Krüger)}
+\item a bug in luaotfload-tool has been corrected (reported on the texlive list)
+\item the fontloader has been patched to resolve a problem with color fonts and save/restore pairs \gitissue{124}
+\endsubsection
+
 \beginsubsection {New in version 3.13 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item A\marginpar{\mbox{}\hfill \textbf{Change!}} problem with text fonts with minimal math table has been fixed \gitissue{148}:

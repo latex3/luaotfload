@@ -65,7 +65,7 @@ echo luacode environ adjustbox collectbox ms varwidth geometry url ulem lua-ul
 
 # some packages for the documentation
 echo caption fancyvrb hyperref inconsolata listings luatex85 mdwtools
-echo metalogo pdfpages pgf-blur standalone tikzducks tikzmarmots titlesec
+echo metalogo pdfpages pgf-blur standalone tikzducks tikzlings titlesec
 echo tocloft tools
 
 

@@ -2129,16 +2129,14 @@ do
             if formats then
                 current_formats = tableappend (current_formats, formats)
             end
-        elseif stringsub (formats, 1, 1) == "-" then -- add
+        elseif stringsub (formats, 1, 1) == "-" then -- remove
             formats = lpegmatch (splitcomma, stringsub (formats, 2))
             if formats then
                 local newformats = { }
                 for i = 1, #current_formats do
                     local fmt     = current_formats[i]
-                    local include = true
                     for j = 1, #formats do
                         if current_formats[i] == formats[j] then
-                            include = false
                             goto skip
                         end
                     end

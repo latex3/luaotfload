@@ -731,6 +731,10 @@ local type1_metrics = { "tfm", "ofm", }
 lookup_font_file = function (filename)
     local found = lookup_filename (filename)
 
+    if found and not lfsisfile(found) then
+        found = nil
+    end
+
     if not found then
         local type = file.suffix(filename)
         if type ~= "" then

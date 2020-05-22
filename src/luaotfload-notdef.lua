@@ -302,8 +302,6 @@ otfregister {
   },
 }
 
-ignorable_replacement = {}
-
 local delayed_remove do
   local delayed
   function delayed_remove(n)

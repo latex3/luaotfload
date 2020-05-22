@@ -7,7 +7,7 @@ do -- block to avoid to many local variables error
      name          = "luaotfload-harf-define",
      version       = "3.14",       --TAGVERSION
      date          = "2020-05-06", --TAGDATE
-     description   = "luaotfload submodule / database",
+     description   = "luaotfload submodule / HarfBuzz font loading",
      license       = "GPL v2.0",
      author        = "Khaled Hosny, Marcel Krüger",
      copyright     = "Luaotfload Development Team",     

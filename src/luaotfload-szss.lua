@@ -7,7 +7,7 @@ local ProvidesLuaModule = {
     name          = "luaotfload-szss",
     version       = "3.14",       --TAGVERSION
     date          = "2020-05-06", --TAGDATE
-    description   = "luaotfload submodule / color",
+    description   = "luaotfload submodule / Special feature handling",
     license       = "GPL v2.0",
     author        = "Marcel Krüger"
 }

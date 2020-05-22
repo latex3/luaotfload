@@ -40,7 +40,7 @@ luaotfload.log                    = luaotfload.log or { }
 local logreport
 luaotfload.version                = ProvidesLuaModule.version
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = { 0, 95, 0 }
+luaotfload.min_luatex_version     = { 1, 10, 0 }
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 if not tex or not tex.luatexversion then

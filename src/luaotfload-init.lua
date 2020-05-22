@@ -44,8 +44,8 @@ local lfsisdir     = lfs.isdir
 
 --doc]]--
 
-local log        --- filled in after loading the log module
-local logreport  --- filled in after loading the log module
+local log = require'luaotfload-log'
+local logreport = log.report
 
 --[[doc--
 
@@ -237,9 +237,6 @@ local function init_main(early_hook)
 
   --doc]]--
 
-  luaotfload.loaders.luaotfload "log"
-  log       = luaotfload.log
-  logreport = log.report
   log.set_loglevel (default_log_level)
 
   logreport ("log", 4, "init", "Concealing callback.register().")

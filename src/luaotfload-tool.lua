@@ -184,13 +184,13 @@ end
 
 require "alt_getopt"
 
-loadmodule "log"           --- this populates the luaotfload.log.* namespace
+local log = require "luaotfload-log"
 loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
 loadmodule "configuration" --- configuration file handling
 loadmodule "database"
 loadmodule "resolvers"     --- Font lookup
 
-local logreport
+local logreport = log.report
 
 local function init_modules ()
     --- NB we don’t command the logger at this point.
@@ -215,7 +215,6 @@ local function init_modules ()
             return false
         end
     end
-    logreport = luaotfload.log.report
     return ret
 end
 
@@ -752,7 +751,7 @@ local actions = { } --- (jobspec -> (bool * bool)) list
 function actions.loglevel (job)
     local lvl = job.log_level
     if lvl then
-        luaotfload.log.set_loglevel(lvl)
+        log.set_loglevel(lvl)
         logreport ("info", 3, "util", "Setting the log level to %d.", lvl)
         logreport ("log", 2, "util", "Lua=%q", _VERSION)
     end
@@ -1506,7 +1505,7 @@ local function process_cmdline ( ) -- unit -> jobspec
         elseif v == "log" then
             local str = optarg[n]
             if str then
-                finalizers = luaotfload.log.set_logout(str, finalizers)
+                finalizers = log.set_logout(str, finalizers)
             end
         elseif v == "find" then
             action_pending["query"] = true

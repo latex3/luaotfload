@@ -57,7 +57,7 @@ local lpeg                     = require "lpeg"
 local C, Cg, Ct                = lpeg.C, lpeg.Cg, lpeg.Ct
 local lpegmatch                = lpeg.match
 
-local report                   = luaotfload.log.report
+local report                   = require "luaotfload-log".report
 local function out (...)
     report (false, 0, "diagnose", ...)
 end

@@ -61,9 +61,10 @@ local file                    = file
 local filejoin                = file.join
 local filereplacesuffix       = file.replacesuffix
 
-local logreport               = print -- overloaded later
-local getwritablepath         = luaotfload.fontloader.caches.getwritablepath
+local log                     = require'luaotfload-log'
+local logreport               = log.report
 
+local getwritablepath         = luaotfload.fontloader.caches.getwritablepath
 
 local config_parser -- set later during init
 local stripslashes  -- set later during init
@@ -346,7 +347,7 @@ end
 
 local function set_loglevel ()
   if luaotfload then
-    luaotfload.log.set_loglevel (config.luaotfload.run.log_level)
+    log.set_loglevel (config.luaotfload.run.log_level)
     return true
   end
   return false
@@ -1012,7 +1013,6 @@ end
 
 return function ()
   config.luaotfload = { }
-  logreport         = luaotfload.log.report
   local parsers     = luaotfload.parsers
   config_parser     = parsers.config
   stripslashes      = parsers.stripslashes

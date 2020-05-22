@@ -40,7 +40,7 @@ local filedirname       = file.dirname
 local io                = io
 local ioopen            = io.open
 
-local logreport         = print
+local logreport         = require "luaotfload-log".report
 
 local string            = string
 local stringsub         = string.sub
@@ -780,7 +780,6 @@ local parse_config      = Ct (ini_sections)
 --doc]=]--
 
 return function ()
-  logreport = luaotfload.log.report
   luaotfload.parsers = {
     --- parameters
     traversal_maxdepth    = traversal_maxdepth,

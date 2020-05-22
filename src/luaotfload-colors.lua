@@ -31,7 +31,7 @@ explanation: http://tug.org/pipermail/luatex/2013-May/004305.html
 
 --doc]]--
 
-local logreport             = luaotfload and luaotfload.log.report or print
+local logreport             = require "luaotfload-log".report
 
 local nodedirect            = node.direct
 local newnode               = nodedirect.new
@@ -398,7 +398,6 @@ function luaotfload.set_colorhandler(cb)
 end
 
 return function ()
-    logreport = luaotfload.log.report
     if not fonts then
         logreport ("log", 0, "color",
                    "OTF mechanisms missing -- did you forget to \z

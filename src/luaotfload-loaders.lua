@@ -24,7 +24,7 @@ end
 if not lualibs    then error "this module requires Luaotfload" end
 if not luaotfload then error "this module requires Luaotfload" end
 
-local logreport = luaotfload.log and luaotfload.log.report or print
+local logreport = require "luaotfload-log".report
 
 local function lua_reader (specification)
   local fullname = specification.resolved

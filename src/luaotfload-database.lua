@@ -125,8 +125,8 @@ end
 local lpeg                     = require "lpeg"
 local P, lpegmatch         = lpeg.P, lpeg.match
 
-local log                      = luaotfload.log
-local logreport                = log and log.report or print -- overriden later on
+local log                      = require "luaotfload-log"
+local logreport                = log.report
 local report_status            = log.names_status
 local report_status_start      = log.names_status_start
 local report_status_stop       = log.names_status_stop
@@ -3818,7 +3818,6 @@ return function ()
     --- we need to put some fallbacks into place for when running
     --- as a script
     if not fonts then return false end
-    logreport       = luaotfload.log.report
     local fonts     = fonts
     fonts.names     = fonts.names or names
     fonts.formats   = fonts.formats or { }

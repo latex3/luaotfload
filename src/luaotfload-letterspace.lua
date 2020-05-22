@@ -20,7 +20,7 @@ end
 --- This code diverged quite a bit from its origin in Context. Please
 --- do *not* report bugs on the Context list.
 
-local logreport          = luaotfload.log.report
+local logreport          = require "luaotfload-log".report
 
 local getmetatable       = getmetatable
 local setmetatable       = setmetatable

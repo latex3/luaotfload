@@ -49,7 +49,7 @@ local stringformat        = string.format
 local filesuffix          = file.suffix
 local fileremovesuffix    = file.removesuffix
 local luatexbase          = luatexbase
-local logreport           = luaotfload.log.report
+local logreport           = require "luaotfload-log".report
 
 --[[doc--
 

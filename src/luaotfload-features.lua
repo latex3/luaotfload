@@ -46,11 +46,13 @@ local otf               = handlers.otf
 local config            = config or { luaotfload = { run = { } } }
 
 local as_script         = true
-local normalize         = function () end
+local normalize
 
 if config.luaotfload.run.live ~= false then
     normalize = otf.features.normalize
     as_script = false
+else
+    function normalize() end
 end
 
 --[[HH (font-xtx) --
@@ -62,8 +64,7 @@ function definers.getspecification(str)
     return "", str, "", ":", str
 end
 
-local log              = luaotfload.log
-local report           = log.report
+local report           = require'luaotfload-log'.report
 
 local stringgsub       = string.gsub
 local stringformat     = string.format

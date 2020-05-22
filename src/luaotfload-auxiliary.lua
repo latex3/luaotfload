@@ -18,8 +18,7 @@ end
 
 
 luaotfload                  = luaotfload or { }
-local log                   = luaotfload.log
-local logreport             = log.report
+local logreport             = require'luaotfload-log'.report
 local fonthashes            = fonts.hashes
 local encodings             = fonts.encodings
 local identifiers           = fonthashes.identifiers

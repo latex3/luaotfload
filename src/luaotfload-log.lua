@@ -29,9 +29,7 @@ because we lack a user interface to toggle per-subsystem tracing.
 local module_name       = "luaotfload" --- prefix for messages
 local debug             = debug
 
-luaotfload              = luaotfload or { }
-luaotfload.log          = luaotfload.log or { }
-local log               = luaotfload.log
+local log               = {}
 
 local ioopen            = io.open
 local iowrite           = io.write
@@ -391,4 +389,6 @@ local function texioreporter (message)
 end
 
 texio.reporter = texioreporter
+
+return log
 --- vim:shiftwidth=4:expandtab:ft=lua

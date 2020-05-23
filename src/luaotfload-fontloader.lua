@@ -1,12 +1,12 @@
 -----------------------------------------------------------------------
---         FILE:  luaotfload-init.lua
+--         FILE:  luaotfload-fontloader.lua
 --  DESCRIPTION:  part of luaotfload / font loader initialization
 -- REQUIREMENTS:  luatex v.0.80 or later; packages lualibs
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Marcel Krüger
 -----------------------------------------------------------------------
 
 local ProvidesLuaModule = {
-    name          = "luaotfload-init",
+    name          = "luaotfload-fontloader",
     version       = "3.14",       --TAGVERSION
     date          = "2020-05-06", --TAGDATE
     description   = "luaotfload submodule / initialization",
@@ -148,13 +148,55 @@ local context_modules = {
 
 } --[[context_modules]]
 
-local function load_context_modules (pth)
+local function ignore_module (name)
+    logreport ("log", 3, "load",
+               "Skipping module %q on purpose.",
+               name)
+end
 
+local function load_context_modules (base)
   local load_module   = luaotfload.loaders.context
-  local ignore_module = luaotfload.loaders.ignore
-
-  logreport ("both", 2, "init",
-             "Loading fontloader components from context.")
+  local resolved_paths = {}
+  if base then
+    for k, path in next, context_module_paths do
+      local found
+      local tpath = type (path)
+      if not path then
+        load_module (spec)
+      elseif tpath == "string" then
+        path = file.join(base, path)
+        if lfsisdir(path) then
+          found = path
+        end
+      elseif tpath == "table" then
+        for j = 1, #path do
+          local full = file.join (base, path[j])
+          if lfsisdir (full) then --- pick the first real one
+            found = full
+            break
+          end
+        end
+      else
+        assert(false)
+      end
+      if found then
+        resolved_paths[j] = found
+      else
+        logreport ("both", 0, "init",
+                   "Search path for ConTeXt modules doesn't exists. \z
+                    Are you sure that this is a ConTeXt path? \z
+                    I will try to interpret the fontloader option in another \z
+                    way now, but please fix your configuration.")
+        return false
+      end
+    end
+    logreport ("log", 0, "init",
+               "Loading Context files under prefix %q.",
+               fontloader)
+  else
+    logreport ("log", 0, "init",
+               "Loading Context modules in lookup path.")
+  end
   for i = 1, #context_modules do
     local kind, spec = unpack (context_modules [i])
     if kind == ignore then
@@ -163,37 +205,7 @@ local function load_context_modules (pth)
       if kind == ltx then
         spec = 'luatex-' .. spec
       end
-      local sub = context_module_paths[kind]
-      local tsub = type (sub)
-      if not pth then
-        load_module (spec)
-      elseif tsub == "string" then
-        load_module (spec, file.join (pth, sub))
-      elseif tsub == "table" then
-        local pfx
-        local nsub = #sub
-        for j = 1, nsub do
-          local full = file.join (pth, sub [j])
-          if lfsisdir (full) then --- pick the first real one
-            pfx = full
-            break
-          end
-        end
-        if pfx then
-          load_module (spec, pfx)
-        else
-          logreport ("both", 0, "init",
-                     "None of the %d search paths for module %q exist; \z
-                      falling back to default path.",
-                     nsub, tostring (spec))
-          load_module (spec) --- maybe we’ll get by after all?
-        end
-      else
-        logreport ("both", 0, "init",
-                   "Internal error, please report. \z
-                    This is not your fault.")
-        os.exit (-1)
-      end
+      load_module (spec, resolved_paths[kind])
     end
   end
 
@@ -287,7 +299,6 @@ local function init_main(early_hook)
   font.originaleach = font.each
 
   local load_fontloader_module = luaotfload.loaders.fontloader
-  local ignore_module          = luaotfload.loaders.ignore
 
   load_fontloader_module "basics-gen"
 
@@ -336,17 +347,10 @@ local function init_main(early_hook)
       (mod[1] == ignore and ignore_module or load_fontloader_module)(mod[2])
     end
 
-  elseif fontloader == "context" then
-    logreport ("log", 0, "init",
-               "Loading Context modules in lookup path.")
-    load_context_modules ()
-
-  elseif lfsisdir (fontloader) and verify_context_dir (fontloader) then
-    logreport ("log", 0, "init",
-               "Loading Context files under prefix %q.",
-               fontloader)
-    load_context_modules (fontloader)
-
+  elseif fontloader == "context" and load_context_modules() then
+    ;
+  elseif lfsisdir (fontloader) and load_context_modules (fontloader) then
+    ;
   elseif lfs.isfile (fontloader) then
     logreport ("log", 0, "init",
                "Loading fontloader from absolute path %q.",

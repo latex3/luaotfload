@@ -87,18 +87,16 @@ and a
 
 this script has been already changed to use luaotfload-filelist.lua
    
-### luaotfload-init.lua
+### luaotfload-fontloader.lua
 
-luaotfload-init.lua needs a table
+luaotfload-fontloader.lua needs a table
 --> context_modules
 with the (ordered) entries
 
 {false, "name"}            -- kind_lualibs
 {ctxdir,"ctxprefix+name"} -- kind_essential or kind_merged 
 
-The same list should be used in local init_main = function ()
-but only without the prefix.
-it is unclear how fonts_syn should be handled!!!!
+It is unclear how fonts_syn should be handled!!!!
    
 ### filegraph.tex
 has been already adapted
@@ -232,7 +230,7 @@ luaotfload.filelist.data =
 -- the luaotfload files
     { name = "luaotfload"        ,kind = kind_core, ext =".sty", gitdir=gitdirsrc, texdir=texdirtex, gitpref="",},
     { name = "main"              ,kind = kind_core, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
-    { name = "init"              ,kind = kind_core, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
+    { name = "fontloader"        ,kind = kind_core, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
     { name = "log"               ,kind = kind_core, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
     { name = "diagnostics"       ,kind = kind_core, ext =".lua", gitdir=gitdirsrc, texdir=texdirtex, gitpref = "luaotfload-" },
     

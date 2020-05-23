@@ -177,12 +177,6 @@ end
     called in the expected places.
 --doc]]--
 
-local function dummy_loader (name)
-    logreport ("log", 3, "load",
-               "Skipping module %q on purpose.",
-               name)
-end
-
 local context_environment = setmetatable({}, {__index = _G})
 luaotfload.fontloader = context_environment
 local function context_isolated_load(name)
@@ -233,7 +227,6 @@ local function install_loaders ()
     loaders.luaotfload = loadmodule
     loaders.fontloader = make_loader ("fontloader", context_isolated_load)
     loaders.context    = context_loader
-    loaders.ignore     = dummy_loader
 ----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
 
     function loaders.initialize (name)
@@ -284,7 +277,7 @@ luaotfload.main = function ()
         luaotfload.harfbuzz = harfbuzz
     end
 
-    local init      = loadmodule "init" --- fontloader initialization
+    local init      = loadmodule "fontloader" --- fontloader initialization
     init (function ()
         initialize "parsers"         --- fonts.conf and syntax
         initialize "configuration"   --- configuration options

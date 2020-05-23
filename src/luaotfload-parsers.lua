@@ -17,6 +17,7 @@ if luatexbase and luatexbase.provides_module then
   luatexbase.provides_module (ProvidesLuaModule)
 end  
 
+require'lualibs'
 
 local traversal_maxdepth  = 42 --- prevent stack overflows
 
@@ -779,19 +780,16 @@ local parse_config      = Ct (ini_sections)
 
 --doc]=]--
 
-return function ()
-  luaotfload.parsers = {
-    --- parameters
-    traversal_maxdepth    = traversal_maxdepth,
-    --- main parsers
-    read_fonts_conf       = read_fonts_conf,
-    font_request          = font_request,
-    config                = parse_config,
-    --- common patterns
-    stripslashes          = stripslashes,
-    splitcomma            = splitcomma,
-  }
-  return true
-end
+return {
+  --- parameters
+  traversal_maxdepth    = traversal_maxdepth,
+  --- main parsers
+  read_fonts_conf       = read_fonts_conf,
+  font_request          = font_request,
+  config                = parse_config,
+  --- common patterns
+  stripslashes          = stripslashes,
+  splitcomma            = splitcomma,
+}
 
 -- vim:ft=lua:tw=71:et:sw=2:sts=4:ts=8

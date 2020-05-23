@@ -260,12 +260,6 @@ local function verify_context_dir (pth)
 end
 
 local function init_main(early_hook)
-  config                       = config or { } --- global
-  config.luaotfload            = config.luaotfload or { }
-  config.lualibs               = config.lualibs    or { }
-  config.lualibs.verbose       = false
-  config.lualibs.prefer_merged = true
-  config.lualibs.load_extended = true
   fonts                        = fonts or { }
 
   require "lualibs"

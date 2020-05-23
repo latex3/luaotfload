@@ -33,7 +33,6 @@ if luatexbase and luatexbase.provides_module then
 end  
 
 local osgettimeofday              = os.gettimeofday
-config                            = config     or { }
 local luaotfload                  = luaotfload or { }
 _ENV.luaotfload                   = luaotfload
 local logreport                   = require "luaotfload-log".report --- Enable logging as soon as possible
@@ -169,6 +168,10 @@ luaotfload.main = function ()
 
     local starttime = osgettimeofday ()
 
+    if config and config.lualibs then
+        config.lualibs.load_extended = true
+    end
+
     -- Feature detect HarfBuzz. This is done early to allow easy HarfBuzz
     -- detection in other modules
     local harfstatus, harfbuzz = pcall(require, 'luaharfbuzz')
@@ -178,7 +181,7 @@ luaotfload.main = function ()
 
     local init      = loadmodule "fontloader" --- fontloader initialization
     init (function ()
-        initialize "parsers"         --- fonts.conf and syntax
+        luaotfload.parsers = loadmodule "parsers"         --- fonts.conf and syntax
         initialize "configuration"   --- configuration options
     end)
 

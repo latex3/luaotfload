@@ -185,7 +185,7 @@ end
 require "alt_getopt"
 
 local log = require "luaotfload-log"
-loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
+luaotfload.parsers = loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
 loadmodule "configuration" --- configuration file handling
 loadmodule "database"
 loadmodule "resolvers"     --- Font lookup

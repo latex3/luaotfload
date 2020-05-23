@@ -111,39 +111,25 @@ local type             = type
 --doc]]--
 
 local function make_loader_name (prefix, name)
-    if not name then
-        logreport ("both", 0, "load",
-                   "Fatal error: make_loader_name (%q, %q).",
-                   tostring (prefix), tostring (name))
-        return "dummy-name"
-    end
-    name = tostring (name)
-    if prefix == false then
+    name = assert(tostring(name), "make_loader_name requires a module name")
+    if not prefix then
         logreport ("log", 9, "load",
                    "No prefix requested, passing module name %q unmodified.",
                    name)
-        return tostring (name) .. ".lua"
+        return name
     end
     prefix = tostring (prefix)
     logreport ("log", 9, "load",
                "Composing module name from constituents %s, %s.",
                prefix, name)
-    return prefix .. "-" .. name .. ".lua"
+    return prefix .. "-" .. name
 end
-
-local timing_info = {
-    t_load = { },
-    t_init = { },
-}
 
 local function make_loader (prefix, load_helper)
     return function (name)
-        local t_0 = osgettimeofday ()
         local modname = make_loader_name (prefix, name)
         --- We don’t want the stack info from inside, so just pcall().
         local ok, data = pcall (load_helper or require, modname)
-        local t_end = osgettimeofday ()
-        timing_info.t_load [name] = t_end - t_0
         if not ok then
             io.write "\n"
             logreport ("both", 0, "load", "FATAL ERROR")
@@ -170,13 +156,6 @@ local function make_loader (prefix, load_helper)
     end
 end
 
---[[doc--
-    Certain files are kept around that aren’t loaded because they are part of
-    the imported fontloader. In order to keep the initialization structure
-    intact we also provide a no-op version of the module loader that can be
-    called in the expected places.
---doc]]--
-
 local context_environment = setmetatable({}, {__index = _G})
 luaotfload.fontloader = context_environment
 local function context_isolated_load(name)
@@ -191,24 +170,15 @@ local function context_loader (name, path)
     logreport ("log", 3, "load",
                "Loading module %q from Context.",
                name)
-    local t_0 = osgettimeofday ()
     local modname = make_loader_name (false, name)
     local modpath = modname
     if path then
-        if lfs.isdir (path) then
-            logreport ("log", 3, "load",
-                       "Prepending path %q.",
-                       path)
-            modpath = file.join (path, modname)
-        else
-            logreport ("both", 0, "load",
-                       "Non-existant path %q specified, ignoring.",
-                       path)
-        end
+        logreport ("log", 3, "load",
+                   "Prepending path %q.",
+                   path)
+        modpath = file.join (path, modname)
     end
     local ret = context_isolated_load (modpath)
-    local t_end = osgettimeofday ()
-    timing_info.t_load [name] = t_end - t_0
 
     if ret ~= nil then
         --- require () returns “true” upon success unless the loaded file
@@ -244,7 +214,6 @@ local function install_loaders ()
             logreport ("log", 4, "load",
                        "Module %q loaded in %g ms.",
                        name, d_t * 1000)
-            timing_info.t_init [name] = d_t
         end
     end
 
@@ -313,7 +282,6 @@ luaotfload.main = function ()
     logreport ("log", 1, "main",
                "initialization completed in %0.3f seconds\n",
                osgettimeofday() - starttime)
-----inspect (timing_info)
 end
 
 -- vim:tw=79:sw=4:ts=4:et

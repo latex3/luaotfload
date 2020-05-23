@@ -234,13 +234,13 @@ local function context_loader (name, path)
     local t_end = osgettimeofday ()
     timing_info.t_load [name] = t_end - t_0
 
-    if ret ~= true then
+    if ret ~= nil then
         --- require () returns “true” upon success unless the loaded file
         --- yields a non-zero exit code. This isn’t per se indicating that
         --- something isn’t right, but against HH’s coding practices. We’ll
         --- silently ignore this ever happening on lower log levels.
         luaotfload.log.report ("log", 4, "load",
-                               "Module %q returned %q.", ret)
+                               "Module %q returned %q.", modname, ret)
     end
     return ret
 end

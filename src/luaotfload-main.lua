@@ -40,7 +40,6 @@ luaotfload.log                    = luaotfload.log or { }
 local logreport
 luaotfload.version                = ProvidesLuaModule.version
 luaotfload.loaders                = { }
-luaotfload.min_luatex_version     = { 1, 10, 0 }
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 if not tex or not tex.luatexversion then
@@ -48,21 +47,14 @@ if not tex or not tex.luatexversion then
 end
 
 --- version check
-local major    = tex.luatexversion / 100
-local minor    = tex.luatexversion % 100
-local revision = tex.luatexrevision --[[ : string ]]
-local revno    = tonumber (revision)
-local minimum  = luaotfload.min_luatex_version
-local actual   = { major, minor, revno or 0 }
-if actual [1] < minimum [1]
-    or actual == minimum and actual [2] < minimum [2]
-    or actual == minimum and actual [2] == minimum [2] and actual [3] < minimum [3]
-then
+local revno   = tonumber(tex.luatexrevision)
+local minimum = { 110, 0 }
+if tex.luatexversion < minimum[1] or tex.luatexversion == minimum[1] and revno < minimum[2] then
     texio.write_nl ("term and log",
                     string.format ("\tFATAL ERROR\n\z
                                     \tLuaotfload requires a Luatex version >= %d.%d.%d.\n\z
                                     \tPlease update your TeX distribution!\n\n",
-                                   (unpack or table.unpack) (minimum)))
+                                   math.floor(minimum[1] / 100), minimum[1] % 100, minimum[2]))
     error "version check failed"
 end
 

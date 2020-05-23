@@ -149,21 +149,50 @@ local context_modules = {
 } --[[context_modules]]
 
 local function ignore_module (name)
+  logreport ("log", 3, "load",
+             "Skipping module %q on purpose.",
+             name)
+end
+
+local context_environment = luaotfload.fontloader or setmetatable({}, {__index = _G})
+luaotfload.fontloader = context_environment
+
+local function context_isolated_load(name)
+  local fullname = kpsefind_file(name, 'lua')
+  if not fullname then
+    error(string.format('Fontloader module %q could not be found.', name))
+  end
+  return assert(loadfile(fullname, nil, context_environment))(name)
+end
+
+local function context_loader (modname, path)
+  local modpath = modname
+  if path then
     logreport ("log", 3, "load",
-               "Skipping module %q on purpose.",
-               name)
+               "Prepending path %q.",
+               path)
+    modpath = file.join (path, modname)
+  end
+  local ret = context_isolated_load (modpath)
+
+  if ret ~= nil then
+    --- require () returns “true” upon success unless the loaded file
+    --- yields a non-zero exit code. This isn’t per se indicating that
+    --- something isn’t right, but against HH’s coding practices. We’ll
+    --- silently ignore this ever happening on lower log levels.
+    logreport ("log", 4, "load",
+               "Module %q returned %q.", modname, ret)
+  end
+  return ret
 end
 
 local function load_context_modules (base)
-  local load_module   = luaotfload.loaders.context
   local resolved_paths = {}
   if base then
     for k, path in next, context_module_paths do
       local found
       local tpath = type (path)
-      if not path then
-        load_module (spec)
-      elseif tpath == "string" then
+      if tpath == "string" then
         path = file.join(base, path)
         if lfsisdir(path) then
           found = path
@@ -205,10 +234,13 @@ local function load_context_modules (base)
       if kind == ltx then
         spec = 'luatex-' .. spec
       end
-      load_module (spec, resolved_paths[kind])
+      logreport ("log", 3, "load",
+                 "Loading module %q from ConTeXt.",
+                 spec)
+      context_loader (spec, resolved_paths[kind])
     end
   end
-
+  return true
 end
 
 local function verify_context_dir (pth)
@@ -280,7 +312,6 @@ local function init_main(early_hook)
   local new_attribute    = luatexbase.new_attribute
   local the_attributes   = luatexbase.attributes
 
-  local context_environment = luaotfload.fontloader
   context_environment.attributes = {
     private = function (name)
       local attr   = "luaotfload@" .. name --- used to be: “otfl@”
@@ -298,9 +329,7 @@ local function init_main(early_hook)
 
   font.originaleach = font.each
 
-  local load_fontloader_module = luaotfload.loaders.fontloader
-
-  load_fontloader_module "basics-gen"
+  context_loader "fontloader-basics-gen"
 
   if early_hook then early_hook() end
 
@@ -327,7 +356,7 @@ local function init_main(early_hook)
 
   if fontloader == "reference" then
     logreport ("log", 0, "init", "Using reference fontloader.")
-    load_fontloader_module (luaotfload.fontloader_package)
+    context_loader ("fontloader-" .. luaotfload.fontloader_package)
 
   elseif fontloader == "default" then
     --- Same as above but loader name not correctly replaced by the file name
@@ -336,7 +365,7 @@ local function init_main(early_hook)
     --- hurt reporting it as a bug.
     logreport ("both", 0, "init", "Fontloader substitution failed, got \"default\".")
     logreport ("log",  4, "init", "Falling back to reference fontloader.")
-    load_fontloader_module (luaotfload.fontloader_package)
+    context_loader ("fontloader-" .. luaotfload.fontloader_package)
 
   elseif fontloader == "unpackaged" then
 
@@ -344,31 +373,24 @@ local function init_main(early_hook)
                "Loading fontloader components individually.")
     for i = 1, #context_modules do
       local mod = context_modules[i];
-      (mod[1] == ignore and ignore_module or load_fontloader_module)(mod[2])
+      (mod[1] == ignore and ignore_module or context_loader)('fontloader-' .. mod[2])
     end
 
   elseif fontloader == "context" and load_context_modules() then
     ;
   elseif lfsisdir (fontloader) and load_context_modules (fontloader) then
     ;
-  elseif lfs.isfile (fontloader) then
+  elseif kpsefind_file (fontloader, 'lua') then
     logreport ("log", 0, "init",
-               "Loading fontloader from absolute path %q.",
+               "Resolving fontloader %q using kpathsea.",
                fontloader)
-    local _void = assert (loadfile (fontloader, nil, context_environment)) ()
+    context_loader (fontloader)
 
-  elseif kpsefind_file (fontloader) then
-    local path = kpsefind_file (fontloader)
-    logreport ("log", 0, "init",
-               "Loading fontloader %q from kpse-resolved path %q.",
-               fontloader, path)
-    local _void = assert (loadfile (path, nil, context_environment)) ()
-
-  elseif kpsefind_file (("fontloader-%s.lua"):format(fontloader)) then
+  elseif kpsefind_file ("fontloader-" .. fontloader, 'lua') then
     logreport ("log", 0, "init",
                "Using predefined fontloader %q.",
                fontloader)
-    load_fontloader_module (fontloader)
+    context_loader ("fontloader-" .. fontloader)
 
   else
     logreport ("both", 0, "init",
@@ -378,10 +400,10 @@ local function init_main(early_hook)
     logreport ("both", 0, "init",
                "Defaulting to predefined fontloader %q.",
                fontloader)
-    load_fontloader_module (fontloader)
+    context_loader ("fontloader-" .. fontloader)
   end
 
-  ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
+  ---context_loader "fontloader-font-odv.lua" --- <= Devanagari support from Context
 
   logreport ("log", 0, "init",
              "Context OpenType loader version %q",
@@ -405,8 +427,8 @@ local init_post_install_callbacks = function ()
 
   -- The order is important here: multiscript=auto needs to look at the
   -- fallback fonts, so they already have to be processed at that stage
-  local fallback = luaotfload.loaders.luaotfload "fallback".process
-  local multiscript = luaotfload.loaders.luaotfload "multiscript".process
+  local fallback = require "luaotfload-fallback".process
+  local multiscript = require "luaotfload-multiscript".process
 
   -- MK Pass current text direction to simple_font_handler
   local handler = luaotfload.fontloader.nodes.simple_font_handler

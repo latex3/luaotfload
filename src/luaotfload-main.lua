@@ -38,7 +38,6 @@ local luaotfload                  = luaotfload or { }
 _ENV.luaotfload                   = luaotfload
 local logreport                   = require "luaotfload-log".report --- Enable logging as soon as possible
 luaotfload.version                = ProvidesLuaModule.version
-luaotfload.loaders                = { }
 luaotfload.fontloader_package     = "reference"    --- default: from current Context
 
 if not tex or not tex.luatexversion then
@@ -110,114 +109,50 @@ local type             = type
 
 --doc]]--
 
-local function make_loader_name (prefix, name)
-    name = assert(tostring(name), "make_loader_name requires a module name")
-    if not prefix then
-        logreport ("log", 9, "load",
-                   "No prefix requested, passing module name %q unmodified.",
-                   name)
-        return name
-    end
-    prefix = tostring (prefix)
-    logreport ("log", 9, "load",
-               "Composing module name from constituents %s, %s.",
-               prefix, name)
-    return prefix .. "-" .. name
-end
-
-local function make_loader (prefix, load_helper)
-    return function (name)
-        local modname = make_loader_name (prefix, name)
-        --- We don’t want the stack info from inside, so just pcall().
-        local ok, data = pcall (load_helper or require, modname)
-        if not ok then
-            io.write "\n"
-            logreport ("both", 0, "load", "FATAL ERROR")
-            logreport ("both", 0, "load", "  × Failed to load %q module %q.",
-                       tostring (prefix), tostring (name))
-            local lines = string.split (data, "\n\t")
-            if not lines then
-                logreport ("both", 0, "load", "  × Error message: %q", data)
-            else
-                logreport ("both", 0, "load", "  × Error message:")
-                for i = 1, #lines do
-                    logreport ("both", 0, "load", "    × %q.", lines [i])
-                end
+local function loadmodule (name)
+    local modname = 'luaotfload-' .. name
+    local ok, data = pcall (require, modname)
+    if not ok then
+        io.write "\n"
+        logreport ("both", 0, "load", "FATAL ERROR")
+        logreport ("both", 0, "load", "  × Failed to load luaotfload module %q.",
+                   tostring (name))
+        local lines = string.split (data, "\n\t")
+        if not lines then
+            logreport ("both", 0, "load", "  × Error message: %q", data)
+        else
+            logreport ("both", 0, "load", "  × Error message:")
+            for i = 1, #lines do
+                logreport ("both", 0, "load", "    × %q.", lines [i])
             end
+        end
+        io.write "\n\n"
+        local debug = debug
+        if debug then
+            io.write (debug.traceback())
             io.write "\n\n"
-            local debug = debug
-            if debug then
-                io.write (debug.traceback())
-                io.write "\n\n"
-            end
-            os.exit(-1)
         end
-        return data
+        os.exit(-1)
     end
+    return data
 end
 
-local context_environment = setmetatable({}, {__index = _G})
-luaotfload.fontloader = context_environment
-local function context_isolated_load(name)
-    local fullname = kpse.find_file(name, 'lua')
-    if not fullname then
-        error(string.format('Fontloader module %q could not be found.', name))
-    end
-    return assert(loadfile(fullname, nil, context_environment))(name)
-end
-
-local function context_loader (name, path)
-    logreport ("log", 3, "load",
-               "Loading module %q from Context.",
-               name)
-    local modname = make_loader_name (false, name)
-    local modpath = modname
-    if path then
-        logreport ("log", 3, "load",
-                   "Prepending path %q.",
-                   path)
-        modpath = file.join (path, modname)
-    end
-    local ret = context_isolated_load (modpath)
-
-    if ret ~= nil then
-        --- require () returns “true” upon success unless the loaded file
-        --- yields a non-zero exit code. This isn’t per se indicating that
-        --- something isn’t right, but against HH’s coding practices. We’ll
-        --- silently ignore this ever happening on lower log levels.
+local function initialize (name)
+    local tmp       = loadmodule (name)
+    local init = type(tmp) == "table" and tmp.init or tmp
+    if init and type (init) == "function" then
+        local t_0 = osgettimeofday ()
+        if not init () then
+            logreport ("log", 0, "load",
+                       "Failed to load module %q.", name)
+            return
+        end
+        local t_end = osgettimeofday ()
+        local d_t = t_end - t_0
         logreport ("log", 4, "load",
-                   "Module %q returned %q.", modname, ret)
+                   "Module %q loaded in %g ms.",
+                   name, d_t * 1000)
     end
-    return ret
-end
-
-local function install_loaders ()
-    local loaders      = { }
-    local loadmodule   = make_loader "luaotfload"
-    loaders.luaotfload = loadmodule
-    loaders.fontloader = make_loader ("fontloader", context_isolated_load)
-    loaders.context    = context_loader
-----loaders.plaintex   = make_loader "luatex" --=> for Luatex-Plain
-
-    function loaders.initialize (name)
-        local tmp       = loadmodule (name)
-        local init = type(tmp) == "table" and tmp.init or tmp
-        if init and type (init) == "function" then
-            local t_0 = osgettimeofday ()
-            if not init () then
-                logreport ("log", 0, "load",
-                           "Failed to load module %q.", name)
-                return
-            end
-            local t_end = osgettimeofday ()
-            local d_t = t_end - t_0
-            logreport ("log", 4, "load",
-                       "Module %q loaded in %g ms.",
-                       name, d_t * 1000)
-        end
-    end
-
-    return loaders
 end
 
 local luaotfload_initialized = false --- prevent multiple invocations
@@ -231,11 +166,6 @@ luaotfload.main = function ()
         return
     end
     luaotfload_initialized = true
-
-    luaotfload.loaders = install_loaders ()
-    local loaders    = luaotfload.loaders
-    local loadmodule = loaders.luaotfload
-    local initialize = loaders.initialize
 
     local starttime = osgettimeofday ()
 

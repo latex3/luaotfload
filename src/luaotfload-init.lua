@@ -129,7 +129,7 @@ local context_modules = {
   { ctx,   "font-onr"          },
   { ctx,   "font-one"          },
   { ctx,   "font-afk"          },
-  { ctx,   "luatex-fonts-tfm"  },
+  { ltx,   "luatex-fonts-tfm"  },
   { ctx,   "font-lua"          },
   { ctx,   "font-def"          },
   { ltx,   "luatex-fonts-def"  },  

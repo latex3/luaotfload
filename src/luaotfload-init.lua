@@ -111,8 +111,8 @@ local context_modules = {
   { ctx,   "font-map"          },
 --  { ltx,   "luatex-fonts-syn"  }, -- ignore??
   { ctx,   "font-vfc"          }, -- NEW UF 19.09.2018
-  { ctx,   "font-oti"          },
   { ctx,   "font-otr"          },
+  { ctx,   "font-oti"          },
   { ctx,   "font-ott"          }, 
   { ctx,   "font-cff"          },
   { ctx,   "font-ttf"          },

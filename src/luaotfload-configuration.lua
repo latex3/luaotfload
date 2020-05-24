@@ -30,7 +30,7 @@ local stringsub               = string.sub
 
 local tableappend             = table.append
 local tableconcat             = table.concat
-local tablecopy               = table.copy
+local tablecopy               = table.fastcopy
 local table                   = table
 local tabletohash             = table.tohash
 
@@ -66,8 +66,9 @@ local logreport               = log.report
 
 local getwritablepath         = luaotfload.fontloader.caches.getwritablepath
 
-local config_parser -- set later during init
-local stripslashes  -- set later during init
+local parsers                 = require 'luaotfload-parsers'
+local config_parser           = parsers.config
+local stripslashes            = parsers.stripslashes
 
 -------------------------------------------------------------------------------
 ---                                SETTINGS
@@ -265,6 +266,8 @@ local default_config = {
   },
 }
 
+local config = {}
+
 -------------------------------------------------------------------------------
 ---                          RECONFIGURATION TASKS
 -------------------------------------------------------------------------------
@@ -283,7 +286,7 @@ local min_terminal_width = 40
 --- short status messages, e.g. when building the database
 --- online.
 local function check_termwidth ()
-  if config.luaotfload.misc.termwidth == nil then
+  if config.misc.termwidth == nil then
       local tw = 79
       if not (   os.type == "windows" --- Assume broken terminal.
               or osgetenv "TERM" == "dumb")
@@ -302,7 +305,7 @@ local function check_termwidth ()
               logreport ("log", 2, "db", "Assuming 79 cols terminal width.")
           end
       end
-      config.luaotfload.misc.termwidth = tw
+      config.misc.termwidth = tw
   end
   return true
 end
@@ -310,7 +313,7 @@ end
 local function set_font_filter ()
   local names = fonts.names
   if names and names.set_font_filter then
-    local formats = config.luaotfload.db.formats
+    local formats = config.db.formats
     if not formats or formats == "" then
       formats = default_config.db.formats
     end
@@ -322,7 +325,7 @@ end
 local function set_size_dimension ()
   local names = fonts.names
   if names and names.set_size_dimension then
-    local dim = config.luaotfload.db.designsize_dimen
+    local dim = config.db.designsize_dimen
     if not dim or dim == "" then
       dim = default_config.db.designsize_dimen
     end
@@ -335,7 +338,7 @@ local function set_name_resolver ()
   local names = fonts.names
   if names and names.resolve_cached then
     --- replace the resolver from luatex-fonts
-    if config.luaotfload.db.resolver == "cached" then
+    if config.db.resolver == "cached" then
         logreport ("both", 2, "cache", "Caching of name: lookups active.")
         names.resolvespec  = fonts.names.lookup_font_name_cached
     else
@@ -347,14 +350,14 @@ end
 
 local function set_loglevel ()
   if luaotfload then
-    log.set_loglevel (config.luaotfload.run.log_level)
+    log.set_loglevel (config.run.log_level)
     return true
   end
   return false
 end
 
 local function build_cache_paths ()
-  local paths  = config.luaotfload.paths
+  local paths  = config.paths
   local prefix = getwritablepath (paths.names_dir, "")
 
   if not prefix then
@@ -378,7 +381,7 @@ end
 
 
 local function set_default_features ()
-  local default_features = config.luaotfload.default_features
+  local default_features = config.default_features
   luaotfload.features    = luaotfload.features or {
                              global   = { },
                              defaults = { },
@@ -888,34 +891,6 @@ local process_options = function (opts)
   return new
 end
 
-local function apply (old, new)
-  if not new then
-    if not old then
-      return false
-    end
-    return tablecopy (old)
-  elseif not old then
-    return tablecopy (new)
-  end
-  local result = tablecopy (old)
-  for name, section in next, new do
-    local t_section = type (section)
-    if t_section ~= table_t then
-      logreport ("both", 1, "conf",
-                 "Error applying configuration: entry %s is %s, expected table.",
-                 section, t_section)
-      --- ignore
-    else
-      local currentsection = result[name]
-      for var, val in next, section do
-        currentsection[var] = val
-      end
-    end
-  end
-  result.status = luaotfloadstatus
-  return result
-end
-
 local function reconfigure()
   for i = 1, #reconf_tasks do
     local name, task = unpack (reconf_tasks[i])
@@ -926,6 +901,28 @@ local function reconfigure()
     end
   end
   return true
+end
+
+local function apply (new, ...)
+  if new == nil then
+    return reconfigure()
+  end
+  for name, section in next, new do
+    local t_section = type (section)
+    if t_section ~= table_t then
+      logreport ("both", 1, "conf",
+                 "Error applying configuration: entry %s is %s, expected table.",
+                 section, t_section)
+      --- ignore
+    else
+      local currentsection = config[name]
+      for var, val in next, section do
+        currentsection[var] = val
+      end
+    end
+  end
+  config.status = luaotfloadstatus
+  return apply (...)
 end
 
 local function read (extra)
@@ -960,20 +957,21 @@ local function read (extra)
   return ret
 end
 
-local function apply_defaults ()
-  local defaults      = default_config
-  local vars          = read ()
+local function apply_defaults (extra, ...)
+  for name, section in next, default_config do
+    config[name] = tablecopy(section)
+  end
+  local vars          = read (extra)
   --- Side-effects galore ...
-  config.luaotfload   = apply (defaults, vars)
-  return reconfigure ()
+  return apply (vars, ...)
 end
 
 local function dump ()
-  local sections = table.sortedkeys (config.luaotfload)
+  local sections = table.sortedkeys (config)
   local confdata = { }
   for i = 1, #sections do
     local section    = sections[i]
-    local vars       = config.luaotfload[section]
+    local vars       = config[section]
     local varnames   = table.sortedkeys (vars)
     local sformats   = formatters[section]
     if sformats then
@@ -1011,23 +1009,17 @@ end
 ---                                 EXPORTS
 -------------------------------------------------------------------------------
 
-return function ()
-  config.luaotfload = { }
-  local parsers     = require 'luaotfload-parsers'
-  config_parser     = parsers.config
-  stripslashes      = parsers.stripslashes
+setmetatable(config, {
+  __index = {
+    apply = apply_defaults,
+    reconfigure = reconfigure,
+    dump = dump,
+  },
+})
 
-  luaotfload.default_config = default_config
-  config.actions = {
-    read             = read,
-    apply            = apply,
-    apply_defaults   = apply_defaults,
-    reconfigure      = reconfigure,
-    dump             = dump,
-  }
-  if not apply_defaults () then
-    logreport ("log", 0, "load",
-               "Configuration unsuccessful: error loading default settings.")
-  end
-  return true
+-- luaotfload.default_config = default_config
+if not apply_defaults () then
+  logreport ("log", 0, "load",
+             "Configuration unsuccessful: error loading default settings.")
 end
+return config

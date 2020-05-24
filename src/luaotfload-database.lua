@@ -203,6 +203,7 @@ local unicode                  = require 'luaotfload-unicode'
 local casefold                 = unicode.casefold
 local alphnum_only             = unicode.alphnum_only
 
+local config                   = require 'luaotfload-configuration'
 local parsers                  = require 'luaotfload-parsers'
 
 local name_index               = nil --> upvalue for names.data
@@ -553,7 +554,7 @@ local fuzzy_limit = 1 --- display closest only
 --- bool? -> -> bool? -> dbobj option
 load_names = function (dry_run, no_rebuild)
     local starttime = osgettimeofday ()
-    local foundname, data = load_lua_file (config.luaotfload.paths.index_path_lua)
+    local foundname, data = load_lua_file (config.paths.index_path_lua)
 
     if data then
         logreport ("log", 0, "db",
@@ -634,7 +635,7 @@ end
 
 --- unit -> unit
 local function load_lookups ( )
-    local foundname, data = load_lua_file(config.luaotfload.paths.lookup_path_lua)
+    local foundname, data = load_lua_file(config.paths.lookup_path_lua)
     if data then
         logreport ("log", 0, "cache", "Lookup cache loaded from %s.", foundname)
         logreport ("term", 3, "cache",
@@ -755,7 +756,7 @@ lookup_font_file = function (filename)
         end
     end
 
-    if not fonts_reloaded and config.luaotfload.db.update_live == true then
+    if not fonts_reloaded and config.db.update_live == true then
         return reload_db (stringformat ("File not found: %s.", filename),
                           lookup_font_file,
                           filename)
@@ -1243,7 +1244,7 @@ lookup_font_name = function (specification)
     end
 
     if not resolved then
-        if not fonts_reloaded and config.luaotfload.db.update_live == true then
+        if not fonts_reloaded and config.db.update_live == true then
             return reload_db (stringformat ("Font %s not found.",
                                             specification.name or "<?>"),
                               lookup_font_name,
@@ -2277,7 +2278,7 @@ end
 --- indicates the number of characters already consumed on the
 --- line.
 local function truncate_string (str, restrict)
-    local tw  = config.luaotfload.misc.termwidth
+    local tw  = config.misc.termwidth
     local wd  = tw - restrict
     local len = utf8len (str)
     if not len then
@@ -2867,7 +2868,7 @@ local function pull_values (entry)
     entry.width             = style.width
     entry.pfmweight         = style.pfmweight
 
-    if config.luaotfload.db.strip == true then
+    if config.db.strip == true then
         entry.file  = nil
         entry.names = nil
         entry.style = nil
@@ -3146,12 +3147,12 @@ local function collect_font_filenames ()
     logreport ("info", 4, "db", "Scanning the filesystem for font files.")
 
     local filenames = { }
-    local bisect    = config.luaotfload.misc.bisect
-    local max_fonts = config.luaotfload.db.max_fonts --- XXX revisit for lua 5.3 wrt integers
+    local bisect    = config.misc.bisect
+    local max_fonts = config.db.max_fonts --- XXX revisit for lua 5.3 wrt integers
 
     tableappend (filenames, collect_font_filenames_texmf  ())
     tableappend (filenames, collect_font_filenames_system ())
-    local scan_local = config.luaotfload.db.scan_local == true
+    local scan_local = config.db.scan_local == true
     if scan_local then
         local localfonts, found = collect_font_filenames_local()
         if found then
@@ -3392,8 +3393,7 @@ function update_names(currentnames, force, dry_run)
     local n_new = 0
     local n_rem = 0
 
-    local conf = config.luaotfload
-    if conf.run.live ~= false and conf.db.update_live == false then
+    if config.run.live ~= false and config.db.update_live == false then
         logreport ("info", 2, "db", "Skipping database update.")
         --- skip all db updates
         return currentnames or name_index
@@ -3410,7 +3410,7 @@ function update_names(currentnames, force, dry_run)
                "Updating the font names database"
                .. (force and " forcefully." or "."))
 
-    if config.luaotfload.db.skip_read == true then
+    if config.db.skip_read == true then
         --- the difference to a “dry run” is that we don’t search
         --- for font files entirely. we also ignore the “force”
         --- parameter since it concerns only the font files.
@@ -3460,7 +3460,7 @@ function update_names(currentnames, force, dry_run)
     end
 
     --- pass 3 (optional): collect some stats about the raw font info
-    if config.luaotfload.misc.statistics == true then
+    if config.misc.statistics == true then
         targetnames.meta.statistics = collect_statistics
                                             (targetnames.mappings)
     end
@@ -3511,7 +3511,7 @@ end
 
 --- unit -> bool
 function save_lookups()
-    local paths = config.luaotfload.paths
+    local paths = config.paths
     local luaname, lucname = paths.lookup_path_lua, paths.lookup_path_luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
         tabletofile (luaname, lookup_cache, true)
@@ -3548,12 +3548,12 @@ do
         elseif currentnames.meta and currentnames.meta["local"] then
             return false, "table contains local entries"
         end
-        local paths = config.luaotfload.paths
+        local paths = config.paths
         local luaname, lucname = paths.index_path_lua, paths.index_path_luc
         if fileiswritable (luaname) and fileiswritable (lucname) then
             osremove (lucname)
             local gzname = luaname .. ".gz"
-            if config.luaotfload.db.compress then
+            if config.db.compress then
                 local serialized = tableserialize (currentnames, true)
                 gzipsave (gzname, serialized)
                 caches.compile (currentnames, "", lucname)
@@ -3671,7 +3671,7 @@ end
 local function getwritablecachepath ( )
     --- fonts.handlers.otf doesn’t exist outside a Luatex run,
     --- so we have to improvise
-    local writable = getwritablepath (config.luaotfload.paths.cache_dir, "")
+    local writable = getwritablepath (config.paths.cache_dir, "")
     if writable then
         return writable
     end
@@ -3679,7 +3679,7 @@ end
 
 local function getreadablecachepaths ( )
     local readables = caches.getreadablepaths
-                        (config.luaotfload.paths.cache_dir)
+                        (config.paths.cache_dir)
     local result    = { }
     if readables then
         for i=1, #readables do

@@ -56,8 +56,6 @@ local setattribute          = nodedirect.set_attribute
 local stringformat          = string.format
 local identifiers           = fonts.hashes.identifiers
 
-local add_color_callback --[[ this used to be a global‽ ]]
-
 --[[doc--
 Color string parser.
 --doc]]--
@@ -285,10 +283,11 @@ end
 local color_callback_name      = "luaotfload.color_handler"
 local color_callback_activated = 0
 local add_to_callback          = luatexbase.add_to_callback
+local config                   = require 'luaotfload-configuration'
 
 --- unit -> unit
-add_color_callback = function ( )
-    color_callback = config.luaotfload.run.color_callback
+local function add_color_callback ( )
+    color_callback = config.run.color_callback
     if not color_callback then
         color_callback = "post_linebreak_filter"
     end

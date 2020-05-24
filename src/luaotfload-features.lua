@@ -43,12 +43,12 @@ local handlers          = fonts.handlers
 local fontidentifiers   = fonts.hashes and fonts.hashes.identifiers
 local otf               = handlers.otf
 
-local config            = config or { luaotfload = { run = { } } }
+local config            = require "luaotfload-configuration"
 
 local as_script         = true
 local normalize
 
-if config.luaotfload.run.live ~= false then
+if config.run.live ~= false then
     normalize = otf.features.normalize
     as_script = false
 else

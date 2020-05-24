@@ -181,7 +181,6 @@ luaotfload.main = function ()
 
     local init      = loadmodule "fontloader" --- fontloader initialization
     init (function ()
-        initialize "configuration"   --- configuration options
     end)
 
     initialize "loaders"         --- Font loading; callbacks
@@ -191,7 +190,7 @@ luaotfload.main = function ()
     local init_resolvers = loadmodule "resolvers" --- Font lookup
     init_resolvers ()
 
-    if not config.actions.reconfigure () then
+    if not require "luaotfload-configuration".reconfigure () then
         logreport ("log", 0, "load", "Post-configuration hooks failed.")
     end
 

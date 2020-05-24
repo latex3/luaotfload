@@ -50,6 +50,7 @@ local filesuffix          = file.suffix
 local fileremovesuffix    = file.removesuffix
 local luatexbase          = luatexbase
 local logreport           = require "luaotfload-log".report
+local config              = require "luaotfload-configuration"
 
 --[[doc--
 
@@ -109,7 +110,7 @@ end
 
 local function resolve_name (specification)
     local resolver = fonts.names.lookup_font_name_cached
-    if config.luaotfload.run.resolver == "normal" then
+    if config.run.resolver == "normal" then
         resolver = fonts.names.lookup_font_name
     end
     local resolved, subfont = resolver (specification)
@@ -218,7 +219,7 @@ local default_anon_sequence = {
 }
 
 local function resolve_anon (specification)
-    return resolve_sequence (config.luaotfload.run.anon_sequence, specification)
+    return resolve_sequence (config.run.anon_sequence, specification)
 end
 
 --[[doc--

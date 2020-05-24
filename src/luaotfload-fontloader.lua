@@ -344,8 +344,7 @@ local function init_main(early_hook)
 
   --doc]]--
 
-  local fontloader = config.luaotfload and config.luaotfload.run.fontloader
-                                        or "reference"
+  local fontloader = require'luaotfload-configuration'.run.fontloader or "reference"
   fontloader = tostring (fontloader)
 
   if fontloader == "reference" then

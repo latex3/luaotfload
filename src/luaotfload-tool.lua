@@ -88,23 +88,6 @@ string.quoted = string.quoted or function (str)
   return string.format("%q",str) 
 end
 
---[[doc--
-
-    XXX:
-        Creating the config table will be moved to the common
-        initialization when the times comes.
-
---doc]]--
-
-config                          = config or { }
-local config                    = config
-config.luaotfload               = config.luaotfload or { }
-
-config.lualibs                  = config.lualibs or { }
-config.lualibs.verbose          = false
-config.lualibs.prefer_merged    = true
-config.lualibs.load_extended    = true
-
 require "lualibs"
 
 local iosavedata                = io.savedata
@@ -116,6 +99,8 @@ local tableserialize            = table.serialize
 local tablesortedkeys           = table.sortedkeys
 local tabletohash               = table.tohash
 local splitcomma                = require "luaotfload-parsers".splitcomma
+
+local config                    = require "luaotfload-configuration"
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -311,7 +296,7 @@ Enter 'luaotfload-tool --help' for a larger list of options.
 
 local function help_msg (version)
     local template      = help_messages[version]
-    local paths         = config.luaotfload.paths
+    local paths         = config.paths
     local names_plain   = paths.index_path_lua
     local names_gzip    = names_plain .. ".gz"
     local names_bin     = paths.index_path_luc
@@ -320,7 +305,7 @@ local function help_msg (version)
                          luaotfload.self,
                          names_gzip,
                          names_bin,
-                         caches.getwritablepath (config.luaotfload.paths.cache_dir, "")))
+                         caches.getwritablepath (config.paths.cache_dir, "")))
 end
 
 local about = [[
@@ -336,7 +321,7 @@ local function version_msg ( )
     local meta  = fonts.names.getmetadata ()
 
     local runtime = luaotfload.runtime
-    local notes   = config.luaotfload.status
+    local notes   = config.status
     local notes   = status and status.notes or { }
 
     out (about, luaotfload.self)
@@ -759,14 +744,7 @@ function actions.loglevel (job)
 end
 
 function actions.config (job)
-    local defaults            = luaotfload.default_config
-    local vars                = config.actions.read (job.extra_config)
-    config.luaotfload         = config.actions.apply (defaults, vars)
-    config.luaotfload         = config.actions.apply (config.luaotfload, job.config)
-
-    --inspect(config.luaotfload)
-    --os.exit()
-    if not config.actions.reconfigure () then
+    if not config.apply(job.extra_config, job.config) then
         return false, false
     end
     return true, true
@@ -778,7 +756,7 @@ function actions.version (job)
 end
 
 function actions.dumpconf (job)
-    config.actions.dump ()
+    config.dump ()
     return true, false
 end
 
@@ -1093,7 +1071,7 @@ local function bisect_run ()
                nsteps, lo, hi, pivot)
     logreport ("info", 1, "bisect", "Step %d: Testing fonts from %d to %d.",
                currentstep, lo, pivot)
-    config.luaotfload.misc.bisect = { lo, pivot }
+    config.misc.bisect = { lo, pivot }
     return true, true
 end
 

@@ -66,6 +66,8 @@ local parsers                  = require "luaotfload-parsers"
 local stripslashes             = parsers.stripslashes
 local splitcomma               = parsers.splitcomma
 
+local config                   = require "luaotfload-configuration"
+
 local function check_index (errcnt)
 
     out "================= font names =================="
@@ -109,7 +111,7 @@ end
 
 local function verify_files (errcnt)
     out "================ verify files ================="
-    local status = config.luaotfload.status
+    local status = config.status
     local hashes = status.hashes
     local notes  = status.notes
     if not hashes or #hashes == 0 then
@@ -256,7 +258,7 @@ local function check_conformance (spec, permissions, errcnt)
 end
 
 local function init_desired_permissions ()
-    local paths = config.luaotfload.paths
+    local paths = config.paths
     return {
         { "d", {"r","w"}, function () return caches.getwritablepath ("", "") end },
         { "d", {"r","w"}, paths.prefix },
@@ -654,7 +656,7 @@ local function diagnose (job)
     end
 
     if asked.repository == true then
-        local status = config.luaotfload.status
+        local status = config.status
         check_upstream (status.notes.revision)
         asked.repository = nil
     end

@@ -133,9 +133,7 @@ local report_status_stop       = log.names_status_stop
 
 
 --- Luatex builtins
-local load                     = load
 local next                     = next
-local require                  = require
 local tonumber                 = tonumber
 local unpack                   = table.unpack
 
@@ -144,8 +142,6 @@ local fontshandlers            = fonts.handlers     or { }
 local otfhandler               = fonts.handlers.otf or { }
 fonts.handlers                 = fontshandlers
 
-local gzipload                 = gzip.load
-local gzipsave                 = gzip.save
 local iolines                  = io.lines
 local ioopen                   = io.open
 local kpseexpand_path          = kpse.expand_path
@@ -203,9 +199,11 @@ local names                    = fonts and fonts.names or { }
 local resolversfindfile        = context_environment.resolvers.findfile
 
 --- some of our own
-local unicode                  = require'luaotfload-unicode'
+local unicode                  = require 'luaotfload-unicode'
 local casefold                 = unicode.casefold
 local alphnum_only             = unicode.alphnum_only
+
+local parsers                  = require 'luaotfload-parsers'
 
 local name_index               = nil --> upvalue for names.data
 local lookup_cache             = nil --> for names.lookups
@@ -279,7 +277,7 @@ local macroman2utf8 do
         for i=1,#bytes do
             bytes[i] = mapping[bytes[i]] or bytes[i]
         end
-        return utf8.char(table.unpack(bytes))
+        return utf8.char(unpack(bytes))
     end
 end
 local function sanitize_fontname (str)
@@ -488,37 +486,41 @@ end
 --- .luc.
 
 --- string -> (string * table)
-local function load_lua_file (path)
-    local foundname = filereplacesuffix (path, "luc")
-    local code      = nil
+local load_lua_file do
+    local gzipload = gzip.load
+    local load     = load
+    function load_lua_file (path)
+        local foundname = filereplacesuffix (path, "luc")
+        local code      = nil
 
-    local fh = ioopen (foundname, "rb") -- try bin first
-    if fh then
-        local chunk = fh:read"*all"
-        fh:close()
-        code = load (chunk, "b")
-    end
-
-    if not code then --- fall back to text file
-        foundname = filereplacesuffix (path, "lua")
-        fh = ioopen(foundname, "rb")
+        local fh = ioopen (foundname, "rb") -- try bin first
         if fh then
             local chunk = fh:read"*all"
             fh:close()
-            code = load (chunk, "t")
+            code = load (chunk, "b")
         end
-    end
 
-    if not code then --- probe gzipped file
-        foundname = filereplacesuffix (path, "lua.gz")
-        local chunk = gzipload (foundname)
-        if chunk then
-            code = load (chunk, "t")
+        if not code then --- fall back to text file
+            foundname = filereplacesuffix (path, "lua")
+            fh = ioopen(foundname, "rb")
+            if fh then
+                local chunk = fh:read"*all"
+                fh:close()
+                code = load (chunk, "t")
+            end
         end
-    end
 
-    if not code then return nil, nil end
-    return foundname, code ()
+        if not code then --- probe gzipped file
+            foundname = filereplacesuffix (path, "lua.gz")
+            local chunk = gzipload (foundname)
+            if chunk then
+                code = load (chunk, "t")
+            end
+        end
+
+        if not code then return nil, nil end
+        return foundname, code ()
+    end
 end
 
 --- define locals in scope
@@ -2126,7 +2128,7 @@ do
             return
         end
 
-        local splitcomma = luaotfload.parsers and luaotfload.parsers.splitcomma
+        local splitcomma = parsers.splitcomma
 
         if stringsub (formats, 1, 1) == "+" then -- add
             formats = lpegmatch (splitcomma, stringsub (formats, 2))
@@ -2333,7 +2335,7 @@ end
 local function filter_out_pwd (dirs)
     local result = { }
     if stripslashes == nil then
-        stripslashes = luaotfload.parsers and luaotfload.parsers.stripslashes
+        stripslashes = parsers.stripslashes
     end
     local pwd = path_normalize (lpegmatch (stripslashes,
                                            lfscurrentdir ()))
@@ -2422,10 +2424,7 @@ local function get_os_dirs ()
             "/usr/local/etc/fonts/fonts.conf",
             "/etc/fonts/fonts.conf",
         }
-        if not luaotfload.parsers then
-            logreport ("log", 0, "db", "Fatal: no fonts.conf parser.")
-        end
-        local os_dirs = luaotfload.parsers.read_fonts_conf(fonts_conves, find_files)
+        local os_dirs = parsers.read_fonts_conf(fonts_conves, find_files)
         return os_dirs
     end
     return {}
@@ -3388,7 +3387,7 @@ end
 --- dry_dun:    don’t write to the db, just scan dirs
 
 --- dbobj? -> bool? -> bool? -> dbobj
-update_names = function (currentnames, force, dry_run)
+function update_names(currentnames, force, dry_run)
     local targetnames
     local n_new = 0
     local n_rem = 0
@@ -3511,7 +3510,7 @@ update_names = function (currentnames, force, dry_run)
 end
 
 --- unit -> bool
-save_lookups = function ( )
+function save_lookups()
     local paths = config.luaotfload.paths
     local luaname, lucname = paths.lookup_path_lua, paths.lookup_path_luc
     if fileiswritable (luaname) and fileiswritable (lucname) then
@@ -3538,57 +3537,60 @@ end
 
 --- save_names() is usually called without the argument
 --- dbobj? -> bool * string option
-save_names = function (currentnames)
-    if not currentnames then
-        currentnames = name_index
-    end
-    if not currentnames or type (currentnames) ~= "table" then
-        return false, "invalid names table"
-    elseif currentnames.meta and currentnames.meta["local"] then
-        return false, "table contains local entries"
-    end
-    local paths = config.luaotfload.paths
-    local luaname, lucname = paths.index_path_lua, paths.index_path_luc
-    if fileiswritable (luaname) and fileiswritable (lucname) then
-        osremove (lucname)
-        local gzname = luaname .. ".gz"
-        if config.luaotfload.db.compress then
-            local serialized = tableserialize (currentnames, true)
-            gzipsave (gzname, serialized)
-            caches.compile (currentnames, "", lucname)
-        else
-            tabletofile (luaname, currentnames, true)
-            caches.compile (currentnames, luaname, lucname)
+do
+    local gzipsave = gzip.save
+    function save_names(currentnames)
+        if not currentnames then
+            currentnames = name_index
         end
-        logreport ("info", 2, "db", "Font index saved at ...")
-        local success = false
-        if lfsisfile (luaname) then
-            logreport ("info", 2, "db", "Text: " .. luaname)
-            success = true
+        if not currentnames or type (currentnames) ~= "table" then
+            return false, "invalid names table"
+        elseif currentnames.meta and currentnames.meta["local"] then
+            return false, "table contains local entries"
         end
-        if lfsisfile (gzname) then
-            logreport ("info", 2, "db", "Gzip: " .. gzname)
-            success = true
+        local paths = config.luaotfload.paths
+        local luaname, lucname = paths.index_path_lua, paths.index_path_luc
+        if fileiswritable (luaname) and fileiswritable (lucname) then
+            osremove (lucname)
+            local gzname = luaname .. ".gz"
+            if config.luaotfload.db.compress then
+                local serialized = tableserialize (currentnames, true)
+                gzipsave (gzname, serialized)
+                caches.compile (currentnames, "", lucname)
+            else
+                tabletofile (luaname, currentnames, true)
+                caches.compile (currentnames, luaname, lucname)
+            end
+            logreport ("info", 2, "db", "Font index saved at ...")
+            local success = false
+            if lfsisfile (luaname) then
+                logreport ("info", 2, "db", "Text: " .. luaname)
+                success = true
+            end
+            if lfsisfile (gzname) then
+                logreport ("info", 2, "db", "Gzip: " .. gzname)
+                success = true
+            end
+            if lfsisfile (lucname) then
+                logreport ("info", 2, "db", "Byte: " .. lucname)
+                success = true
+            end
+            if success then
+                return true
+            else
+                logreport ("info", 0, "db", "Could not compile font index.")
+                return false
+            end
         end
-        if lfsisfile (lucname) then
-            logreport ("info", 2, "db", "Byte: " .. lucname)
-            success = true
+        logreport ("info", 0, "db", "Index file not writable")
+        if not fileiswritable (luaname) then
+            logreport ("info", 0, "db", "Failed to write %s.", luaname)
         end
-        if success then
-            return true
-        else
-            logreport ("info", 0, "db", "Could not compile font index.")
-            return false
+        if not fileiswritable (lucname) then
+            logreport ("info", 0, "db", "Failed to write %s.", lucname)
         end
+        return false
     end
-    logreport ("info", 0, "db", "Index file not writable")
-    if not fileiswritable (luaname) then
-        logreport ("info", 0, "db", "Failed to write %s.", luaname)
-    end
-    if not fileiswritable (lucname) then
-        logreport ("info", 0, "db", "Failed to write %s.", lucname)
-    end
-    return false
 end
 
 --[[doc--

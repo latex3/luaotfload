@@ -1013,7 +1013,7 @@ end
 
 return function ()
   config.luaotfload = { }
-  local parsers     = luaotfload.parsers
+  local parsers     = require 'luaotfload-parsers'
   config_parser     = parsers.config
   stripslashes      = parsers.stripslashes
 

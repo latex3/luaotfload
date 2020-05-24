@@ -356,9 +356,10 @@ do
     extract_subfont   = full_path * sub_expr
 end
 
+local font_request_pattern = require "luaotfload-parsers".font_request
 --- spec -> spec
 local function handle_request (specification)
-    local request = lpegmatch(luaotfload.parsers.font_request,
+    local request = lpegmatch(font_request_pattern,
                               specification.specification)
 ----inspect(request)
     if not request then

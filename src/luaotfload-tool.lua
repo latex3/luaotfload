@@ -115,6 +115,7 @@ local tablekeys                 = table.keys
 local tableserialize            = table.serialize
 local tablesortedkeys           = table.sortedkeys
 local tabletohash               = table.tohash
+local splitcomma                = require "luaotfload-parsers".splitcomma
 
 --[[doc--
 \fileent{luatex-basics-gen.lua} calls functions from the
@@ -185,7 +186,6 @@ end
 require "alt_getopt"
 
 local log = require "luaotfload-log"
-luaotfload.parsers = loadmodule "parsers"       --- fonts.conf, configuration, and request syntax
 loadmodule "configuration" --- configuration file handling
 loadmodule "database"
 loadmodule "resolvers"     --- Font lookup
@@ -1291,7 +1291,6 @@ function actions.list (job)
     local name_index    = fonts.names.data ()
 
     if asked_fields then
-        local splitcomma = luaotfload.parsers.splitcomma
         asked_fields = lpegmatch(splitcomma, asked_fields)
     end
 

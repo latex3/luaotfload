@@ -62,7 +62,7 @@ local function out (...)
     report (false, 0, "diagnose", ...)
 end
 
-local parsers                  = luaotfload.parsers
+local parsers                  = require "luaotfload-parsers"
 local stripslashes             = parsers.stripslashes
 local splitcomma               = parsers.splitcomma
 

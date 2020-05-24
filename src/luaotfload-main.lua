@@ -181,7 +181,6 @@ luaotfload.main = function ()
 
     local init      = loadmodule "fontloader" --- fontloader initialization
     init (function ()
-        luaotfload.parsers = loadmodule "parsers"         --- fonts.conf and syntax
         initialize "configuration"   --- configuration options
     end)
 

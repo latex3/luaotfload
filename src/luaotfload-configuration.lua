@@ -907,21 +907,23 @@ local function apply (new, ...)
   if new == nil then
     return reconfigure()
   end
-  for name, section in next, new do
-    local t_section = type (section)
-    if t_section ~= table_t then
-      logreport ("both", 1, "conf",
-                 "Error applying configuration: entry %s is %s, expected table.",
-                 section, t_section)
-      --- ignore
-    else
-      local currentsection = config[name]
-      for var, val in next, section do
-        currentsection[var] = val
+  if new then
+    for name, section in next, new do
+      local t_section = type (section)
+      if t_section ~= table_t then
+        logreport ("both", 1, "conf",
+                   "Error applying configuration: entry %s is %s, expected table.",
+                   section, t_section)
+        --- ignore
+      else
+        local currentsection = config[name]
+        for var, val in next, section do
+          currentsection[var] = val
+        end
       end
     end
+    config.status = luaotfloadstatus
   end
-  config.status = luaotfloadstatus
   return apply (...)
 end
 

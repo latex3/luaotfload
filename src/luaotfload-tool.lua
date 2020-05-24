@@ -24,7 +24,6 @@ luaotfload                     = luaotfload or { }
 local version                  = ProvidesLuaModule.version
 luaotfload.version             = ProvidesLuaModule.version
 luaotfload.self                = "luaotfload-tool"
-luaotfload.fontloader          = _G -- We don't isolate the fontloader here
 
 --[[doc--
 
@@ -98,56 +97,42 @@ local tablekeys                 = table.keys
 local tableserialize            = table.serialize
 local tablesortedkeys           = table.sortedkeys
 local tabletohash               = table.tohash
+
+package.preload["luaotfload-fontloader"] = function()
+    local environment = require'luaotfload-fontloader-base'
+
+    fonts = fonts or { }
+    environment.fonts = fonts
+    local fontsnames = fonts.names or { }
+    fonts.names      = fontsnames
+
+    environment.pdf = pdf or {}
+
+    local function load(name)
+        return assert(loadfile(assert(kpsefind_file('fontloader-' .. name, 'lua')), nil, environment))()
+    end
+    load "data-con"
+    load "font-ini"
+    load "font-con"
+    load "fonts-enc"
+    load "font-cid"
+    load "font-map"
+    load "font-oti"
+    load "font-otr"
+    load "font-ott"
+    load "font-cff"
+    load "font-ttf"
+    load "font-dsp"
+    load "font-oup"
+    load "font-onr"
+    load "font-def"
+
+    return environment
+end
+
 local splitcomma                = require "luaotfload-parsers".splitcomma
-
 local config                    = require "luaotfload-configuration"
-
---[[doc--
-\fileent{luatex-basics-gen.lua} calls functions from the
-\luafunction{texio.*} library; too much for our taste.
-We intercept them with dummies.
-
-Also, it sets up dummies in place of the tables created by the Context
-libraries. Since we have loaded the lualibs already this would cause
-collateral damage for some libraries whose namespace would be
-overridden. We employ our usual backup-restore strategy to work around
-this. (Postponing the loading of the lualibs code is not an option
-because the functionality is needed by basics-gen itself.)
---doc]]--
-
-local function dummy_function ( ) end
-local backup = {
-    write     = texio.write,
-    write_nl  = texio.write_nl,
-    utilities = utilities,
-}
-
-texio.write, texio.write_nl          = dummy_function, dummy_function
-require "fontloader-basics-gen.lua"
-texio.write, texio.write_nl          = backup.write, backup.write_nl
-utilities                            = backup.utilities
-
-pdf = pdf or { } --- for fonts-tfm
-
-require "fontloader-data-con"
-require "fontloader-font-ini"
-require "fontloader-font-con"
-require "fontloader-fonts-enc"
-require "fontloader-font-cid"
-require "fontloader-font-map"
-require "fontloader-font-oti"
-require "fontloader-font-otr"
-require "fontloader-font-ott"
-require "fontloader-font-cff"
-require "fontloader-font-ttf"
-require "fontloader-font-dsp"
-require "fontloader-font-oup"
-require "fontloader-font-onr"
-require "fontloader-font-def"
-
-fonts = fonts or { }
-local fontsnames = fonts.names or { }
-fonts.names      = fontsnames
+local fontloader                = require "luaotfload-fontloader"
 
 local require_init = { }
 
@@ -171,7 +156,6 @@ end
 require "alt_getopt"
 
 local log = require "luaotfload-log"
-loadmodule "configuration" --- configuration file handling
 loadmodule "database"
 loadmodule "resolvers"     --- Font lookup
 
@@ -305,7 +289,7 @@ local function help_msg (version)
                          luaotfload.self,
                          names_gzip,
                          names_bin,
-                         caches.getwritablepath (config.paths.cache_dir, "")))
+                         fontloader.caches.getwritablepath (config.paths.cache_dir, "")))
 end
 
 local about = [[
@@ -790,7 +774,7 @@ end
 --- bisect mode
 -------------------------------------------------------------------------------
 
-local bisect_status_path = caches.getwritablepath ("bisect", "")
+local bisect_status_path = fontloader.caches.getwritablepath ("bisect", "")
 local bisect_status_file = bisect_status_path .."/" .. "luaotfload-bisect-status.lua"
 local bisect_status_fmt  = [[
 --[==[-------------------------------------------------------------------------

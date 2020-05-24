@@ -311,6 +311,7 @@ local function check_termwidth ()
 end
 
 local function set_font_filter ()
+  if not fonts then return true end
   local names = fonts.names
   if names and names.set_font_filter then
     local formats = config.db.formats
@@ -323,6 +324,7 @@ local function set_font_filter ()
 end
 
 local function set_size_dimension ()
+  if not fonts then return true end
   local names = fonts.names
   if names and names.set_size_dimension then
     local dim = config.db.designsize_dimen
@@ -335,25 +337,23 @@ local function set_size_dimension ()
 end
 
 local function set_name_resolver ()
+  if not fonts then return true end
   local names = fonts.names
   if names and names.resolve_cached then
     --- replace the resolver from luatex-fonts
     if config.db.resolver == "cached" then
         logreport ("both", 2, "cache", "Caching of name: lookups active.")
-        names.resolvespec  = fonts.names.lookup_font_name_cached
+        names.resolvespec  = names.lookup_font_name_cached
     else
-        names.resolvespec  = fonts.names.lookup_font_name
+        names.resolvespec  = names.lookup_font_name
     end
   end
   return true
 end
 
 local function set_loglevel ()
-  if luaotfload then
-    log.set_loglevel (config.run.log_level)
-    return true
-  end
-  return false
+  log.set_loglevel (config.run.log_level)
+  return true
 end
 
 local function build_cache_paths ()

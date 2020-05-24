@@ -137,11 +137,6 @@ local next                     = next
 local tonumber                 = tonumber
 local unpack                   = table.unpack
 
-local fonts                    = fonts              or { }
-local fontshandlers            = fonts.handlers     or { }
-local otfhandler               = fonts.handlers.otf or { }
-fonts.handlers                 = fontshandlers
-
 local iolines                  = io.lines
 local ioopen                   = io.open
 local kpseexpand_path          = kpse.expand_path
@@ -170,7 +165,13 @@ local utf8offset               = utf8.offset
 
 --- these come from Lualibs/Context
 local context_environment      = require'luaotfload-fontloader'
+
+local fonts                    = fonts              or { }
+local fontshandlers            = fonts.handlers     or { }
+local otfhandler               = fonts.handlers.otf or { }
+fonts.handlers                 = fontshandlers
 local caches                   = context_environment.caches
+
 local filebasename             = file.basename
 local filecollapsepath         = file.collapsepath or file.collapse_path
 local filedirname              = file.dirname

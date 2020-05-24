@@ -27,7 +27,6 @@ local kern_id            = node.id'kern'
 local disc_id            = node.id'disc'
 local nodenew            = node.direct.new
 local nodecopy           = node.direct.copy
-local otfregister        = fonts.constructors.features.otf.register
 local protect_glyph      = node.direct.protect_glyph
 local remove             = node.direct.remove
 local setfont            = node.direct.setfont
@@ -38,7 +37,11 @@ local getwidth           = node.direct.getwidth
 local setkern            = node.direct.setkern
 local setattributelist   = node.direct.setattributelist
 local getattributelist   = node.direct.getattributelist
-local setmove            = luaotfload.fontloader.nodes.injections.setmove
+
+local fontloader         = require'luaotfload-fontloader'
+
+local otfregister        = fontloader.fonts.constructors.features.otf.register
+local setmove            = fontloader.nodes.injections.setmove
 
 -- According to DerivedCoreProperties.txt, Default_Ignorable_Code_Point
 -- is generated from:

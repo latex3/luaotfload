@@ -74,7 +74,7 @@ local get_designsize do
   end
 end
 
-local containers = luaotfload.fontloader.containers
+local containers = require'luaotfload-fontloader'.containers
 local hbcacheversion = 1.1
 local facecache = containers.define("fonts", "hb", hbcacheversion, true)
 

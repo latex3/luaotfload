@@ -149,7 +149,7 @@ end
 
 local tex_formats = { "tfm", "ofm" }
 
-local resolvers_findfile = luaotfload.fontloader.resolvers.findfile
+local resolvers_findfile = require'luaotfload-fontloader'.resolvers.findfile
 local function resolve_tex_format (specification)
     local name = specification.name
     for i=1, #tex_formats do

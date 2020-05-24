@@ -179,9 +179,7 @@ luaotfload.main = function ()
         luaotfload.harfbuzz = harfbuzz
     end
 
-    local init      = loadmodule "fontloader" --- fontloader initialization
-    init (function ()
-    end)
+    loadmodule "fontloader" --- fontloader initialization
 
     initialize "loaders"         --- Font loading; callbacks
     initialize "database"        --- Font management.

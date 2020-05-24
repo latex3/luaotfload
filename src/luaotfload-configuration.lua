@@ -64,7 +64,7 @@ local filereplacesuffix       = file.replacesuffix
 local log                     = require'luaotfload-log'
 local logreport               = log.report
 
-local getwritablepath         = luaotfload.fontloader.caches.getwritablepath
+local getwritablepath         = require'luaotfload-fontloader-base'.caches.getwritablepath
 
 local parsers                 = require 'luaotfload-parsers'
 local config_parser           = parsers.config

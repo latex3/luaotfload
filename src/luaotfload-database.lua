@@ -169,7 +169,7 @@ local utf8len                  = utf8.len
 local utf8offset               = utf8.offset
 
 --- these come from Lualibs/Context
-local context_environment      = luaotfload.fontloader
+local context_environment      = require'luaotfload-fontloader'
 local caches                   = context_environment.caches
 local filebasename             = file.basename
 local filecollapsepath         = file.collapsepath or file.collapse_path

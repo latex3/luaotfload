@@ -154,8 +154,7 @@ local function ignore_module (name)
              name)
 end
 
-local context_environment = luaotfload.fontloader or setmetatable({}, {__index = _G})
-luaotfload.fontloader = context_environment
+local context_environment = require'luaotfload-fontloader-base'
 
 local function context_isolated_load(name)
   local fullname = kpsefind_file(name, 'lua')
@@ -259,23 +258,11 @@ local function verify_context_dir (pth)
   return false
 end
 
-local function init_main(early_hook)
+local function init_main()
   fonts                        = fonts or { }
-
-  require "lualibs"
 
   if not lualibs    then error "this module requires Luaotfload" end
   if not luaotfload then error "this module requires Luaotfload" end
-
-  --[[doc--
-
-    The logger needs to be in place prior to loading the fontloader due
-    to order of initialization being crucial for the logger functions
-    that are swapped.
-
-  --doc]]--
-
-  log.set_loglevel (default_log_level)
 
   logreport ("log", 4, "init", "Concealing callback.register().")
   local trapped_register = callback.register
@@ -322,10 +309,6 @@ local function init_main(early_hook)
   --doc]]--
 
   font.originaleach = font.each
-
-  context_loader "fontloader-basics-gen"
-
-  if early_hook then early_hook() end
 
   --[[doc--
 
@@ -424,7 +407,7 @@ local init_post_install_callbacks = function ()
   local multiscript = require "luaotfload-multiscript".process
 
   -- MK Pass current text direction to simple_font_handler
-  local handler = luaotfload.fontloader.nodes.simple_font_handler
+  local handler = context_environment.nodes.simple_font_handler
   local callback = function(head, groupcode, _, _, direction)
     if not direction then
       direction = tex.get'textdir'
@@ -545,14 +528,12 @@ local function init_post ()
   return n
 end --- [init_post]
 
-return function (early_hook)
-  local starttime = os.gettimeofday ()
-  init_main (early_hook)
-  logreport ("both", 1, "init",
-             "fontloader loaded in %0.3f seconds",
-             os.gettimeofday() - starttime)
-  local n = init_post ()
-  logreport ("both", 5, "init", "post hook terminated, %d actions performed", n)
-  return true
-end
+local starttime = os.gettimeofday ()
+init_main ()
+logreport ("both", 1, "init",
+           "fontloader loaded in %0.3f seconds",
+           os.gettimeofday() - starttime)
+local n = init_post ()
+logreport ("both", 5, "init", "post hook terminated, %d actions performed", n)
+return context_environment
 -- vim:tw=79:sw=2:ts=2:expandtab

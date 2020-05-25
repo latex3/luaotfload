@@ -292,7 +292,7 @@ return function()
     end
     logreport ("log", 5, "resolvers", "installing font resolvers", name)
     local request_resolvers = fonts.definers.resolvers
-    for k, _ in pairs(resolvers) do
+    for k, _ in pairs(request_resolvers) do
         request_resolvers[k] = nil
     end
     setmetatable(request_resolvers, {__index = function(t, n)

@@ -754,7 +754,7 @@ lookup_font_file = function (filename)
     end
 
     if not fonts_reloaded and config.luaotfload.db.update_live == true then
-        return reload_db (stringformat ("File not found: %s.", filename),
+        return reload_db (stringformat ("File not found: %q.", filename),
                           lookup_font_file,
                           filename)
     end
@@ -1242,7 +1242,7 @@ lookup_font_name = function (specification)
 
     if not resolved then
         if not fonts_reloaded and config.luaotfload.db.update_live == true then
-            return reload_db (stringformat ("Font %s not found.",
+            return reload_db (stringformat ("Font %q not found.",
                                             specification.name or "<?>"),
                               lookup_font_name,
                               specification)
@@ -1291,7 +1291,7 @@ reload_db = function (why, caller, ...)
     local formats   = tableconcat (namedata.meta.formats, ",")
 
     logreport ("both", 0, "db",
-               "Reload initiated (formats: %s); reason: %q.",
+               "Reload initiated (formats: %s); reason: %s",
                formats, why)
 
     set_font_filter (formats)

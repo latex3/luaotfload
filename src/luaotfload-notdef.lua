@@ -333,7 +333,7 @@ local function ignorablehandler(head, fid, ...) -- FIXME: The arguments are prob
     end
   end end
   delayed_remove()
-  for n in traverse_id(head, disc_id) do
+  for n in traverse_id(disc_id, head) do
     local a, b, c = getdisc(n)
     setdisc(ignorablehandler(a, fid), ignorablehandler(b, fid), ignorablehandler(c, fid))
   end

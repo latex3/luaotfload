@@ -906,7 +906,7 @@ local luaotfload_header = [==[
   The code in this file is provided under the GPL v2.0 license. See the
   file COPYING in the Luaotfload repository for details.
 
-  Report bugs to github.com/u-fischer/luaotfload
+  Report bugs to https://github.com/latex3/luaotfload
 
   This file has been assembled from components taken from Context. See
   the Luaotfload documentation for details:

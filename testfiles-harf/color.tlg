@@ -33,46 +33,46 @@ Completed box being shipped out [1]
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 539.94232fil, direction TLT
 ...\write-{}
-...\glue(\topskip) 2.68
-...\hbox(7.32+2.88)x345.0, glue set 241.84001fil, direction TLT
+...\glue(\topskip) 2.75
+...\hbox(7.25+2.9)x345.0, glue set 241.84001fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/Amiri(0)/m/n/10 "ق" 120C5E +0:+0
-....\TU/Amiri(0)/m/n/10 "ل" 120C58 +0:+0
-....\TU/Amiri(0)/m/n/10 "ب" 120BF8 +0:+0
-....\TU/Amiri(0)/m/n/10 "ي" 120EA5 +0:+0
+....\TU/Amiri(0)/m/n/10 "ق" 120C69 +0:+0
+....\TU/Amiri(0)/m/n/10 "ل" 120C63 +0:+0
+....\TU/Amiri(0)/m/n/10 "ب" 120C03 +0:+0
+....\TU/Amiri(0)/m/n/10 "ي" 120EB0 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\pdfcolorstack 0 push {1 0 0 rg}
 ....\pdfcolorstack 1 push {/TransGs0.502 gs}
-....\TU/Amiri(1)/m/n/10 "ت" 120808 +0:+0
-....\TU/Amiri(1)/m/n/10 "ل" 120914 +0:+0
-....\TU/Amiri(1)/m/n/10 "و" 12098B +0:+0
-....\TU/Amiri(1)/m/n/10 "ن" 12082E +0:+0
+....\TU/Amiri(1)/m/n/10 "ت" 120813 +0:+0
+....\TU/Amiri(1)/m/n/10 "ل" 12091F +0:+0
+....\TU/Amiri(1)/m/n/10 "و" 120996 +0:+0
+....\TU/Amiri(1)/m/n/10 "ن" 120839 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/Amiri(1)/m/n/10 "ك" 121526 +0:+0
-....\TU/Amiri(1)/m/n/10 "ل" 121512 +0:+0
-....\TU/Amiri(1)/m/n/10 "ه" 1208D2 +0:+0
+....\TU/Amiri(1)/m/n/10 "ك" 121531 +0:+0
+....\TU/Amiri(1)/m/n/10 "ل" 12151D +0:+0
+....\TU/Amiri(1)/m/n/10 "ه" 1208DD +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\pdfcolorstack 0 pop
 ....\pdfcolorstack 1 pop
-....\TU/Amiri(0)/m/n/10 "ب" 120815 +0:+0
-....\TU/Amiri(0)/m/n/10 "ل" 120914 +0:+0
-....\TU/Amiri(0)/m/n/10 "و" 12098B +0:+0
-....\TU/Amiri(0)/m/n/10 "ن" 12082E +0:+0
+....\TU/Amiri(0)/m/n/10 "ب" 120820 +0:+0
+....\TU/Amiri(0)/m/n/10 "ل" 12091F +0:+0
+....\TU/Amiri(0)/m/n/10 "و" 120996 +0:+0
+....\TU/Amiri(0)/m/n/10 "ن" 120839 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/Amiri(0)/m/n/10 "ا" 120DF9 +0:+0
-....\TU/Amiri(0)/m/n/10 "ل" 120DF4 +0:+0
-....\TU/Amiri(0)/m/n/10 "ح" 120FD3 +0:+0
-....\TU/Amiri(0)/m/n/10 "ب" 1210AD +0:+0
-....\TU/Amiri(0)/m/n/10 "." 12077A +0:+0
+....\TU/Amiri(0)/m/n/10 "ا" 120E04 +0:+0
+....\TU/Amiri(0)/m/n/10 "ل" 120DFF +0:+0
+....\TU/Amiri(0)/m/n/10 "ح" 120FDE +0:+0
+....\TU/Amiri(0)/m/n/10 "ب" 1210B8 +0:+0
+....\TU/Amiri(0)/m/n/10 "." 120785 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
-...\glue -2.88
+...\glue -2.9
 ...\glue 0.0 plus 1.0fil
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil

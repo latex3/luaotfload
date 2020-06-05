@@ -34,6 +34,8 @@ local setfont            = node.direct.setfont
 local traverse_char      = node.direct.traverse_char
 local traverse_id        = node.direct.traverse_id
 local setchar            = node.direct.setchar
+local setdisc            = node.direct.setdisc
+local getdisc            = node.direct.getdisc
 local getwidth           = node.direct.getwidth
 local setkern            = node.direct.setkern
 local setattributelist   = node.direct.setattributelist
@@ -197,7 +199,7 @@ local push, pop do
         head = node.direct.remove(head, n)
         l[#l+1] = n
       elseif id == disc_id then
-        local pre, post, replace = node.direct.getdisc(n)
+        local pre, post, replace = getdisc(n)
         for nn in node.direct.traverse(pre) do
           if checkprop(nn) then
             local after
@@ -217,7 +219,7 @@ local push, pop do
             l[#l+1] = {nn, n, 'replace'}
           end
         end
-        node.direct.setdisc(n, pre, post, replace)
+        setdisc(n, pre, post, replace)
       end
     end
     return head

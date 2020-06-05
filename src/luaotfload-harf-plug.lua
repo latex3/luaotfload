@@ -556,9 +556,15 @@ function shape(head, firstnode, run)
     if not fontdata.shaper_warning then
       local shaper = shapers[1]
       if shaper then
-        logreport("both", 0, "harf", "Failed to shape text in font %q with shaper %q.\nMaybe you should try the default shaper instead?", fontdata.name, shaper)
+        tex.error("luaotfload | harf : Shaper failed", {
+          string.format("You asked me to use shaper %q to shape", shaper),
+          string.format("the font %q", fontdata.name),
+          "but the shaper failed. This probably means that either the shaper is not",
+          "available or the font is not compatible.",
+          "Maybe you should try the default shaper instead?"
+        })
       else
-        logreport("both", 0, "harf", "All shapers failed for font %q.", fontdata.name)
+        tex.error(string.format("luaotfload | harf : All shapers failed for font %q.", fontdata.name))
       end
       fontdata.shaper_warning = true -- Only warn once for every font
     end

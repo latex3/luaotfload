@@ -18,7 +18,8 @@ do -- block to avoid to many local variables error
  end  
 end
 
-local hb = luaotfload.harfbuzz
+local hb                = luaotfload.harfbuzz
+local logreport         = luaotfload.log.report
 
 local assert            = assert
 local next              = next
@@ -265,6 +266,7 @@ local function makesub(run, codes, nodelist)
     nodelist = nil
   end
   nodelist, nodelist, glyphs = shape(nodelist, nodelist, subrun)
+  assert(glyphs, [[Shaping discretionary list failed. This shouldn't happen.]])
   return { glyphs = glyphs, run = subrun, head = nodelist }
 end
 
@@ -550,9 +552,17 @@ function shape(head, firstnode, run)
       end
     end
     return head, firstnode, glyphs, run.len - len
+  else
+    if not fontdata.shaper_warning then
+      local shaper = shapers[1]
+      if shaper then
+        logreport("both", 0, "harf", "Failed to shape text in font %q with shaper %q.\nMaybe you should try the default shaper instead?", fontdata.name, shaper)
+      else
+        logreport("both", 0, "harf", "All shapers failed for font %q.", fontdata.name)
+      end
+      fontdata.shaper_warning = true -- Only warn once for every font
+    end
   end
-
-  return head, firstnode, {}, 0
 end
 
 local function color_to_rgba(color)
@@ -888,10 +898,11 @@ local function shape_run(head, current, run)
     -- shaping.
     local glyphs, offset
     head, current, glyphs, offset = shape(head, current, run)
-    return offset, tonodes(head, current, run, glyphs)
-  else
-    return 0, head, run.after
+    if glyphs then
+      return offset, tonodes(head, current, run, glyphs)
+    end
   end
+  return 0, head, run.after
 end
 
 function process(head, font, _attr, direction)

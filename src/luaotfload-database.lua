@@ -1577,8 +1577,6 @@ local function organize_namedata (rawinfo,
                         or nametable.family
                         or rawinfo.familyname
                         or info.familyname
---    local default_modifier = nametable.typographicsubfamily
---                          or nametable.subfamily
     local fontnames = {
         --- see
         --- https://developer.apple.com/fonts/TTRefMan/RM06/Chap6name.html
@@ -2725,95 +2723,48 @@ local function generate_filedata (mappings)
     return files
 end
 
-local bold_spectrum_low  = 501 --- 500 is medium, 900 heavy/black
-local normal_weight      = 400
-local bold_weight        = 700
-local normal_width       = 5
-
-local pick_style
-local pick_fallback_style
-local check_regular
-
-do
-    function pick_style (typographicsubfamily, subfamily)
-        return style_synonym [typographicsubfamily or subfamily or ""]
+local function regular_score(entry)
+    return 10000 * (entry.italicangle or 0)^2 -- We really don't want italic fonts here (italic font have an angle around 10)
+         +   .01 * ((entry.pfmweight or 400) - 400)^2 -- weights are normally multiples of 100, so they are still quite large after .01
+         +         ((entry.width or 5) - 5)^2
+         + (regular_synonym[entry.subfamily or entry.typographicsubfamily] and 0 or 1000000)
+         + (entry.pfmweight > 500 and 1000 or 0)
+end
+local function italic_score(entry, regular_entry)
+    local regularangle = regular_entry.italicangle or 0
+    local angle = entry.italicangle or 0
+    if angle == 0 or angle == regularangle then
+        return -- This font is not italic in any way
     end
-
-    function pick_fallback_style (italicangle, pfmweight, width)
-        --[[--
-            More aggressive, but only to determine bold faces.
-            Note: Before you make this test more inclusive, ensure
-            no fonts are matched in the bold synonym spectrum over
-            a literally “bold[italic]” one. In the past, heuristics
-            been tried but ultimately caused unwanted modifiers
-            polluting the lookup table. What doesn’t work is, e. g.
-            treating weights > 500 as bold or allowing synonyms like
-            “heavy”, “black”.
-        --]]--
-        if width == normal_width then
-            if pfmweight == bold_weight then
-                --- bold spectrum matches
-                if italicangle == 0 then
-                    return "b"
-                end
-                return "bi"
-            elseif pfmweight == normal_weight then
-                if italicangle ~= 0 then
-                    return "i"
-                end
-            end
-            return tostring(pfmweight) .. (italicangle == 0 and "" or "i")
-        end
-        return false
+    return  .1 * (angle - regularangle - 10)^2 -- Should there ever be multiple levels of italicness...
+         + 0.1 * ((entry.pfmweight or 400) - (regular_entry.pfmweight or 400))^2 -- weights are normally multiples of 100, so they are still quite large after .01
+         +       ((entry.width or 5) - regular_entry.width)^2
+         + (style_synonym[entry.subfamily or entry.typographicsubfamily] == 'i' and 0 or 1000000)
+end
+local function bold_score(entry, regular_entry)
+    local regularweight = regular_entry.pfmweight or 400
+    local weight = entry.pfmweight
+    if weight < regularweight + 100 then
+        return -- This font is not bold in any way
     end
-
-    --- we use only exact matches here since there are constructs
-    --- like “regularitalic” (Cabin, Bodoni Old Fashion)
-
-    function check_regular (typographicsubfamily,
-                            subfamily,
-                            italicangle,
-                            weight,
-                            width,
-                            pfmweight)
-        local plausible_weight = false
-        --[[--
-          This filters out undesirable candidates that specify their
-          typographicsubfamily or subfamily as “regular” but are actually of
-          “semibold” or other weight—another drawback of the
-          oversimplifying classification into only three styles (r, i,
-          b, bi).
-        --]]--
-        if italicangle == 0 then
-            if pfmweight == 400 then
-                --[[--
-                  Some fonts like Dejavu advertise an undistinguished
-                  regular and a “condensed” version with the same
-                  weight whilst also providing the style info in the
-                  typographic subfamily instead of the subfamily (i. e.
-                  the converse of what Adobe’s doing). The only way to
-                  weed out the undesired pseudo-regular shape is to
-                  peek at its advertised width (4 vs. 5).
-                --]]--
-                if width then
-                    plausible_weight = width == normal_width
-                else
-                    plausible_weight = true
-                end
-            elseif weight and regular_synonym [weight] then
-                plausible_weight = true
-            end
-        end
-
-        if plausible_weight then
-            if subfamily then
-                if regular_synonym [subfamily] then return "r" end
-            elseif typographicsubfamily then
-                if regular_synonym [typographicsubfamily] then return "r" end
-            end
-        end
-        return false
+    return 10000 * (entry.italicangle or 0)^2 -- We really don't want italic fonts here (italic font have an angle around 10)
+         +   .01 * ((entry.pfmweight or 400) - (regularweight + 200))^2 -- weights are normally multiples of 100, so they are still quite large after .01
+         +         ((entry.width or 5) - regular_entry.width)^2
+         + (style_synonym[entry.subfamily or entry.typographicsubfamily] == 'b' and 0 or 1000000)
+         + (entry.pfmweight > 500 and 0 or 10000)
+end
+local function bolditalic_score(entry, bold_entry, italic_entry)
+    local italicangle = italic_entry.italicangle or 0
+    local angle = entry.italicangle or 0
+    local boldweight = bold_entry.pfmweight or 400
+    local weight = entry.pfmweight or 400
+    if angle == 0 or weight < boldweight then
+        return -- This font is not italic in any way
     end
+    return 100 * (angle - italicangle)^2
+         +       (weight - boldweight)^2
+         +       ((entry.width or 5) - bold_entry.width)^2
+         + (style_synonym[entry.subfamily or entry.typographicsubfamily] == 'bi' and 0 or 1000000)
 end
 
 local function pull_values (entry)
@@ -2854,7 +2805,7 @@ local function pull_values (entry)
     end
 end
 
-local function add_family (name, subtable, modifier, entry)
+local function add_family (name, subtable, entry)
     if not name then --- probably borked font
         return
     end
@@ -2866,20 +2817,7 @@ local function add_family (name, subtable, modifier, entry)
 
     familytable [#familytable + 1] = {
         index    = entry.index,
-        modifier = modifier,
     }
-end
-
-local function add_lastresort_regular (name, subtable, entry)
-    if not name then --- probably borked font
-        return
-    end
-    local familytable = subtable [name]
-    if not familytable then
-        familytable = { }
-        subtable [name] = familytable
-    end
-    familytable.fallback = entry.index
 end
 
 local function get_subtable (families, entry)
@@ -2919,27 +2857,7 @@ local function collect_families (mappings)
         local width                = entry.width
         local pfmweight            = entry.pfmweight
         local italicangle          = entry.italicangle
-        local modifier             = pick_style (typographicsubfamily, subfamily)
-
-        if not modifier then --- regular, exact only
-            modifier = check_regular (typographicsubfamily,
-                                      subfamily,
-                                      italicangle,
-                                      weight,
-                                      width,
-                                      pfmweight)
-        end
-
-        if not modifier then
-            modifier = pick_fallback_style (italicangle, pfmweight, width)
-        end
-
-        if modifier then
-            add_family (familyname, subtable, modifier, entry)
-        end
-        if modifier ~= 'r' and regular_synonym[typographicsubfamily or subfamily or ''] then
-            add_lastresort_regular (familyname, subtable, entry)
-        end
+        add_family (familyname, subtable, entry)
     end
 
     collectgarbage "collect"
@@ -2988,94 +2906,129 @@ local function group_modifiers (mappings, families)
     for location, location_data in next, families do
         for format, format_data in next, location_data do
             for familyname, collected in next, format_data do
-                local styledata = { } --- will replace the “collected” table
-                local lastresort_regular = collected.fallback
-                collected.fallback = nil
-                --- First, fill in the ordinary style data that
-                --- fits neatly into the four relevant modifier
-                --- categories.
-                for _, modifier in next, style_categories do
-                    local entries
-                    for key, info in next, collected do
-                        if info.modifier == modifier then
-                            if not entries then
-                                entries = { }
-                            end
-                            local index = info.index
-                            local entry = mappings [index]
-                            local size  = entry.size
+                local best_score = 1000000000000
+                local best_match
+                for i=1,#collected do
+                    local v = collected[i]
+                    local entry = mappings[v.index]
+                    local score = regular_score(entry)
+                    if score <= best_score then
+                        v.prev = best_score == score and best_match or nil
+                        best_score = score
+                        best_match = v
+                    end
+                end
+                local regular = {}
+                repeat
+                    local index = best_match.index
+                    local entry = mappings[index]
+                    local size = entry.size
+                    if size then
+                        regular [#regular + 1] = {
+                            size [1],
+                            size [2],
+                            size [3],
+                            index,
+                        }
+                    else
+                        regular.default = index
+                    end
+                    best_match = best_match.prev
+                until not best_match
+                local regular_entry = mappings[regular.default or regular[1][4]]
+                local best_match_i, best_match_b
+                local best_score_i, best_score_b = 10000000000, 10000000000
+                for i=1,#collected do
+                    local v = collected[i]
+                    local entry = mappings[v.index]
+                    local score_i = italic_score(entry, regular_entry)
+                    local score_b = bold_score(entry, regular_entry)
+                    if score_i and score_i <= best_score_i then
+                        v.prev_i = best_score_i == score_i and best_match_i or nil
+                        best_score_i = score_i
+                        best_match_i = v
+                    end
+                    if score_b and score_b <= best_score_b then
+                        v.prev_b = best_score_b == score_b and best_match_b or nil
+                        best_score_b = score_b
+                        best_match_b = v
+                    end
+                end
+                local italic, bold
+                if best_match_i then
+                    italic = {}
+                    repeat
+                        local index = best_match_i.index
+                        local entry = mappings[index]
+                        local size = entry.size
+                        if size then
+                            italic [#italic + 1] = {
+                                size [1],
+                                size [2],
+                                size [3],
+                                index,
+                            }
+                        else
+                            italic.default = index
+                        end
+                        best_match_i = best_match_i.prev
+                    until not best_match_i
+                end
+                if best_match_b then
+                    bold = {}
+                    repeat
+                        local index = best_match_b.index
+                        local entry = mappings[index]
+                        local size = entry.size
+                        if size then
+                            bold [#bold + 1] = {
+                                size [1],
+                                size [2],
+                                size [3],
+                                index,
+                            }
+                        else
+                            bold.default = index
+                        end
+                        best_match_b = best_match_b.prev
+                    until not best_match_b
+                end
+                local bolditalic
+                if bold and italic then
+                    best_score = 1000000000000
+                    local bold_entry = mappings[bold.default or bold[1][4]]
+                    local italic_entry = mappings[italic.default or italic[1][4]]
+                    for i=1,#collected do
+                        local v = collected[i]
+                        local entry = mappings[v.index]
+                        local score = bolditalic_score(entry, bold_entry, italic_entry)
+                        if score and score <= best_score then
+                            v.prev = best_score == score and best_match or nil
+                            best_score = score
+                            best_match = v
+                        end
+                    end
+                    if best_match then
+                        bolditalic = {}
+                        repeat
+                            local index = best_match.index
+                            local entry = mappings[index]
+                            local size = entry.size
                             if size then
-                                entries [#entries + 1] = {
+                                bolditalic [#bolditalic + 1] = {
                                     size [1],
                                     size [2],
                                     size [3],
                                     index,
                                 }
                             else
-                                entries.default = index
+                                bolditalic.default = index
                             end
-                            collected [key] = nil
-                        end
-                        styledata [modifier] = entries
+                            best_match = best_match.prev
+                        until not best_match
                     end
                 end
-                if not styledata.r and lastresort_regular then
-                    styledata.r = {default = lastresort_regular}
-                end
-
-                --- At this point the family set may still lack
-                --- entries for bold or bold italic. We will fill
-                --- those in using the modifier with the numeric
-                --- weight that is closest to bold (700).
-                if next (collected) then --- there are uncategorized entries
-                    for _, modifier in next, bold_categories do
-                        if not styledata [modifier] then
-                            local closest
-                            local minimum = 2^51
-                            for key, info in next, collected do
-                                local info_modifier = tonumber (info.modifier) and "b" or "bi"
-                                if modifier == info_modifier then
-                                    local index  = info.index
-                                    local entry  = mappings [index]
-                                    local weight = entry.pfmweight
-                                    local diff   = weight < 700 and 700 - weight or weight - 700
-                                    if weight > 500 and diff < minimum then
-                                        minimum = diff
-                                        closest = weight
-                                    end
-                                end
-                            end
-                            if closest then
-                                --- We know there is a substitute face for the modifier.
-                                --- Now we scan the list again to extract the size data
-                                --- in case the shape is available at multiple sizes.
-                                local entries = { }
-                                for key, info in next, collected do
-                                    local info_modifier = tonumber (info.modifier) and "b" or "bi"
-                                    if modifier == info_modifier then
-                                        local index  = info.index
-                                        local entry  = mappings [index]
-                                        local size   = entry.size
-                                        if entry.pfmweight == closest then
-                                            if size then
-                                                entries [#entries + 1] =  {
-                                                    size [1],
-                                                    size [2],
-                                                    size [3],
-                                                    index,
-                                                }
-                                            else
-                                                entries.default = index
-                                            end
-                                        end
-                                    end
-                                end
-                                styledata [modifier] = entries
-                            end
-                        end
-                    end
-                end
-                format_data [familyname] = styledata
+                format_data [familyname] = { r = regular, b = bold, i = italic, bi = bolditalic }
             end
         end
     end

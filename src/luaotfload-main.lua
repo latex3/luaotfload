@@ -326,6 +326,9 @@ luaotfload.main = function ()
     loadmodule "szss"       --- missing glyph handling
     initialize "auxiliary"    --- additional high-level functionality
     loadmodule "tounicode"
+    if tex.outputmode == 0 then
+        loadmodule "dvi"          --- allow writing fonts to DVI files
+    end
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec
 

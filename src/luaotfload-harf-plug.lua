@@ -1011,7 +1011,16 @@ local utfchar = utf8.char
 local function get_glyph_info(n)
   n = todirect(n)
   local props = properties[n]
-  return props and props.glyph_info or utfchar(getchar(n)):gsub('\0', '^^@')
+  local info = props and props.glyph_info
+  if info then return info end
+  local c = getchar(n)
+  if c == 0 then
+    return '^^@'
+  elseif c < 0x11000 then
+    return utfchar(c)
+  else
+    return string.format("^^^^^^%06X", c)
+  end
 end
 
 fonts.handlers.otf.registerplugin('harf', process)

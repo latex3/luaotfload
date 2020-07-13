@@ -51,8 +51,7 @@ local getattrs          = direct.getattributelist
 local setattrs          = direct.setattributelist
 local getchar           = direct.getchar
 local setchar           = direct.setchar
-local getdir            = direct.getdir
-local setdir            = direct.setdir
+local getdirection      = direct.getdirection
 local getdisc           = direct.getdisc
 local setdisc           = direct.setdisc
 local getfont           = direct.getfont
@@ -60,6 +59,8 @@ local getdata           = direct.getdata
 local setdata           = direct.setdata
 local getfont           = direct.getfont
 local setfont           = direct.setfont
+local getwhatsitfield   = direct.getwhatsitfield or direct.getfield
+local setwhatsitfield   = direct.setwhatsitfield or direct.setfield
 local getfield          = direct.getfield
 local setfield          = direct.setfield
 local getid             = direct.getid
@@ -175,7 +176,7 @@ local function itemize(head, fontid, direction)
 
   local runs, codes = {}, {}
   local dirstack = {}
-  local currdir = direction or "TLT"
+  local currdir = direction == "TRT" and 1 or 0
   local lastskip, lastdir = true
   local lastrun = {}
 
@@ -204,18 +205,19 @@ local function itemize(head, fontid, direction)
         skip = true
       end
     elseif id == dir_t then
-      local dir = getdir(n)
-      if dir:sub(1, 1) == "+" then
-        -- Push the current direction to the stack.
-        tableinsert(dirstack, currdir)
-        currdir = dir:sub(2)
-      else
-        assert(currdir == dir:sub(2))
+      local dir, cancel = getdirection(n)
+      local direction, kind = getdirection(n)
+      if cancel then
+        assert(currdir == dir)
         -- Pop the last direction from the stack.
         currdir = tableremove(dirstack)
+      else
+        -- Push the current direction to the stack.
+        tableinsert(dirstack, currdir)
+        currdir = dir
       end
     elseif id == localpar_t then
-      currdir = getdir(n)
+      currdir = getdirection(n)
     end
 
     codes[#codes + 1] = code
@@ -226,7 +228,7 @@ local function itemize(head, fontid, direction)
         start = #codes,
         len = 1,
         font = fontid,
-        dir = currdir == "TRT" and dir_rtl or dir_ltr,
+        dir = currdir == 1 and dir_rtl or dir_ltr,
         skip = skip,
         codes = codes,
       }
@@ -929,8 +931,8 @@ end
 
 local function pageliteral(data)
   local n = newnode(whatsit_t, pdfliteral_t)
-  setfield(n, "mode", 1) -- page
-  setdata(n, data)
+  setwhatsitfield(n, "mode", 1) -- page
+  setwhatsitfield(n, "data", data) -- page
   return n
 end
 

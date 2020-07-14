@@ -779,19 +779,20 @@ local parse_config      = Ct (ini_sections)
 
 --doc]=]--
 
+luaotfload.parsers = {
+  --- parameters
+  traversal_maxdepth    = traversal_maxdepth,
+  --- main parsers
+  read_fonts_conf       = read_fonts_conf,
+  font_request          = font_request,
+  config                = parse_config,
+  --- common patterns
+  stripslashes          = stripslashes,
+  splitcomma            = splitcomma,
+}
+
 return function ()
   logreport = luaotfload.log.report
-  luaotfload.parsers = {
-    --- parameters
-    traversal_maxdepth    = traversal_maxdepth,
-    --- main parsers
-    read_fonts_conf       = read_fonts_conf,
-    font_request          = font_request,
-    config                = parse_config,
-    --- common patterns
-    stripslashes          = stripslashes,
-    splitcomma            = splitcomma,
-  }
   return true
 end
 

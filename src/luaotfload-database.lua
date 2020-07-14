@@ -2120,13 +2120,12 @@ do
 
     local current_formats = { }
 
+    local splitcomma = luaotfload.parsers.splitcomma
     function set_font_filter (formats)
 
         if not formats or type (formats) ~= "string" then
             return
         end
-
-        local splitcomma = luaotfload.parsers and luaotfload.parsers.splitcomma
 
         if stringsub (formats, 1, 1) == "+" then -- add
             formats = lpegmatch (splitcomma, stringsub (formats, 2))
@@ -2329,12 +2328,10 @@ local function collect_font_filenames_dir (dirname, location)
     return files
 end
 
+local stripslashes = luaotfload.parsers.stripslashes
 --- string list -> string list
 local function filter_out_pwd (dirs)
     local result = { }
-    if stripslashes == nil then
-        stripslashes = luaotfload.parsers and luaotfload.parsers.stripslashes
-    end
     local pwd = path_normalize (lpegmatch (stripslashes,
                                            lfscurrentdir ()))
     for i = 1, #dirs do
@@ -2426,9 +2423,6 @@ local function get_os_dirs ()
             "/usr/local/etc/fonts/fonts.conf",
             "/etc/fonts/fonts.conf",
         }
-        if not luaotfload.parsers then
-            logreport ("log", 0, "db", "Fatal: no fonts.conf parser.")
-        end
         local os_dirs = luaotfload.parsers.read_fonts_conf(fonts_conves, find_files)
         return os_dirs
     end

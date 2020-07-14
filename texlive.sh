@@ -58,7 +58,7 @@ echo luatexja arabluatex babel babel-english
 
 
 # math
-echo amsmath lualatex-math
+echo amsmath lualatex-math latex-amsmath-dev
 
 # a few more packages
 echo luacode environ adjustbox collectbox ms varwidth geometry url ulem lua-ul

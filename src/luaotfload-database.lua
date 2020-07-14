@@ -176,7 +176,6 @@ local utf8offset               = utf8.offset
 local context_environment      = luaotfload.fontloader
 local caches                   = context_environment.caches
 local filebasename             = file.basename
-local filecollapsepath         = file.collapsepath or file.collapse_path
 local filedirname              = file.dirname
 local fileextname              = file.extname
 local fileiswritable           = file.iswritable
@@ -1958,8 +1957,7 @@ do
     --- choose a normalization function in advance
     --- instead of testing with every call
     local os_type, os_name = os.type, os.name
-    local filecollapsepath = filecollapsepath
-    local lfsreadlink      = lfs.readlink
+    local filecollapsepath = file.collapsepath or file.collapse_path
 
     --- windows and dos
     if os_type == "windows" or os_type == "msdos" then
@@ -1977,20 +1975,7 @@ do
 --doc]]--
 
     else -- posix
-        function path_normalize (path)
-            local dest = lfsreadlink(path)
-            if dest then
-                if kpsereadable_file(dest) then
-                    path = dest
-                elseif kpsereadable_file(filejoin(filedirname(path), dest)) then
-                    path = filejoin(file.dirname(path), dest)
-                else
-                    -- broken symlink?
-                end
-            end
-            path = filecollapsepath(path)
-            return path
-        end
+        path_normalize = filecollapsepath
     end
 end
 

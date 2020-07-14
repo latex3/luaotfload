@@ -1018,7 +1018,7 @@ local function get_glyph_info(n)
   local c = getchar(n)
   if c == 0 then
     return '^^@'
-  elseif c < 0x11000 then
+  elseif c < 0x110000 then
     return utfchar(c)
   else
     return string.format("^^^^^^%06X", c)

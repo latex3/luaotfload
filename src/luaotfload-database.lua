@@ -2416,7 +2416,11 @@ local function get_os_dirs ()
     elseif os.type == "windows" or os.type == "msdos" then
         local windir = osgetenv("WINDIR")
         local appdata = osgetenv("LOCALAPPDATA")
-        return { filejoin(windir, 'Fonts'), filejoin(appdata, 'Microsoft/Windows/Fonts') }
+        if kpse.var_value('command_line_encoding') ~= nil then
+            return { filejoin(windir, 'Fonts'), chgstrcp.syscptoutf8(filejoin(appdata, 'Microsoft/Windows/Fonts')) }
+        else
+            return { filejoin(windir, 'Fonts'), filejoin(appdata, 'Microsoft/Windows/Fonts') }
+        end
     else
         local fonts_conves = { --- plural, much?
             "/usr/local/etc/fonts/fonts.conf",

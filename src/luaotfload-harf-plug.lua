@@ -573,17 +573,28 @@ function shape(head, firstnode, run)
   end
 end
 
+local set_alpha_cmd do
+  local literals = setmetatable({}, {__index = function(t, alpha)
+    local lit = string.format("/lolTrans%i gs", alpha)
+    rawset(t, alpha, lit)
+    -- FIXME: Printing statements to the user is not the most effective
+    -- way to add entries to PDF resource dictionaries [citation needed]
+    print(string.format('\n-----\nHERE WE SHOULD ADD THE FOLLOWING TO /ExtGState: /lolTrans%i << /ca %.3g /CA %.3g >>\n-----', alpha, alpha/255, alpha/255))
+    return lit
+  end})
+  local print_pdf = vf.pdf
+  set_alpha_cmd = setmetatable({}, {__index = function(t, alpha)
+    local cmd = { "lua", function() print_pdf("page", literals[alpha]) end }
+    rawset(t, alpha, cmd)
+    return cmd
+  end})
+end
+
 local function color_to_rgba(color)
   local r = color.red   / 255
   local g = color.green / 255
   local b = color.blue  / 255
-  local a = color.alpha / 255
-  if a ~= 1 then
-    -- XXX: alpha
-    return format('%s %s %s rg', r, g, b)
-  else
-    return format('%s %s %s rg', r, g, b)
-  end
+  return format('%s %s %s rg', r, g, b)
 end
 
 -- Cache of color glyph PNG data for bookkeeping, only because I couldn’t
@@ -705,6 +716,7 @@ local function tonodes(head, node, run, glyphs)
             if layers then
               local cmds = {} -- Every layer will add 5 cmds
               local prev_color = nil
+              local set_alpha_255 = { "nop" } -- By default alpha 255 is ignored
               local k = 1 -- k == j except that k does only get increased if the layer isn't dropped
               for j = 1, #layers do
                 local layer = layers[j]
@@ -720,11 +732,23 @@ local function tonodes(head, node, run, glyphs)
                 -- get nil anyway.
                 local color = palette[layer.color_index]
                 if not color or color.alpha ~= 0 then
-                  cmds[5*k - 4] = (color and not prev_color) and save_cmd or nop_cmd
-                  cmds[5*k - 3] = prev_color == color and nop_cmd or (color and {"pdf", "page", color_to_rgba(color)} or restore_cmd)
-                  cmds[5*k - 2] = push_cmd
-                  cmds[5*k - 1] = {"char", layer.glyph + gid_offset}
-                  cmds[5*k] = pop_cmd
+                  cmds[6*k - 5] = (color and not prev_color) and save_cmd or nop_cmd
+                  cmds[6*k - 4] = prev_color == color and nop_cmd or (color and {"pdf", "page", color_to_rgba(color)} or restore_cmd)
+                  local trans_cmd
+                  if not color or (prev_color and prev_color.alpha == color.alpha) then
+                    trans_cmd = nop_cmd
+                  elseif color.alpha == 255 then
+                    trans_cmd = set_alpha_255
+                  else
+                    trans_cmd = set_alpha_cmd[color.alpha]
+                    if set_alpha_255[1] == 'nop' then
+                      table.move(set_alpha_cmd[255], 1, 2, 1, set_alpha_255)
+                    end
+                  end
+                  cmds[6*k - 3] = trans_cmd
+                  cmds[6*k - 2] = push_cmd
+                  cmds[6*k - 1] = {"char", layer.glyph + gid_offset}
+                  cmds[6*k] = pop_cmd
                   fontglyphs[layer.glyph].used = true
                   prev_color = color
                   k = k+1

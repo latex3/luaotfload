@@ -705,6 +705,7 @@ local function tonodes(head, node, run, glyphs)
             if layers then
               local cmds = {} -- Every layer will add 5 cmds
               local prev_color = nil
+              local k = 1 -- k == j except that k does only get increased if the layer isn't dropped
               for j = 1, #layers do
                 local layer = layers[j]
                 local layerchar = characters[gid_offset + layer.glyph]
@@ -718,13 +719,16 @@ local function tonodes(head, node, run, glyphs)
                 -- color, we don’t check for it here explicitly since we will
                 -- get nil anyway.
                 local color = palette[layer.color_index]
-                cmds[5*j - 4] = (color and not prev_color) and save_cmd or nop_cmd
-                cmds[5*j - 3] = prev_color == color and nop_cmd or (color and {"pdf", "page", color_to_rgba(color)} or restore_cmd)
-                cmds[5*j - 2] = push_cmd
-                cmds[5*j - 1] = {"char", layer.glyph + gid_offset}
-                cmds[5*j] = pop_cmd
-                fontglyphs[layer.glyph].used = true
-                prev_color = color
+                if not color or color.alpha ~= 0 then
+                  cmds[5*k - 4] = (color and not prev_color) and save_cmd or nop_cmd
+                  cmds[5*k - 3] = prev_color == color and nop_cmd or (color and {"pdf", "page", color_to_rgba(color)} or restore_cmd)
+                  cmds[5*k - 2] = push_cmd
+                  cmds[5*k - 1] = {"char", layer.glyph + gid_offset}
+                  cmds[5*k] = pop_cmd
+                  fontglyphs[layer.glyph].used = true
+                  prev_color = color
+                  k = k+1
+                end
               end
               cmds[#cmds + 1] = prev_color and restore_cmd
               if not character.colored then

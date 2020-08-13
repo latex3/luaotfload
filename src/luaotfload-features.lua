@@ -603,6 +603,110 @@ do
 end
 
 do
+    local function mathfontdimen(tfmdata, _, value)
+        if not next(tfmdata.mathparameters) then return end
+        local parameters = tfmdata.parameters
+        local mathparameters = tfmdata.mathparameters
+        if value == 'xetex' then
+            parameters[10] = mathparameters.ScriptPercentScaleDown
+            parameters[11] = mathparameters.ScriptScriptPercentScaleDown
+            parameters[12] = mathparameters.DelimitedSubFormulaMinHeight
+            parameters[13] = mathparameters.DisplayOperatorMinHeight
+            parameters[14] = mathparameters.MathLeading
+            parameters[15] = mathparameters.AxisHeight
+            parameters[16] = mathparameters.AccentBaseHeight
+            parameters[17] = mathparameters.FlattenedAccentBaseHeight
+            parameters[18] = mathparameters.SubscriptShiftDown
+            parameters[19] = mathparameters.SubscriptTopMax
+            parameters[20] = mathparameters.SubscriptBaselineDropMin
+            parameters[21] = mathparameters.SuperscriptShiftUp
+            parameters[22] = mathparameters.SuperscriptShiftUpCramped
+            parameters[23] = mathparameters.SuperscriptBottomMin
+            parameters[24] = mathparameters.SuperscriptBaselineDropMax
+            parameters[25] = mathparameters.SubSuperscriptGapMin
+            parameters[26] = mathparameters.SuperscriptBottomMaxWithSubscript
+            parameters[27] = mathparameters.SpaceAfterScript
+            parameters[28] = mathparameters.UpperLimitGapMin
+            parameters[29] = mathparameters.UpperLimitBaselineRiseMin
+            parameters[30] = mathparameters.LowerLimitGapMin
+            parameters[31] = mathparameters.LowerLimitBaselineDropMin
+            parameters[32] = mathparameters.StackTopShiftUp
+            parameters[33] = mathparameters.StackTopDisplayStyleShiftUp
+            parameters[34] = mathparameters.StackBottomShiftDown
+            parameters[35] = mathparameters.StackBottomDisplayStyleShiftDown
+            parameters[36] = mathparameters.StackGapMin
+            parameters[37] = mathparameters.StackDisplayStyleGapMin
+            parameters[38] = mathparameters.StretchStackTopShiftUp
+            parameters[39] = mathparameters.StretchStackBottomShiftDown
+            parameters[40] = mathparameters.StretchStackGapAboveMin
+            parameters[41] = mathparameters.StretchStackGapBelowMin
+            parameters[42] = mathparameters.FractionNumeratorShiftUp
+            parameters[43] = mathparameters.FractionNumeratorDisplayStyleShiftUp
+            parameters[44] = mathparameters.FractionDenominatorShiftDown
+            parameters[45] = mathparameters.FractionDenominatorDisplayStyleShiftDown
+            parameters[46] = mathparameters.FractionNumeratorGapMin
+            parameters[47] = mathparameters.FractionNumeratorDisplayStyleGapMin
+            parameters[48] = mathparameters.FractionRuleThickness
+            parameters[49] = mathparameters.FractionDenominatorGapMin
+            parameters[50] = mathparameters.FractionDenominatorDisplayStyleGapMin
+            parameters[51] = mathparameters.SkewedFractionHorizontalGap
+            parameters[52] = mathparameters.SkewedFractionVerticalGap
+            parameters[53] = mathparameters.OverbarVerticalGap
+            parameters[54] = mathparameters.OverbarRuleThickness
+            parameters[55] = mathparameters.OverbarExtraAscender
+            parameters[56] = mathparameters.UnderbarVerticalGap
+            parameters[57] = mathparameters.UnderbarRuleThickness
+            parameters[58] = mathparameters.UnderbarExtraDescender
+            parameters[59] = mathparameters.RadicalVerticalGap
+            parameters[60] = mathparameters.RadicalDisplayStyleVerticalGap
+            parameters[61] = mathparameters.RadicalRuleThickness
+            parameters[62] = mathparameters.RadicalExtraAscender
+            parameters[63] = mathparameters.RadicalKernBeforeDegree
+            parameters[64] = mathparameters.RadicalKernAfterDegree
+            parameters[65] = mathparameters.RadicalDegreeBottomRaisePercent
+            -- parameters[66] = mathparameters.MinConnectorOverlap
+            -- parameters[67] = mathparameters.SubscriptShiftDownWithSuperscript
+            -- parameters[68] = mathparameters.FractionDelimiterSize
+            -- parameters[69] = mathparameters.FractionDelimiterDisplayStyleSize
+            -- parameters[70] = mathparameters.NoLimitSubFactor
+            -- parameters[71] = mathparameters.NoLimitSupFactor
+        elseif value == 'tex2' then
+            parameters[8] = mathparameters.FractionNumeratorDisplayStyleShiftUp
+            parameters[9] = mathparameters.FractionNumeratorShiftUp
+            parameters[10] = mathparameters.StackTopShiftUp
+            parameters[11] = mathparameters.FractionDenominatorDisplayStyleShiftDown
+            parameters[12] = mathparameters.FractionDenominatorShiftDown
+            parameters[13] = mathparameters.SuperscriptShiftUp
+            parameters[14] = mathparameters.SuperscriptShiftUp
+            parameters[15] = mathparameters.SuperscriptShiftUpCramped
+            parameters[16] = mathparameters.SubscriptShiftDown
+            parameters[17] = mathparameters.SubscriptShiftDown
+            parameters[18] = mathparameters.SuperscriptBaselineDropMax
+            parameters[19] = mathparameters.SubscriptBaselineDropMin
+            parameters[20] = mathparameters.FractionDelimiterDisplayStyleSize
+            parameters[21] = mathparameters.FractionDelimiterSize
+            parameters[22] = mathparameters.AxisHeight
+        elseif value == 'tex3' then
+            parameters[8] = mathparameters.Defa
+            parameters[9] = mathparameters.UpperLimitGapMin
+            parameters[10] = mathparameters.LowerLimitGapMin
+            parameters[11] = mathparameters.UpperLimitBaselineRiseMin
+            parameters[12] = mathparameters.LowerLimitBaselineDropMin
+            parameters[13] = 0
+        end
+    end
+    fonts.constructors.features.otf.register {
+        name = 'mathfontdimen',
+        description = 'Set fontdimen values for compatibility with other engines',
+        manipulators = {
+            base = mathfontdimen,
+          -- node = mathfontdimen,
+          -- plug = mathfontdimen,
+        },
+    }
+end
+
+do
     local number = lpeg.R'09'^1/tonumber
     local patt = number * ' ' * number * ' ' * number * -1
     local function setexpansion(tfmdata, _, value)

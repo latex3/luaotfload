@@ -292,7 +292,21 @@ local function init_main(early_hook)
   local load_fontloader_module = luaotfload.loaders.fontloader
   local ignore_module          = luaotfload.loaders.ignore
 
-  load_fontloader_module "basics-gen"
+  do
+    local saved_reporter = texio.reporter
+    local saved_exit = os.exit
+    local errmsg
+    function texio.reporter(msg, ...)
+      print(...)
+      errmsg = msg
+    end
+    function os.exit()
+      error(errmsg)
+    end
+    load_fontloader_module "basics-gen"
+    texio.reporter = saved_reporter
+    os.exit = saved_exit
+  end
 
   if early_hook then early_hook() end
 

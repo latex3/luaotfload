@@ -706,29 +706,6 @@ do
     }
 end
 
-do
-    local number = lpeg.R'09'^1/tonumber
-    local patt = number * ' ' * number * ' ' * number * -1
-    local function setexpansion(tfmdata, _, value)
-        local stretch, shrink, step = patt:match(value)
-        if not stretch then
-            report("term and log", 0, "features",
-                "Invalid expansion parameter provided")
-            return
-        end
-        tfmdata.stretch, tfmdata.shrink, tfmdata.step = stretch, shrink, step
-    end
-    fonts.constructors.features.otf.register {
-        name = 'expansion',
-        description = 'Set expansion parameters',
-        manipulators = {
-            base = setexpansion,
-            node = setexpansion,
-            plug = setexpansion,
-        },
-    }
-end
-
 return function ()
     if not fonts and fonts.handlers then
         report ("log", 0, "features",

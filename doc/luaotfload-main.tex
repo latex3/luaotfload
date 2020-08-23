@@ -62,6 +62,26 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.15 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+  \item The font database is updated more reliably if fonts get deleted.
+  \item In multiple error cases, error messages are shown instead of silently
+    generating bad output.
+  \item Write glyph ids instead of internal identifiers to DVI files. This
+    allows using OpenType fonts when working with \identifier{dvilualatex}.
+    (This requires additional support from the DVI reader)
+  \item The\marginpar{\mbox{}\hfill \textbf{Change!}} set of font features which
+    are enabled by default has been changed to be more similar to HarfBuzz.
+    Especially \enquote{Above-base mark Positioning} (abvm),
+    \enquote{Below-base mark Positioning} (blwm), \enquote{Contextual
+      Alternates} (calt), \enquote{Cursive Positioning} (curs),
+    \enquote{Distances} (dist), and \enquote{Required Contextual Alternates}
+    (rclt) are now enabled by default for all scripts.
+  \item Added a \identifier{mathfontdimen} font feature which allows emulating
+    fontdimen values from xetex or traditional \TeX\ math fonts.
+\end{itemize}
+\endsubsection
+
 \beginsubsection {New in version 3.14 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
 \item a bug in luaotfload-tool has been corrected (reported on the texlive list)

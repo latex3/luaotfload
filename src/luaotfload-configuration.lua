@@ -107,8 +107,10 @@ local base_features = tabletohash {
   -- Adopt the generic default from HarfBuzz.
   -- The first line is generally enabled there,
   -- the second only for horizontal text.
+  -- The third line is luaotfload specific
   "abvm", "blwm", "ccmp", "locl", "mark", "mkmk", "rlig",
   "calt", "clig", "curs", "dist", "kern", "liga", "rclt",
+  "itlc",
 }
 local feature_presets = {
   arab = table.merged( tabletohash {

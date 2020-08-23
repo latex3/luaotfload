@@ -432,7 +432,8 @@ function shape(head, firstnode, run)
             while startglyph > 1
               and codes[glyphs[startglyph - 1].cluster + 1] ~= 0x20
               and codes[glyphs[startglyph - 1].cluster + 1] ~= 0xFFFC
-              and unsafetobreak(glyphs[startglyph]) do
+              and (unsafetobreak(glyphs[startglyph])
+                or glyphs[startglyph].cluster == glyphs[startglyph-1].cluster) do
               startglyph = startglyph - 1
             end
             -- Get the corresponding character index.

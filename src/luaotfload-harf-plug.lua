@@ -176,7 +176,7 @@ local function itemize(head, fontid, direction)
 
   local runs, codes = {}, {}
   local dirstack = {}
-  local currdir = direction == "TRT" and 1 or 0
+  local currdir = direction or 0
   local lastskip, lastdir = true
   local lastrun = {}
 

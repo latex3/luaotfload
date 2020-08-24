@@ -427,7 +427,9 @@ local init_post_install_callbacks = function ()
   local handler = luaotfload.fontloader.nodes.simple_font_handler
   local callback = function(head, groupcode, _, _, direction)
     if not direction then
-      direction = tex.get'textdir'
+      direction = tex.get'textdirection'
+    else
+      direction = direction == "TRT" and 1 or 0
     end
     multiscript(head, nil, nil, nil, direction)
     fallback(head, nil, nil, nil, direction)

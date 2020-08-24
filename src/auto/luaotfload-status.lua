@@ -89,7 +89,7 @@ return {
  },
  ["notes"]={
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",
-  ["description"]="v3.14/2020-05-06",
+  ["description"]="v3.15-dev/2020-08-24",
   ["loader"]="fontloader-2020-08-24.lua",
   ["revision"]="5a43385437b6a30d4e2d631cb2e243917264baa6",
   ["timestamp"]="2020-08-24 14:55:30 +0200",

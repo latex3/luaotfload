@@ -66,9 +66,10 @@ for k, v in next, disccodes do
     disccodes[v] = k
 end
 
-nodes.nodecodes    = nodecodes
-nodes.glyphcodes   = glyphcodes
-nodes.disccodes    = disccodes
+nodes.nodecodes  = nodecodes
+nodes.glyphcodes = glyphcodes
+nodes.disccodes  = disccodes
+nodes.dirvalues  = { lefttoright = 0, righttoleft = 1 }
 
 nodes.handlers.protectglyphs   = node.protect_glyphs   -- beware: nodes!
 nodes.handlers.unprotectglyphs = node.unprotect_glyphs -- beware: nodes!

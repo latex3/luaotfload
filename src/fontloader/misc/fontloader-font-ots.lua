@@ -1,5 +1,6 @@
 if not modules then modules = { } end modules ['font-ots'] = { -- sequences
     version   = 1.001,
+    optimize  = true,
     comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -25,7 +26,7 @@ effect that suddenly fonts behave differently. We don't want to catch all font
 issues.</p>
 
 <p>After a lot of experiments (mostly by Taco, me and Idris) the first implementation
-becaus quite useful. When it did most of what we wanted, a more optimized version
+was already quite useful. When it did most of what we wanted, a more optimized version
 evolved. Of course all errors are mine and of course the code can be improved. There
 are quite some optimizations going on here and processing speed is currently quite
 acceptable and has been improved over time. Many complex scripts are not yet supported
@@ -251,6 +252,9 @@ local disc_code          = nodecodes.disc
 local math_code          = nodecodes.math
 local dir_code           = nodecodes.dir
 local localpar_code      = nodecodes.localpar
+
+local lefttoright_code   = nodes.dirvalues.lefttoright
+local righttoleft_code   = nodes.dirvalues.righttoleft
 
 local discretionarydisc_code = disccodes.discretionary
 local ligatureglyph_code     = glyphcodes.ligature
@@ -2056,6 +2060,7 @@ local function chaindisk(head,start,dataset,sequence,rlmode,skiphash,ck)
     local sweepnode     = sweepnode
     local sweeptype     = sweeptype
     local sweepoverflow = false
+    local checkdisc     = getprev(head)
     local keepdisc      = not sweepnode
     local lookaheaddisc = nil
     local backtrackdisc = nil
@@ -2089,6 +2094,7 @@ local function chaindisk(head,start,dataset,sequence,rlmode,skiphash,ck)
                     sweepnode     = current
                     current       = getnext(current)
                 else
+                    -- we can use an iterator
                     while replace and i <= l do
                         if getid(replace) == glyph_code then
                             i = i + 1
@@ -2189,7 +2195,7 @@ local function chaindisk(head,start,dataset,sequence,rlmode,skiphash,ck)
         local current = prev
         local i       = f
         local t       = sweeptype == "pre" or sweeptype == "replace"
-        if not current and t and current == checkdisk then
+        if not current and t and current == checkdisc then
             current = getprev(sweepnode)
         end
         while current and i > 1 do -- missing getprev added / moved outside
@@ -2218,7 +2224,7 @@ local function chaindisk(head,start,dataset,sequence,rlmode,skiphash,ck)
                 end
             end
             current = getprev(current)
-            if t and current == checkdisk then
+            if t and current == checkdisc then
                 current = getprev(sweepnode)
             end
         end
@@ -2443,6 +2449,10 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
         local current = start
         local last    = start
 
+        if s == 1 then
+            goto next
+        end
+
         -- current match
 
         if l > f then
@@ -2512,10 +2522,9 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                                     break
                                 end
                             end
-                            -- commented, for Kai to check
-                         -- if n <= l then
-                         --     notmatchpre[last] = true
-                         -- end
+                            if n <= l then
+                                notmatchpre[last] = true
+                            end
                         else
                             notmatchpre[last] = true
                         end
@@ -3620,8 +3629,6 @@ end
 local txtdirstate, pardirstate  do -- this might change (no need for nxt in pardirstate)
 
     local getdirection = nuts.getdirection
-    local lefttoright  = 0
-    local righttoleft  = 1
 
     txtdirstate = function(start,stack,top,rlparmode)
         local dir, pop = getdirection(start)
@@ -3630,19 +3637,19 @@ local txtdirstate, pardirstate  do -- this might change (no need for nxt in pard
                 return 0, rlparmode
             else
                 top = top - 1
-                if stack[top] == righttoleft then
+                if stack[top] == righttoleft_code then
                     return top, -1
                 else
                     return top, 1
                 end
             end
-        elseif dir == lefttoright then
+        elseif dir == lefttoright_code then
             top = top + 1
-            stack[top] = lefttoright
+            stack[top] = lefttoright_code
             return top, 1
-        elseif dir == righttoleft then
+        elseif dir == righttoleft_code then
             top = top + 1
-            stack[top] = righttoleft
+            stack[top] = righttoleft_code
             return top, -1
         else
             return top, rlparmode
@@ -3651,14 +3658,9 @@ local txtdirstate, pardirstate  do -- this might change (no need for nxt in pard
 
     pardirstate = function(start)
         local dir = getdirection(start)
-        if dir == lefttoright then
+        if dir == lefttoright_code then
             return 1, 1
-        elseif dir == righttoleft then
-            return -1, -1
-        -- for old times sake we we handle strings too
-        elseif dir == "TLT" then
-            return 1, 1
-        elseif dir == "TRT" then
+        elseif dir == righttoleft_code then
             return -1, -1
         else
             return 0, 0
@@ -3759,7 +3761,7 @@ do
 
         if getid(head) == localpar_code and start_of_par(head) then
             initialrl = pardirstate(head)
-        elseif direction == 1 or direction == "TRT" then
+        elseif direction == righttoleft_code then
             initialrl = -1
         end
 
@@ -4054,7 +4056,7 @@ do
         local done      = false
         local dirstack  = { nil } -- could move outside function but we can have local runs (maybe a few more nils)
         local start     = head
-        local initialrl = (direction == 1 or direction == "TRT") and -1 or 0
+        local initialrl = (direction == righttoleft_code) and -1 or 0
         local rlmode    = initialrl
         local rlparmode = initialrl
         local topstack  = 0

@@ -117,26 +117,27 @@ local context_modules = {
 --  { ltx,   "fonts-syn"  }, -- ignore??
   { ctx,   "font-vfc"          }, -- NEW UF 19.09.2018
   { ctx,   "font-otr"          },
-  { ctx,   "font-oti"          },
-  { ctx,   "font-ott"          },
   { ctx,   "font-cff"          },
   { ctx,   "font-ttf"          },
   { ctx,   "font-dsp"          },
-  { ctx,   "font-oup"          },
+  { ctx,   "font-oti"          },
+  { ctx,   "font-ott"          },
   { ctx,   "font-otl"          },
   { ctx,   "font-oto"          },
   { ctx,   "font-otj"          },
+  { ctx,   "font-oup"          },
   { ctx,   "font-ota"          },
   { ctx,   "font-ots"          },
+  { ctx,   "font-otc"          },
   { ctx,   "font-osd"          },
   { ctx,   "font-ocl"          },
-  { ctx,   "font-otc"          },
   { ctx,   "font-onr"          },
   { ctx,   "font-one"          },
   { ctx,   "font-afk"          },
   { ltx,   "fonts-tfm"  },
   { ctx,   "font-lua"          },
   { ctx,   "font-def"          },
+  { ctx,   "font-shp"          },
   { ltx,   "fonts-def"  },
   { ltx,   "fonts-ext"  },
   { ctx,   "font-imp-tex"      },
@@ -272,6 +273,7 @@ local function init_main(early_hook)
   local the_attributes   = luatexbase.attributes
 
   local context_environment = luaotfload.fontloader
+  context_environment.CONTEXTLMTXMODE = 0
   context_environment.attributes = {
     private = function (name)
       local attr   = "luaotfload@" .. name --- used to be: “otfl@”

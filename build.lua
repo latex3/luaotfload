@@ -1,8 +1,8 @@
 
 packageversion= "3.14"
 packagedate   = "2020-05-06"
-fontloaderdate= "2020-05-06"
-packagedesc   = "harf"
+fontloaderdate= "2020-08-24"
+packagedesc   = "new-fontloader"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"

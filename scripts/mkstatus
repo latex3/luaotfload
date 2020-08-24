@@ -157,6 +157,7 @@ local oldnames = {
   { miscdir,      "fontloader-fonts-tfm.lua",       }, -- changed 13.04.2019
   { miscdir,      "fontloader-font-otr.lua",        },
   { miscdir,      "fontloader-font-cff.lua",        },
+  { miscdir,      "fontloader-font-shp.lua",        }, -- NEW
   { miscdir,      "fontloader-font-ttf.lua",        },
   { miscdir,      "fontloader-font-dsp.lua",        },
   { miscdir,      "fontloader-font-oup.lua",        },

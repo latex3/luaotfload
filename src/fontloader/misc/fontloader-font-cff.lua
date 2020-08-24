@@ -1,5 +1,6 @@
 if not modules then modules = { } end modules ['font-cff'] = {
     version   = 1.001,
+    optimize  = true,
     comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -612,6 +613,9 @@ do
     parsedictionaries = function(data,dictionaries,what)
         stack   = { }
         strings = data.strings
+        if trace_charstrings then
+            report("charstring format %a",what)
+        end
         for i=1,#dictionaries do
             top    = 0
             result = what == "cff" and {
@@ -1517,7 +1521,7 @@ do
                 end
             end
         else
-            -- error
+            top = top - nofregions * n
         end
     end
 

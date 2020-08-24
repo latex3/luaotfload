@@ -1,5 +1,6 @@
 if not modules then modules = { } end modules ['font-dsp'] = {
     version   = 1.001,
+    optimize  = true,
     comment   = "companion to font-ini.mkiv",
     author    = "Hans Hagen, PRAGMA-ADE, Hasselt NL",
     copyright = "PRAGMA ADE / ConTeXt Development Team",
@@ -302,7 +303,7 @@ end)
 -- values can be anything the min/max permits so we can either think of
 -- real values of a fraction along the axis (probably easier)
 
--- wght:400,wdth:100,ital:1
+-- wght=400,wdth=100,ital=1
 
 local function axistofactors(str)
     local t = settings_to_hash(str)

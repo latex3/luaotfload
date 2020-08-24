@@ -262,6 +262,7 @@ local imports = {
     { name = "font-ots"          , ours = "font-ots"          , kind = kind_merged    },
     { name = "font-ott"          , ours = "font-ott"          , kind = kind_merged    }, -- NEW UF 18.09.2018
     { name = "font-oup"          , ours = "font-oup"          , kind = kind_merged    },
+    { name = "font-shp"          , ours = "font-shp"          , kind = kind_merged    }, 
 --  { name = "font-tfm"          , ours = "font-tfm"          , kind = kind_merged  }, -- REMOVED/MOVED 13.04.2019
     { name = "font-ttf"          , ours = "font-ttf"          , kind = kind_merged    },
     { name = "font-imp-tex"      , ours = "font-imp-tex"      , kind = kind_merged    },
@@ -338,6 +339,7 @@ local package = {
 ---   [42] font-def.lua
 ---REN[43] luatex-fonts-def.lua -- was font-xtx.lua
 ---   [44] luatex-fonts-ext.lua
+---NEW     font-def.lua
 ---NEW     font-imp-tex.lua
 ---NEW     font-imp-ligatures.lua
 ---NEW     font-imp-italics.lua
@@ -412,6 +414,7 @@ local package = {
     "fonts-tfm",          -- was font-tfm,changed 13.04.2019
     "font-lua",
     "font-def",
+    "font-shp",
     "fonts-def",          -- NEW 18.09.2018
     "fonts-ext",
     "font-imp-tex",       -- NEW

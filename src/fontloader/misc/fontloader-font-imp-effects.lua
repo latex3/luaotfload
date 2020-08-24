@@ -280,6 +280,9 @@ end
 
 -- local show_effect = { "lua", "print('!')" }
 
+----- shiftmode = false -- test in mkiv and lmtx
+local shiftmode = CONTEXTLMTXMODE > 0
+
 local function manipulateeffect(tfmdata)
     local effect = tfmdata.properties.effect
     if effect then
@@ -301,42 +304,49 @@ local function manipulateeffect(tfmdata)
         local factor         = (1 + effect.factor)  * factor
         local hfactor        = (1 + effect.hfactor) * hfactor
         local vfactor        = (1 + effect.vfactor) * vfactor
-        local vshift         = vshift ~= 0 and upcommand[vshift] or false
+        if shiftmode then
+            parameters.hshift = hshift
+            parameters.vshift = vshift
+        else
+            vshift = vshift ~= 0 and upcommand[vshift] or false
+            hshift = rightcommand[hshift]
+        end
         for unicode, character in next, characters do
             local oldwidth  = character.width
             local oldheight = character.height
             local olddepth  = character.depth
             if oldwidth and oldwidth > 0 then
                 character.width = oldwidth + wdelta
-                local commands = character.commands
-                local hshift   = rightcommand[hshift]
-                if vshift then
-                    if commands then
-                        prependcommands ( commands,
--- show_effect,
-                            hshift,
-                            vshift
-                        )
+                if not shiftmode then
+                    local commands = character.commands
+                    if vshift then
+                        if commands then
+                            prependcommands ( commands,
+                             -- show_effect,
+                                hshift,
+                                vshift
+                            )
+                        else
+                            character.commands = {
+                             -- show_effect,
+                                hshift,
+                                vshift,
+                                charcommand[unicode]
+                            }
+                        end
                     else
-                        character.commands = {
--- show_effect,
-                            hshift,
-                            vshift,
-                            charcommand[unicode]
-                        }
-                    end
-                else
-                    if commands then
-                        prependcommands ( commands,
--- show_effect,
-                            hshift
-                        )
-                    else
-                        character.commands = {
--- show_effect,
-                            hshift,
-                            charcommand[unicode]
-                        }
+                        if commands then
+                          prependcommands ( commands,
+                           -- show_effect,
+                              hshift
+                          )
+                        else
+                            character.commands = {
+                             -- show_effect,
+                                hshift,
+                                charcommand[unicode]
+                          }
+                        end
                     end
                 end
             end

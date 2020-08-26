@@ -444,6 +444,14 @@ local init_post_install_callbacks = function ()
                              "luaotfload.node_processor",
                              1)
   -- /MK
+
+  local streams = fonts.hashes.streams
+  luatexbase.add_to_callback("glyph_stream_provider",function(id,index,mode)
+    if id <= 0 then return "" end
+    local stream = streams[id].streams
+    if not stream then return "" end
+    return stream[index] or ""
+  end, "luaotfload.glyph_stream")
 end
 
 local function init_post_load_agl ()

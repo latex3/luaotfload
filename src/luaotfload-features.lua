@@ -429,6 +429,13 @@ local function handle_request (specification)
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
     features.normal = normalize (request.features)
+    if features.normal.instance then
+        if features.normal.axis then
+            report("term and log", 0, "features", "instance and axis provided, instance will be ignored")
+        else
+            specification.instance = features.normal.instance
+        end
+    end
     specification.sub = request.sub or specification.sub or false
 
     local forced_mode = request.features and request.features.mode

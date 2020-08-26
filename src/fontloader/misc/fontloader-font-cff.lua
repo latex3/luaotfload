@@ -2265,8 +2265,8 @@ do
 
 end
 
-local function readglobals(f,data)
-    local routines = readlengths(f)
+local function readglobals(f,data,version)
+    local routines = readlengths(f,version == "cff2")
     for i=1,#routines do
         routines[i] = readbytetable(f,routines[i])
     end
@@ -2324,14 +2324,14 @@ local function readprivates(f,data)
     end
 end
 
-local function readlocals(f,data,dictionary)
+local function readlocals(f,data,dictionary,version)
     local header  = data.header
     local private = dictionary.private
     if private then
         local subroutineoffset = private.data.subroutines
         if subroutineoffset ~= 0 then
             setposition(f,header.offset+private.offset+subroutineoffset)
-            local subroutines = readlengths(f)
+            local subroutines = readlengths(f,version=="cff2")
             for i=1,#subroutines do
                 subroutines[i] = readbytetable(f,subroutines[i])
             end
@@ -2394,7 +2394,7 @@ readers.parsecharstrings = parsecharstrings -- used in font-onr.lua (type 1)
 local function readnoselect(f,fontdata,data,glyphs,doshapes,version,streams)
     local dictionaries = data.dictionaries
     local dictionary   = dictionaries[1]
-    readglobals(f,data)
+    readglobals(f,data,version)
     readcharstrings(f,data,version)
     if version == "cff2" then
         dictionary.charset = nil
@@ -2402,9 +2402,19 @@ local function readnoselect(f,fontdata,data,glyphs,doshapes,version,streams)
         readencodings(f,data)
         readcharsets(f,data,dictionary)
     end
+    local cid          = dictionary.cid
+    local fdarray      = cid and cid.fdarray
+    if fdarray and not dictionary.private then
+        setposition(f,data.header.offset+fdarray)
+        local dictionaries = readlengths(f,version=="cff2")
+        assert(#dictionaries == 1)
+        dictionaries[1] = readstring(f,dictionaries[1])
+        parsedictionaries(data,dictionaries)
+        dictionary.private = dictionaries[1].private
+    end
     readprivates(f,data)
     parseprivates(data,data.dictionaries)
-    readlocals(f,data,dictionary)
+    readlocals(f,data,dictionary,version)
     startparsing(fontdata,data,streams)
     parsecharstrings(fontdata,data,glyphs,doshapes,version,streams)
     stopparsing(fontdata,data)
@@ -2416,7 +2426,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
     local dictionary   = dictionaries[1]
     local cid          = dictionary.cid
     local cidselect    = cid and cid.fdselect
-    readglobals(f,data)
+    readglobals(f,data,version)
     readcharstrings(f,data,version)
     if version ~= "cff2" then
         readencodings(f,data)
@@ -2462,7 +2472,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
         local cidarray = cid.fdarray
         if cidarray then
             setposition(f,header.offset+cidarray)
-            local dictionaries = readlengths(f)
+            local dictionaries = readlengths(f, version == "cff2")
             for i=1,#dictionaries do
                 dictionaries[i] = readstring(f,dictionaries[i])
             end
@@ -2470,7 +2480,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
             cid.dictionaries = dictionaries
             readcidprivates(f,data)
             for i=1,#dictionaries do
-                readlocals(f,data,dictionaries[i])
+                readlocals(f,data,dictionaries[i],version)
             end
             startparsing(fontdata,data,streams)
             for i=1,#charstrings do

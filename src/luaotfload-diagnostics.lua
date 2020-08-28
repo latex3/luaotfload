@@ -8,7 +8,7 @@
 local ProvidesLuaModule = { 
     name          = "luaotfload-diagnostics",
     version       = "3.15-dev",       --TAGVERSION
-    date          = "2020-08-24", --TAGDATE
+    date          = "2020-08-28", --TAGDATE
     description   = "luaotfload-tool submodule / diagnostics",
     license       = "GPL v2.0"
 }

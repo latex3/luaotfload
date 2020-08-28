@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2020-08-14 18:54
+-- merge date  : 2020-08-28 13:55
 
 do -- begin closure to overcome local limits and interference
 
@@ -98,9 +98,6 @@ function optionalrequire(...)
  if ok then
   return result
  end
-end
-if lua then
- lua.mask=load([[τεχ = 1]]) and "utf" or "ascii"
 end
 local flush=io.flush
 if flush then
@@ -9134,12 +9131,14 @@ function constructors.scale(tfmdata,specification)
  target.cidinfo=properties.cidinfo
  target.format=properties.format
  target.cache=constructors.cacheintex and "yes" or "renew"
+ local original=properties.original or tfmdata.original
  local fontname=properties.fontname or tfmdata.fontname
  local fullname=properties.fullname or tfmdata.fullname
  local filename=properties.filename or tfmdata.filename
  local psname=properties.psname   or tfmdata.psname
  local name=properties.name  or tfmdata.name
  local psname,psfixed=fixedpsname(psname,fontname or fullname or file.nameonly(filename))
+ target.original=original
  target.fontname=fontname
  target.fullname=fullname
  target.filename=filename
@@ -10483,6 +10482,7 @@ end
 local hash={}
 local conc={}
 table.setmetatableindex(hash,function(t,k)
+ local v
  if k<0xD7FF or (k>0xDFFF and k<=0xFFFF) then
   v=f_single(k)
  else
@@ -13277,15 +13277,15 @@ do
  local p_dictionary=(
   p_byte+p_positive+p_negative+p_short+p_long+p_nibbles+p_single+p_double+p_unsupported
  )^1
- parsedictionaries=function(data,dictionaries,what)
+ parsedictionaries=function(data,dictionaries,version)
   stack={}
   strings=data.strings
   if trace_charstrings then
-   report("charstring format %a",what)
+   report("charstring format %a",version)
   end
   for i=1,#dictionaries do
    top=0
-   result=what=="cff" and {
+   result=version=="cff" and {
     monospaced=false,
     italicangle=0,
     underlineposition=-100,
@@ -14660,8 +14660,8 @@ do
   processshape(tab,index-1)
  end
 end
-local function readglobals(f,data)
- local routines=readlengths(f)
+local function readglobals(f,data,version)
+ local routines=readlengths(f,version=="cff2")
  for i=1,#routines do
   routines[i]=readbytetable(f,routines[i])
  end
@@ -14715,14 +14715,14 @@ local function readprivates(f,data)
   private.data=readstring(f,private.size)
  end
 end
-local function readlocals(f,data,dictionary)
+local function readlocals(f,data,dictionary,version)
  local header=data.header
  local private=dictionary.private
  if private then
   local subroutineoffset=private.data.subroutines
   if subroutineoffset~=0 then
    setposition(f,header.offset+private.offset+subroutineoffset)
-   local subroutines=readlengths(f)
+   local subroutines=readlengths(f,version=="cff2")
    for i=1,#subroutines do
     subroutines[i]=readbytetable(f,subroutines[i])
    end
@@ -14735,7 +14735,7 @@ local function readlocals(f,data,dictionary)
   dictionary.subroutines={}
  end
 end
-local function readcharstrings(f,data,what)
+local function readcharstrings(f,data,version)
  local header=data.header
  local dictionaries=data.dictionaries
  local dictionary=dictionaries[1]
@@ -14744,7 +14744,7 @@ local function readcharstrings(f,data,what)
  if type(offset)~="number" then
  elseif stringtype==2 then
   setposition(f,header.offset+offset)
-  local charstrings=readlengths(f,what=="cff2")
+  local charstrings=readlengths(f,version=="cff2")
   local nofglyphs=#charstrings
   for i=1,nofglyphs do
    charstrings[i]=readstring(f,charstrings[i])
@@ -14774,7 +14774,8 @@ readers.parsecharstrings=parsecharstrings
 local function readnoselect(f,fontdata,data,glyphs,doshapes,version,streams)
  local dictionaries=data.dictionaries
  local dictionary=dictionaries[1]
- readglobals(f,data)
+ local cid=not dictionary.private and dictionary.cid
+ readglobals(f,data,version)
  readcharstrings(f,data,version)
  if version=="cff2" then
   dictionary.charset=nil
@@ -14782,9 +14783,27 @@ local function readnoselect(f,fontdata,data,glyphs,doshapes,version,streams)
   readencodings(f,data)
   readcharsets(f,data,dictionary)
  end
+ if cid then
+  local fdarray=cid.fdarray
+  if fdarray then
+   setposition(f,data.header.offset+fdarray)
+   local dictionaries=readlengths(f,version=="cff2")
+   local nofdictionaries=#dictionaries
+   if nofdictionaries>0 then
+    for i=1,nofdictionaries do
+     dictionaries[i]=readstring(f,dictionaries[i])
+    end
+    parsedictionaries(data,dictionaries)
+    dictionary.private=dictionaries[1].private
+    if nofdictionaries>1 then
+     report("ignoring dictionaries > 1 in cid font")
+    end
+   end
+  end
+ end
  readprivates(f,data)
  parseprivates(data,data.dictionaries)
- readlocals(f,data,dictionary)
+ readlocals(f,data,dictionary,version)
  startparsing(fontdata,data,streams)
  parsecharstrings(fontdata,data,glyphs,doshapes,version,streams)
  stopparsing(fontdata,data)
@@ -14795,7 +14814,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
  local dictionary=dictionaries[1]
  local cid=dictionary.cid
  local cidselect=cid and cid.fdselect
- readglobals(f,data)
+ readglobals(f,data,version)
  readcharstrings(f,data,version)
  if version~="cff2" then
   readencodings(f,data)
@@ -14839,7 +14858,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
   local cidarray=cid.fdarray
   if cidarray then
    setposition(f,header.offset+cidarray)
-   local dictionaries=readlengths(f)
+   local dictionaries=readlengths(f,version=="cff2")
    for i=1,#dictionaries do
     dictionaries[i]=readstring(f,dictionaries[i])
    end
@@ -14847,7 +14866,7 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
    cid.dictionaries=dictionaries
    readcidprivates(f,data)
    for i=1,#dictionaries do
-    readlocals(f,data,dictionaries[i])
+    readlocals(f,data,dictionaries[i],version)
    end
    startparsing(fontdata,data,streams)
    for i=1,#charstrings do
@@ -35926,8 +35945,9 @@ function definers.read(specification,size,id)
    report_defining("already hashed: %s",hash)
   end
  else
-  tfmdata=definers.loadfont(specification) 
+  tfmdata=definers.loadfont(specification)
   if tfmdata then
+   tfmdata.original=specification.specification
    if trace_defining then
     report_defining("loaded and hashed: %s",hash)
    end

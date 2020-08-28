@@ -451,6 +451,7 @@ function constructors.scale(tfmdata,specification)
     target.format        = properties.format
     target.cache         = constructors.cacheintex and "yes" or "renew"
     --
+    local original = properties.original or tfmdata.original
     local fontname = properties.fontname or tfmdata.fontname
     local fullname = properties.fullname or tfmdata.fullname
     local filename = properties.filename or tfmdata.filename
@@ -462,6 +463,7 @@ function constructors.scale(tfmdata,specification)
     --
     local psname, psfixed = fixedpsname(psname,fontname or fullname or file.nameonly(filename))
     --
+    target.original = original
     target.fontname = fontname
     target.fullname = fullname
     target.filename = filename

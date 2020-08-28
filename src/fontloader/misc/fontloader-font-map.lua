@@ -104,6 +104,7 @@ local hash = { }
 local conc = { }
 
 table.setmetatableindex(hash,function(t,k)
+    local v
     if k < 0xD7FF or (k > 0xDFFF and k <= 0xFFFF) then
         v = f_single(k)
     else

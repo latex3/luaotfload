@@ -458,6 +458,58 @@ if as_script == true then --- skip the remainder of the file
     return
 end
 
+do
+    local helpers = fonts.handlers.otf.readers.helpers
+    local axistofactors = helpers.axistofactors
+    local cleanname = helpers.cleanname
+    local getaxisscale = helpers.getaxisscale
+    local function search(table, term, key_field, value_field)
+        if not table then return end
+        for i=1, #table do
+            local entry = table[i]
+            if cleanname(entry[key_field]) == term then
+                return entry[value_field]
+            end
+        end
+    end
+    function helpers.getfactors(tfmdata, instance) -- `instance` might refer to an `axis` value here
+        assert(instance == true or type(instance) == "string", "Fontloader changed interface of helpers.getfactors. This is a bug, please notify the luaotfload maintainers.")
+        local variabledata = tfmdata.variabledata
+        if not variabledata or instance == "" then return end
+        local instances = variabledata.instances
+        local axis = variabledata.axis
+        local designaxis = variabledata.designaxis
+        local segments = variabledata.segments
+        if not axis then return end
+        local factors = {}
+        if instance == true then
+            for i=1, #axis do
+                local cur = axis[i]
+                local default = cur.default
+                factors[i] = getaxisscale(segments, cur.minimum, default, cur.maximum, default)
+            end
+            return factors
+        end
+        local values = search(instances, instance, "subfamily", "values")
+        if values then
+            for i=1, #axis do
+                local cur = axis[i]
+                factors[i] = getaxisscale(segments, cur.minimum, cur.default, cur.maximum, values[i])
+            end
+            return factors
+        end
+        values = axistofactors(instance)
+        for i=1, #axis do
+            local cur = axis[i]
+            local default = cur.default
+            local value = cur.name and values[cur.name] or values[cur.tag]
+            value = tonumber(value) or (value and search(search(designaxis, cur.tag, "tag", "variants"), cleanname(value), "name", "value")) or default
+            factors[i] = getaxisscale(segments, cur.minimum, default, cur.maximum, value)
+        end
+        return factors
+    end
+end
+
 -- MK: Added
 function fonts.definers.analyze (spec_string, size)
     return handle_request {

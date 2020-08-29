@@ -935,6 +935,52 @@ obviously, \inlinecode{random}.
   \endaltitem
 
 
+  \beginaltitem {axis\&instance}
+    Experimental!\marginpar{\mbox{}\hfill NEW in v3.15!} Support for OpenType variable fonts. \emph{Varible fonts are only
+    supported in \texttt{base} and \texttt{node} mode, not in \texttt{harf}
+    mode.}
+
+    To specify the parameters of a variable font, you can either specify a
+    predefined instance of the font by passing the associated
+    \enquote{subfamily} name to \texttt{instance} or parameters for individual
+    axis can be provided using the \texttt{axis} feature. You can \emph{not}
+    use \texttt{instance} and \texttt{axis} together.
+
+    For example (needs the variable Fraunces font installed)
+
+         \beginlisting
+           \def\fraunces#1#2{%
+             \font\varfont = "Fraunces/B:mode=node;#1;" at #2pt\varfont
+           }
+           \fraunces{axis={wght=Regular}}{10}Regular font\par
+           \fraunces{axis={wght=Black}}{10}Black variant (aka. very bold)\par
+           \fraunces{axis={wght=Black,opsz=10}}{10}Black again, but with
+           correct optical size\par
+           \fraunces{axis={weight=100,opsz=10}}{10}Let's try giving axis values
+           numerically\par
+           \fraunces{instance=semibold}{10}A semi-bold one given as
+           a instance
+           (Corresponding to
+           \verb|axis={opsz=144,wght=600,SOFT=100,WONG=1}|)\par
+         \endlisting
+
+      {\def\fraunces#1#2{%
+         \font\varfont = "Fraunces/B:mode=node;#1;" at #2pt\varfont
+       }
+       \fraunces{axis={wght=Regular}}{10}Regular font\par
+       \fraunces{axis={wght=Black}}{10}Black variant (aka. very bold)\par
+       \fraunces{axis={wght=Black,opsz=10}}{10}Black again, but with
+       correct optical size\par
+       \fraunces{axis={weight=100,opsz=10}}{10}Let's try giving axis values
+       numerically\par
+       \fraunces{instance=semibold}{10}A semi-bold one given as a
+       instance\\
+       (Corresponding to
+       \verb|axis={opsz=144,wght=600,SOFT=100,WONG=1}|)\par
+      }
+
+  \endaltitem
+
    \beginaltitem {embolden}
          A factor, defined as a decimal number.
 

@@ -494,7 +494,7 @@ do
         if values then
             for i=1, #axis do
                 local cur = axis[i]
-                factors[i] = getaxisscale(segments, cur.minimum, cur.default, cur.maximum, values[i])
+                factors[i] = getaxisscale(segments, cur.minimum, cur.default, cur.maximum, values[i].value)
             end
             return factors
         end

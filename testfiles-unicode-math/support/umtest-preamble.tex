@@ -3,7 +3,8 @@
 
 \input{regression-test.tex}
 \documentclass{article}
-\usepackage{filehook-ltx}
+\IfFileExists{filehook-ltx.sty}{
+\usepackage{filehook-ltx}}{}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage[enable-debug]{expl3}

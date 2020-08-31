@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : 2020-05-01 15:49
+-- merge date  : Mon Aug 31 23:16:26 2020
 
 do -- begin closure to overcome local limits and interference
 
@@ -98,9 +98,6 @@ function optionalrequire(...)
  if ok then
   return result
  end
-end
-if lua then
- lua.mask=load([[τεχ = 1]]) and "utf" or "ascii"
 end
 local flush=io.flush
 if flush then
@@ -397,19 +394,22 @@ function helpers.loaded(name)
  level=level+1
  for i=1,#sequence do
   local method=sequence[i]
-  if helpers.trace then
-   helpers.report("%s, level '%s', method '%s', name '%s'","locating",level,method,name)
-  end
-  local result,rest=methods[method](name)
-  if type(result)=="function" then
+  local lookup=method and methods[method]
+  if type(lookup)=="function" then
    if helpers.trace then
-    helpers.report("%s, level '%s', method '%s', name '%s'","found",level,method,name)
+    helpers.report("%s, level '%s', method '%s', name '%s'","locating",level,method,name)
    end
-   if helpers.traceused then
-    used[#used+1]={ level=level,name=name }
+   local result,rest=lookup(name)
+   if type(result)=="function" then
+    if helpers.trace then
+     helpers.report("%s, level '%s', method '%s', name '%s'","found",level,method,name)
+    end
+    if helpers.traceused then
+     used[#used+1]={ level=level,name=name }
+    end
+    level=level-1
+    return result,rest
    end
-   level=level-1
-   return result,rest
   end
  end
  level=level-1
@@ -542,11 +542,13 @@ local fullstripper=whitespace^0*C((whitespace^0*nonwhitespace^1)^0)
 local collapser=Cs(spacer^0/""*nonspacer^0*((spacer^0/" "*nonspacer^1)^0))
 local nospacer=Cs((whitespace^1/""+nonwhitespace^1)^0)
 local b_collapser=Cs(whitespace^0/""*(nonwhitespace^1+whitespace^1/" ")^0)
-local e_collapser=Cs((whitespace^1*endofstring/""+nonwhitespace^1+whitespace^1/" ")^0)
 local m_collapser=Cs((nonwhitespace^1+whitespace^1/" ")^0)
+local e_collapser=Cs((whitespace^1*endofstring/""+nonwhitespace^1+whitespace^1/" ")^0)
+local x_collapser=Cs((nonwhitespace^1+whitespace^1/"" )^0)
 local b_stripper=Cs(spacer^0/""*(nonspacer^1+spacer^1/" ")^0)
-local e_stripper=Cs((spacer^1*endofstring/""+nonspacer^1+spacer^1/" ")^0)
 local m_stripper=Cs((nonspacer^1+spacer^1/" ")^0)
+local e_stripper=Cs((spacer^1*endofstring/""+nonspacer^1+spacer^1/" ")^0)
+local x_stripper=Cs((nonspacer^1+spacer^1/"" )^0)
 patterns.stripper=stripper
 patterns.fullstripper=fullstripper
 patterns.collapser=collapser
@@ -554,9 +556,11 @@ patterns.nospacer=nospacer
 patterns.b_collapser=b_collapser
 patterns.m_collapser=m_collapser
 patterns.e_collapser=e_collapser
+patterns.x_collapser=x_collapser
 patterns.b_stripper=b_stripper
 patterns.m_stripper=m_stripper
 patterns.e_stripper=e_stripper
+patterns.x_stripper=x_stripper
 patterns.lowercase=lowercase
 patterns.uppercase=uppercase
 patterns.letter=patterns.lowercase+patterns.uppercase
@@ -3525,11 +3529,19 @@ local function isleapyear(year)
 end
 os.isleapyear=isleapyear
 local days={ 31,28,31,30,31,30,31,31,30,31,30,31 }
-local function nofdays(year,month)
+local function nofdays(year,month,day)
  if not month then
   return isleapyear(year) and 365 or 364
- else
+ elseif not day then
   return month==2 and isleapyear(year) and 29 or days[month]
+ else
+  for i=1,month-1 do
+   day=day+days[i]
+  end
+  if month>2 and isleapyear(year) then
+   day=day+1
+  end
+  return day
  end
 end
 os.nofdays=nofdays
@@ -4665,6 +4677,7 @@ do -- begin closure to overcome local limits and interference
 
 if not modules then modules={} end modules ['l-unicode']={
  version=1.001,
+ optimize=true,
  comment="companion to luat-lib.mkiv",
  author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
  copyright="PRAGMA ADE / ConTeXt Development Team",

@@ -223,21 +223,11 @@ function statistics.show()
             return format("%s, type: %s, binary subtree: %s",
                 os.platform or "unknown",os.type or "unknown", environment.texos or "unknown")
         end)
-     -- register("luatex banner", function()
-     --     return lower(status.banner)
-     -- end)
-        if LUATEXENGINE == "luametatex" then
-            register("used engine", function()
-                return format("%s version: %s, functionality level: %s, format id: %s, compiler: %s",
-                    LUATEXENGINE, LUATEXVERSION, LUATEXFUNCTIONALITY, LUATEXFORMATID, status.used_compiler)
-            end)
-        else
-            register("used engine", function()
-                return format("%s version: %s, functionality level: %s, banner: %s",
-                    LUATEXENGINE, LUATEXVERSION, LUATEXFUNCTIONALITY, lower(status.banner))
-            end)
-        end
-        register("control sequences", function()
+        register("used engine", function()
+            return format("%s version: %s, functionality level: %s, banner: %s",
+                LUATEXENGINE, LUATEXVERSION, LUATEXFUNCTIONALITY, lower(status.banner))
+        end)
+        register("used hash slots", function()
             return format("%s of %s + %s", status.cs_count, status.hash_size,status.hash_extra)
         end)
         register("callbacks", statistics.callbacks)
@@ -251,17 +241,11 @@ function statistics.show()
             end
         end
         -- so far
-     -- collectgarbage("collect")
         register("lua properties",function()
-            local hashchar = tonumber(status.luatex_hashchars)
-            local mask = lua.mask or "ascii"
+            local hash = 2^status.luatex_hashchars
+            local mask = load([[τεχ = 1]]) and "utf" or "ascii"
             return format("engine: %s %s, used memory: %s, hash chars: min(%i,40), symbol mask: %s (%s)",
-                jit and "luajit" or "lua",
-                LUAVERSION,
-                statistics.memused(),
-                hashchar and 2^hashchar or "unknown",
-                mask,
-                mask == "utf" and "τεχ" or "tex")
+                jit and "luajit" or "lua", LUAVERSION, statistics.memused(), hash, mask, mask == "utf" and "τεχ" or "tex")
         end)
         register("runtime",statistics.runtime)
         logs.newline() -- initial newline
@@ -328,3 +312,12 @@ function statistics.tracefunction(base,tag,...)
         statistics.register(formatters["%s.%s"](tag,name),function() return serialize(stat,"calls") end)
     end
 end
+
+function status.getreadstate()
+    return {
+        filename   = status.filename   or "?",
+        linenumber = status.linenumber or 0,
+        iocode     = status.inputid    or 0,
+    }
+end
+

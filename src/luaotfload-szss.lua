@@ -5,8 +5,8 @@
 
 local ProvidesLuaModule = { 
     name          = "luaotfload-szss",
-    version       = "3.15-dev",       --TAGVERSION
-    date          = "2020-08-28", --TAGDATE
+    version       = "3.15",       --TAGVERSION
+    date          = "2020-08-31", --TAGDATE
     description   = "luaotfload submodule / Special feature handling",
     license       = "GPL v2.0",
     author        = "Marcel Krüger"

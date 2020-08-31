@@ -69,12 +69,6 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
 -- l3build check settings
 
-local has_hbengine = os.execute(os.type == "unix"
-                                  and "command -v luahbtex > /dev/null"
-                                  or "where /q luahbtex") == 0 or nil
-assert(has_hbengine, "luahbtex is required for latex-dev")                                  
-
-
 checkformat   = master_branch and "latex" or "latex-dev"
 
 stdengine     = "luatex"
@@ -122,7 +116,7 @@ docfiledir    = "./doc"
 -- documentation
 -------------------
 
-typesetexe = "luahbtex --fmt=lua"..checkformat
+typesetexe = "lua"..checkformat
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}

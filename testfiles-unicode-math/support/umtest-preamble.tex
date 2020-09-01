@@ -3,8 +3,13 @@
 
 \input{regression-test.tex}
 \documentclass{article}
-\IfFileExists{filehook-ltx.sty}{
-\usepackage{filehook-ltx}}{}
+\makeatletter
+\providecommand\IfFormatAtLeastTF{\@ifl@t@r\fmtversion}
+\makeatother
+\IfFormatAtLeastTF{2020/10/01}
+ { 
+   \IfFileExists{filehook-ltx.sty}{
+     \usepackage{filehook-ltx}}{}}{}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \usepackage[enable-debug]{expl3}

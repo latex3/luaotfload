@@ -69,10 +69,17 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
 -- l3build check settings
 
-checkformat   = master_branch and "latex" or "latex-dev"
+ stdengine     = "luatex"
 
-stdengine     = "luatex"
-checkengines = {"luatex"}
+checkformat   = "latex"
+specialformats = specialformats or {}
+specialformats["latex"] = specialformats["latex"] or
+   {
+    luatexdev     = {binary="luahbtex" ,format = "lualatex-dev"},
+    luatex        = {binary="luahbtex" ,format = "lualatex"}
+   } 
+
+checkengines = {"luatex","luatexdev"}
 
 checkconfigs = {
                 "build",

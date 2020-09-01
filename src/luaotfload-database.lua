@@ -140,9 +140,11 @@ local tonumber                 = tonumber
 local unpack                   = table.unpack
 
 local fonts                    = fonts              or { }
-local fontshandlers            = fonts.handlers     or { }
+do
+    local fontshandlers        = fonts.handlers     or { }
+    fonts.handlers             = fontshandlers
+end
 local otfhandler               = fonts.handlers.otf or { }
-fonts.handlers                 = fontshandlers
 
 local gzipload                 = gzip.load
 local gzipsave                 = gzip.save
@@ -360,6 +362,7 @@ This is a sketch of the luaotfload db:
 
     type dbobj = {
         families    : familytable;
+        fontnames   : fontnametable;
         files       : filemap;
         status      : filestatus;
         mappings    : fontentry list;
@@ -379,6 +382,11 @@ This is a sketch of the luaotfload db:
     and sizes = {
         default : int;              // points into mappings or names
         optical : (int, int) list;  // design size -> index entry
+    }
+    and fontnametable = {
+        local  : (format, index) hash;
+        texmf  : (format, index) hash;
+        system : (format, index) hash;
     }
     and metadata = {
         created     : string       // creation time
@@ -1069,21 +1077,25 @@ local function lookup_familyname (specification, name, style, askedsize)
 end
 
 local function lookup_fontname (specification, name)
-    local mappings    = name_index.mappings
-    local fallback    = nil
-    local lastresort  = nil
-    for i = 1, #mappings do
-        local face = mappings [i]
-        local typographicsubfamily = face.typographicsubfamily
-        local subfamily     = face.subfamily
-        if     face.fontname   == name
-            or face.fullname   == name
-            or face.psname     == name
-        then
-            return face.fullpath, face.subfont
+    local fontnames  = name_index.fontnames
+    --- arrow code alert
+    for i = 1, #location_precedence do
+        local location = location_precedence [i]
+        local locgroup = fontnames [location]
+        for j = 1, #format_precedence do
+            local format   = format_precedence [j]
+            local fmtgroup = locgroup [format]
+            if fmtgroup then
+                local index = fmtgroup [name]
+                if index then
+                    local success, resolved, subfont = get_font_file (index)
+                    if success then
+                        return resolved, subfont
+                    end
+                end
+            end
         end
     end
-    return nil, nil
 end
 
 local design_size_dimension  --- scale asked size if not using bp
@@ -2935,6 +2947,29 @@ local function collect_families (mappings)
     return families
 end
 
+local function collect_fontnames (mappings)
+
+    logreport ("info", 2, "db", "Collecting fontnames.")
+
+    local fontnames = {
+        ["local"]  = { },
+        system     = { },
+        texmf      = { },
+    }
+
+    for i = 1, #mappings do
+        local entry = mappings [i]
+
+        local subtable          = get_subtable (fontnames, entry)
+        if entry.fontname then subtable[entry.fontname] = i end
+        if entry.fullname then subtable[entry.fullname] = i end
+        if entry.psname then subtable[entry.psname] = i end
+    end
+
+    collectgarbage "collect"
+    return fontnames
+end
+
 --[[doc--
 
     group_modifiers -- For not-quite-bold faces, determine whether
@@ -3442,14 +3477,16 @@ function update_names (currentnames, force, dry_run)
     targetnames.files       = generate_filedata (targetnames.mappings)
 
     --- pass 5: build family lookup table
-    targetnames.families    = collect_families  (targetnames.mappings)
+    targetnames.families    = collect_families (targetnames.mappings)
 
     --- pass 6: arrange style and size info
     targetnames.families    = group_modifiers (targetnames.mappings,
                                                targetnames.families)
-
     --- pass 7: order design size tables
     targetnames.families    = order_design_sizes (targetnames.families)
+
+    --- pass 8: build family lookup table
+    targetnames.fontnames   = collect_fontnames (targetnames.mappings)
 
     logreport ("info", 3, "db",
                "Rebuilt in %0.f ms.",
@@ -3795,7 +3832,7 @@ return function ()
     names.blacklist = blacklist
     -- MK Changed to rebuild with case insensitive fallback.
     --    Negative version to indicate generation by modified code.
-    names.version   = -1       --- decrease monotonically
+    names.version   = -2       --- decrease monotonically
     -- /MK
     names.data      = nil      --- contains the loaded database
     names.lookups   = nil      --- contains the lookup cache

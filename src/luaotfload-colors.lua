@@ -6,7 +6,7 @@
 local ProvidesLuaModule = { 
     name          = "luaotfload-colors",
     version       = "3.15",       --TAGVERSION
-    date          = "2020-08-31", --TAGDATE
+    date          = "2020-09-02", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
     author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim, David Carlisle",

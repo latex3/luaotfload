@@ -245,7 +245,7 @@ local git_info = function ()
       die "cannot parse git information"
     end
     data = data ()
-    data.description = "v3.15/2020-08-31"
+    data.description = "v3.15/2020-09-02"
     return data
   end
   die "cannot read from pipe"

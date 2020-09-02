@@ -6,7 +6,7 @@
 local ProvidesLuaModule = { 
     name          = "luaotfload-letterspace",
     version       = "3.15",       --TAGVERSION
-    date          = "2020-08-31", --TAGDATE
+    date          = "2020-09-02", --TAGDATE
     description   = "luaotfload submodule / letterspacing",
     license       = "GPL v2.0",
     copyright     = "PRAGMA ADE / ConTeXt Development Team",

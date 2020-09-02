@@ -1,4 +1,4 @@
-2020-08-31 luaotfload v3.14
+2020-09-02 luaotfload v3.15
     * The font database is updated more reliably if fonts get deleted.
     * In multiple error cases, error messages are shown instead of silently
       generating bad output.

@@ -2,7 +2,7 @@
 packageversion= "3.15"
 packagedate   = "2020-09-02"
 fontloaderdate= "2020-08-31"
-packagedesc   = "new-fontloader"
+packagedesc   = "release"
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"

@@ -53,7 +53,7 @@ return {
   { "fontloader-font-ini.lua", "5343de60613adb24cdd7a8d2ee1d153c" },
   { "fontloader-data-con.lua", "23a0f5386d46a1c157ae82a373e35fa0" },
   { "fontloader-reference.lua", "c10086745bc0b8b2303572fdea86d61c" },
-  { "fontloader-basics-gen.lua", "e470c13b1ed41e38932e93518219ad74" },
+  { "fontloader-basics-gen.lua", "4bc43036e9796fccb0b8869f4b05bf2e" },
   { "mktests", "918cb50be9ee8bd645ac1a27dc501e8c" },
   { "mkstatus", "49692433db8a578cf3a03fbedfb2ea9c" },
   { "mkcharacters", "bfca0e96e1e351afe7077502f9595af9" },
@@ -91,7 +91,7 @@ return {
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",
   ["description"]="v3.15/2020-09-02",
   ["loader"]="fontloader-2020-08-31.lua",
-  ["revision"]="0590cad0b35728dd498707d540c4fcc3e7cd3320",
-  ["timestamp"]="2020-09-02 17:09:15 +0200",
+  ["revision"]="77eede02640bef0cb596d24aa79661328a68b448",
+  ["timestamp"]="2020-09-02 21:02:40 +0200",
  },
 }

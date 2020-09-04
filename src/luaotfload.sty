@@ -43,7 +43,7 @@
 \fi
 \directlua{
   if xpcall(function ()%
-             require('luaotfload-main')%
+             require('luaotfload')%
             end,texio.write_nl) then %
   local _void = luaotfload.main ()%
   else %

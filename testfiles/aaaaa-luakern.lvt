@@ -15,7 +15,7 @@ abc
 
 texio.write_nl(luaotfload.version .. " with " .. string.gsub(tostring(config.luaotfload.run.fontloader),"[%-]","xxx"))
 
--- t = {kpse.lookup("luaotfload-main.lua",{["all"]=true})}
+-- t = {kpse.lookup("luaotfload.lua",{["all"]=true})}
 --
 -- texio.write_nl(table.serialize(t))
 --

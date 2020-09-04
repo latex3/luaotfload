@@ -85,7 +85,7 @@ return {
   { "luaotfload-diagnostics.lua", "797176921da30591e6112831ed7459a7" },
   { "luaotfload-log.lua", "932117045a6abfe303314a295c24d338" },
   { "luaotfload-init.lua", "eb1bfca3833688aba31521032ed38883" },
-  { "luaotfload-main.lua", "133ee97a73e07f3116d0417c9373398b" },
+  { "luaotfload.lua", "133ee97a73e07f3116d0417c9373398b" },
  },
  ["notes"]={
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",

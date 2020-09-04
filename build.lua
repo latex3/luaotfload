@@ -165,7 +165,7 @@ typesetdemofiles  =
   sourcefiles  =
   {
     "luaotfload.sty",
-    "**/luaotfload-*.lua",
+    "**/luaotfload*.lua",
     "**/fontloader-*.lua",
     "**/fontloader-*.tex",
     "luaotfload-blacklist.cnf",
@@ -175,7 +175,7 @@ typesetdemofiles  =
    installfiles = {
      "luaotfload.sty",
      "luaotfload-blacklist.cnf",
-     "**/luaotfload-*.lua",
+     "**/luaotfload*.lua",
      "**/fontloader-*.lua",
      "**/fontloader-*.tex",
                 }
@@ -197,7 +197,7 @@ tagfiles = {
             "doc/CTANREADME.md",
             "README.md",
             "src/luaotfload.sty",
-            "src/luaotfload-*.lua",
+            "src/luaotfload*.lua",
             "src/auto/luaotfload-glyphlist.lua",
             "src/auto/luaotfload-status.lua",
             "doc/luaotfload-main.tex",

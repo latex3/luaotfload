@@ -111,7 +111,7 @@ local oldnames = {
   { srcdir,       "luaotfload-letterspace.lua",     },
   { srcdir,       "luaotfload-loaders.lua",         },
   { srcdir,       "luaotfload-log.lua",             },
-  { srcdir,       "luaotfload-main.lua",            },
+  { srcdir,       "luaotfload.lua",                 },
   { srcdir,       "luaotfload-parsers.lua",         },
   { srcdir,       "luaotfload-resolvers.lua",       },
   { srcdir,       "luaotfload-tool.lua",            },

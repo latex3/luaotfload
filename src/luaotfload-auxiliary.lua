@@ -4,18 +4,13 @@
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 -----------------------------------------------------------------------
 
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-auxiliary",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
     description   = "luaotfload submodule / auxiliary functions",
     license       = "GPL v2.0"
 }
-
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
-
 
 luaotfload                  = luaotfload or { }
 local log                   = luaotfload.log

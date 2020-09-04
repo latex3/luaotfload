@@ -3,7 +3,7 @@
 --  DESCRIPTION:  part of luaotfload / letterspacing
 -----------------------------------------------------------------------
 
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-letterspace",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
@@ -12,10 +12,6 @@ local ProvidesLuaModule = {
     copyright     = "PRAGMA ADE / ConTeXt Development Team",
     author        = "Hans Hagen, PRAGMA-ADE, Hasselt NL; adapted by Philipp Gesang, Ulrike Fischer, Marcel Krüger"
 }
-
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
 
 --- This code diverged quite a bit from its origin in Context. Please
 --- do *not* report bugs on the Context list.

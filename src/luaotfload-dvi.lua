@@ -4,7 +4,7 @@
 -------------------------------------------------------------------------------
 
 
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-dvi",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
@@ -13,10 +13,6 @@ local ProvidesLuaModule = {
     author        = "Marcel Krüger",
     copyright     = "Luaotfload Development Team",  
 }
-
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
 
 local getfont = font.getfont
 local setfont = node.direct.setfont

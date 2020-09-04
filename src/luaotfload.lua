@@ -22,15 +22,26 @@ local ProvidesLuaModule = {
     name          = "luaotfload",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
-    description   = "luaotfload entry point",
+    description   = "Lua based OpenType font support",
     author        = authors,
     copyright     = authors,
     license       = "GPL v2.0"
 }
 
 if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
+    luatexbase.provides_module (ProvidesLuaModule)
 end  
+
+if luaotfload_module == nil then
+    local saved_version = ProvidesLuaModule.version
+    function luaotfload_module(module)
+        if luatexbase and luatexbase.provides_module then
+            luatexbase.provides_module (module)
+        end  
+    end
+else
+    error[[luaotfload is reloading itself nested. This can't happen.]]
+end
 
 local osgettimeofday              = os.gettimeofday
 config                            = config     or { }
@@ -336,6 +347,7 @@ luaotfload.main = function ()
                "initialization completed in %0.3f seconds\n",
                osgettimeofday() - starttime)
 ----inspect (timing_info)
+    luaotfload_module = nil
 end
 
 -- vim:tw=79:sw=4:ts=4:et

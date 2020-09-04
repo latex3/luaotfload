@@ -5,18 +5,13 @@
 --       AUTHOR:  Philipp Gesang (Phg), <phg@phi-gamma.net>, Marcel Krüger
 -------------------------------------------------------------------------------
 
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-parsers",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
     description   = "luaotfload submodule / parsers",
     license       = "GPL v2.0"
 }
-
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
-
 
 local traversal_maxdepth  = 42 --- prevent stack overflows
 

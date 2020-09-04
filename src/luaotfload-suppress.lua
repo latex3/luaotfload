@@ -3,7 +3,7 @@
 --  DESCRIPTION:  part of luaotfload / suppress
 -----------------------------------------------------------------------
 
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-suppress",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
@@ -11,10 +11,6 @@ local ProvidesLuaModule = {
     license       = "GPL v2.0",
     author        = "Marcel Krüger"
 }
-
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
 
 local direct       = node.direct
 local otfregister  = fonts.constructors.features.otf.register

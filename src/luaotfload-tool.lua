@@ -15,9 +15,7 @@ local ProvidesLuaModule = {
     license       = "GPL v2.0"
 }
 
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
+function luaotfload_module(module) end -- We don't log module loading here
 
 
 luaotfload                     = luaotfload or { }

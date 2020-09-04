@@ -3,7 +3,7 @@
 --  DESCRIPTION:  part of luaotfload / font features
 -----------------------------------------------------------------------
 
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-features",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
@@ -12,11 +12,6 @@ local ProvidesLuaModule = {
     author        = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
     copyright     = "PRAGMA ADE / ConTeXt Development Team",
 }
-
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
-
 
 local type              = type
 local next              = next

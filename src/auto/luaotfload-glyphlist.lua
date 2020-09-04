@@ -1,4 +1,4 @@
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-glyphlist",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE

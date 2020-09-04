@@ -5,18 +5,13 @@
 --       AUTHOR:  Philipp Gesang <phg@phi-gamma.net>
 -----------------------------------------------------------------------
 
-local ProvidesLuaModule = { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-diagnostics",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
     description   = "luaotfload-tool submodule / diagnostics",
     license       = "GPL v2.0"
 }
-
-if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
-end  
-
 
 local names                    = fonts.names
 

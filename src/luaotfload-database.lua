@@ -3,7 +3,7 @@
 --  DESCRIPTION:  part of luaotfload / luaotfload-tool / font database
 -----------------------------------------------------------------------
 do -- block to avoid to many local variables error
- local ProvidesLuaModule = { 
+ assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-database",
      version       = "3.16-dev",       --TAGVERSION
      date          = "2020-09-03", --TAGDATE
@@ -12,10 +12,6 @@ do -- block to avoid to many local variables error
      author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
      copyright     = "Luaotfload Development Team",     
  }
-
- if luatexbase and luatexbase.provides_module then
-  luatexbase.provides_module (ProvidesLuaModule)
- end  
 end
 
 --[[doc--

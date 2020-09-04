@@ -6,9 +6,9 @@
                      Luaotfload configuration file
 -----------------------------------------------------------------------
 
-:Date:                  2020-08-28
+:Date:                  2020-09-03
 :Copyright:             GPL v2.0
-:Version:               3.15-dev
+:Version:               3.16-dev
 :Manual section:        5
 :Manual group:          text processing
 

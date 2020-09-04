@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : 2020-05-01 15:49
+-- merge date  : Mon Aug 31 23:16:16 2020
 
 do -- begin closure to overcome local limits and interference
 
@@ -658,33 +658,36 @@ local format_extension=function(extensions,f,name)
  local extension=extensions[name] or "tostring(%s)"
  local f=tonumber(f) or 1
  local w=find(extension,"%.%.%.")
- if w then
-  if f==0 then
+ if f==0 then
+  if w then
+   extension=gsub(extension,"%.%.%.","")
+  end
+  return extension
+ elseif f==1 then
+  if w then
+   extension=gsub(extension,"%.%.%.","%%s")
+  end
+  n=n+1
+  local a="a"..n
+  return format(extension,a,a) 
+ elseif f<0 then
+  if w then
    extension=gsub(extension,"%.%.%.","")
    return extension
-  elseif f==1 then
-   extension=gsub(extension,"%.%.%.","%%s")
-   n=n+1
-   local a="a"..n
-   return format(extension,a,a) 
-  elseif f<0 then
+  else
    local a="a"..(n+f+1)
    return format(extension,a,a)
-  else
-   extension=gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
-   local t={}
-   for i=1,f do
-    n=n+1
-    t[i]="a"..n
-   end
-   return format(extension,unpack(t))
   end
  else
-  extension=gsub(extension,"%%s",function()
+  if w then
+   extension=gsub(extension,"%.%.%.",rep("%%s,",f-1).."%%s")
+  end
+  local t={}
+  for i=1,f do
    n=n+1
-   return "a"..n
-  end)
-  return extension
+   t[i]="a"..n
+  end
+  return format(extension,unpack(t))
  end
 end
 local builder=Cs { "start",
@@ -2096,7 +2099,7 @@ local lpeg,table,string=lpeg,table,string
 local P,R,V,S,C,Ct,Cs,Carg,Cc,Cg,Cf,Cp=lpeg.P,lpeg.R,lpeg.V,lpeg.S,lpeg.C,lpeg.Ct,lpeg.Cs,lpeg.Carg,lpeg.Cc,lpeg.Cg,lpeg.Cf,lpeg.Cp
 local lpegmatch,lpegpatterns=lpeg.match,lpeg.patterns
 local concat,gmatch,find=table.concat,string.gmatch,string.find
-local tostring,type,next,rawset=tostring,type,next,rawset
+local tonumber,tostring,type,next,rawset=tonumber,tostring,type,next,rawset
 local mod,div=math.mod,math.div
 utilities=utilities or {}
 local parsers=utilities.parsers or {}
@@ -2488,13 +2491,15 @@ function parsers.csvsplitter(specification)
  specification=specification and setmetatableindex(specification,defaultspecification) or defaultspecification
  local separator=specification.separator
  local quotechar=specification.quote
+ local numbers=specification.numbers
  local separator=S(separator~="" and separator or ",")
  local whatever=C((1-separator-newline)^0)
  if quotechar and quotechar~="" then
   local quotedata=nil
   for chr in gmatch(quotechar,".") do
    local quotechar=P(chr)
-   local quoteword=quotechar*C((1-quotechar)^0)*quotechar
+   local quoteitem=(1-quotechar)^0
+   local quoteword=quotechar*(numbers and (quoteitem/tonumber) or C(quoteitem))*quotechar
    if quotedata then
     quotedata=quotedata+quoteword
    else
@@ -2510,12 +2515,14 @@ function parsers.csvsplitter(specification)
 end
 function parsers.rfc4180splitter(specification)
  specification=specification and setmetatableindex(specification,defaultspecification) or defaultspecification
+ local numbers=specification.numbers
  local separator=specification.separator 
  local quotechar=P(specification.quote)  
  local dquotechar=quotechar*quotechar   
 /specification.quote
  local separator=S(separator~="" and separator or ",")
- local escaped=quotechar*Cs((dquotechar+(1-quotechar))^0)*quotechar
+ local whatever=(dquotechar+(1-quotechar))^0
+ local escaped=quotechar*(numbers and (whatever/tonumber) or Cs(whatever))*quotechar
  local non_escaped=C((1-quotechar-newline-separator)^1)
  local field=escaped+non_escaped+Cc("")
  local record=Ct(field*(separator*field)^1)
@@ -3389,18 +3396,11 @@ function statistics.show()
    return format("%s, type: %s, binary subtree: %s",
     os.platform or "unknown",os.type or "unknown",environment.texos or "unknown")
   end)
-  if LUATEXENGINE=="luametatex" then
-   register("used engine",function()
-    return format("%s version: %s, functionality level: %s, format id: %s, compiler: %s",
-     LUATEXENGINE,LUATEXVERSION,LUATEXFUNCTIONALITY,LUATEXFORMATID,status.used_compiler)
-   end)
-  else
-   register("used engine",function()
-    return format("%s version: %s, functionality level: %s, banner: %s",
-     LUATEXENGINE,LUATEXVERSION,LUATEXFUNCTIONALITY,lower(status.banner))
-   end)
-  end
-  register("control sequences",function()
+  register("used engine",function()
+   return format("%s version: %s, functionality level: %s, banner: %s",
+    LUATEXENGINE,LUATEXVERSION,LUATEXFUNCTIONALITY,lower(status.banner))
+  end)
+  register("used hash slots",function()
    return format("%s of %s + %s",status.cs_count,status.hash_size,status.hash_extra)
   end)
   register("callbacks",statistics.callbacks)
@@ -3414,15 +3414,10 @@ function statistics.show()
    end
   end
   register("lua properties",function()
-   local hashchar=tonumber(status.luatex_hashchars)
-   local mask=lua.mask or "ascii"
+   local hash=2^status.luatex_hashchars
+   local mask=load([[τεχ = 1]]) and "utf" or "ascii"
    return format("engine: %s %s, used memory: %s, hash chars: min(%i,40), symbol mask: %s (%s)",
-    jit and "luajit" or "lua",
-    LUAVERSION,
-    statistics.memused(),
-    hashchar and 2^hashchar or "unknown",
-    mask,
-    mask=="utf" and "τεχ" or "tex")
+    jit and "luajit" or "lua",LUAVERSION,statistics.memused(),hash,mask,mask=="utf" and "τεχ" or "tex")
   end)
   register("runtime",statistics.runtime)
   logs.newline() 
@@ -3477,6 +3472,13 @@ function statistics.tracefunction(base,tag,...)
   base[name]=function(n,k,v) stat[k]=stat[k]+1 return func(n,k,v) end
   statistics.register(formatters["%s.%s"](tag,name),function() return serialize(stat,"calls") end)
  end
+end
+function status.getreadstate()
+ return {
+  filename=status.filename   or "?",
+  linenumber=status.linenumber or 0,
+  iocode=status.inputid or 0,
+ }
 end
 
 end -- closure

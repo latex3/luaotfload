@@ -961,3 +961,12 @@ function table.ordered(t)
         return function() end
     end
 end
+
+-- function table.randomremove(t,n)
+--     if not n then
+--         n = #t
+--     end
+--     if n > 0 then
+--         return remove(t,random(1,n))
+--     end
+-- end

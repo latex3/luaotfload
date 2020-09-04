@@ -1,8 +1,8 @@
 
-packageversion= "3.15-dev"
-packagedate   = "2020-08-28"
-fontloaderdate= "2020-08-28"
-packagedesc   = "new-fontloader"
+packageversion= "3.16-dev"
+packagedate   = "2020-09-03"
+fontloaderdate= "2020-08-31"
+packagedesc   = ""
 
 module   = "luaotfload"
 ctanpkg  = "luaotfload"
@@ -69,16 +69,17 @@ local ismiktex = string.match (luatexstatus.banner,"MiKTeX")
 
 -- l3build check settings
 
-local has_hbengine = os.execute(os.type == "unix"
-                                  and "command -v luahbtex > /dev/null"
-                                  or "where /q luahbtex") == 0 or nil
-assert(has_hbengine, "luahbtex is required for latex-dev")                                  
+ stdengine     = "luatex"
 
+checkformat   = "latex"
+specialformats = specialformats or {}
+specialformats["latex"] = specialformats["latex"] or
+   {
+    luatexdev     = {binary="luahbtex" ,format = "lualatex-dev"},
+    luatex        = {binary="luahbtex" ,format = "lualatex"}
+   } 
 
-checkformat   = master_branch and "latex" or "latex-dev"
-
-stdengine     = "luatex"
-checkengines = {"luatex"}
+checkengines = {"luatex","luatexdev"}
 
 checkconfigs = {
                 "build",
@@ -122,7 +123,7 @@ docfiledir    = "./doc"
 -- documentation
 -------------------
 
-typesetexe = "luahbtex --fmt=lua"..checkformat
+typesetexe = "lua"..checkformat
 
 -- main docu
 typesetfiles      = {"luaotfload-latex.tex"}

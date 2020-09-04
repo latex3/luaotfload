@@ -54,7 +54,7 @@ local function lualibfile(name)
     return lpegmatch(pattern,name) or name
 end
 
-local offset = luarocks and 1 or 0 -- todo: also check other extras
+local offset = luarocks and 1 or 0 -- todo: also check other extras ... we'll drop this luarocks anyway
 
 local helpers = package.helpers or {
     cleanpath  = cleanpath,
@@ -346,19 +346,22 @@ function helpers.loaded(name)
     level = level + 1
     for i=1,#sequence do
         local method = sequence[i]
-        if helpers.trace then
-            helpers.report("%s, level '%s', method '%s', name '%s'","locating",level,method,name)
-        end
-        local result, rest = methods[method](name)
-        if type(result) == "function" then
+        local lookup = method and methods[method]
+        if type(lookup) == "function" then
             if helpers.trace then
-                helpers.report("%s, level '%s', method '%s', name '%s'","found",level,method,name)
+                helpers.report("%s, level '%s', method '%s', name '%s'","locating",level,method,name)
             end
-            if helpers.traceused then
-                used[#used+1] = { level = level, name = name }
+            local result, rest = lookup(name)
+            if type(result) == "function" then
+                if helpers.trace then
+                    helpers.report("%s, level '%s', method '%s', name '%s'","found",level,method,name)
+                end
+                if helpers.traceused then
+                    used[#used+1] = { level = level, name = name }
+                end
+                level = level - 1
+                return result, rest
             end
-            level = level - 1
-            return result, rest
         end
     end
     -- safeguard, we never come here

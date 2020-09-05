@@ -37,23 +37,28 @@ if luaotfload_module == nil then
         return texio.write_nl("%s WARNING: %s", module, text)
     end
     local saved_version = ProvidesLuaModule.version
-    function luaotfload_module(module)
-        local module_version = module.version
-        if module_version ~= saved_version then
-            local filenames
-            if debug then
-                filenames = string.format("luaotfload.lua is found at\n%q\n%s.lua is found at\n%q\n",
-                    debug.getinfo(1, "S").source:sub(2),
-                    module.name,
-                    debug.getinfo(2, "S").source:sub(2))
-            else
-                filenames = ""
-            end
-            print_warning("luaotfload", string.format("Version inconsistency detected.\n\z
-                    luaotfload is loaded in version %s, while %q is loaded \z
-                    in version %s.\n%sI will try to continue anyway.\nHIC SUNT DRACONES",
-                    saved_version, module.name, module_version, filenames))
-       end
+    local trace_submodules = tonumber(os.getenv'LUAOTFLOAD_TRACE_SUBMODULES')
+    if luatexbase and luatexbase.provides_module and trace_submodules and trace_submodules ~= 0 then
+        luaotfload_module = luatexbase.provides_module
+    else
+        function luaotfload_module(module)
+            local module_version = module.version
+            if module_version ~= saved_version then
+                local filenames
+                if debug then
+                    filenames = string.format("luaotfload.lua is found at\n%q\n%s.lua is found at\n%q\n",
+                        debug.getinfo(1, "S").source:sub(2),
+                        module.name,
+                        debug.getinfo(2, "S").source:sub(2))
+                else
+                    filenames = ""
+                end
+                print_warning("luaotfload", string.format("Version inconsistency detected.\n\z
+                        luaotfload is loaded in version %s, while %q is loaded \z
+                        in version %s.\n%sI will try to continue anyway.\nHIC SUNT DRACONES",
+                        saved_version, module.name, module_version, filenames))
+           end
+        end
     end
 else
     error[[luaotfload is reloading itself nested. This can't happen.]]

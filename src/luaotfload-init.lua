@@ -295,7 +295,6 @@ local function init_main(early_hook)
     local saved_exit = os.exit
     local errmsg
     function texio.reporter(msg, ...)
-      print(...)
       errmsg = msg
     end
     function os.exit()

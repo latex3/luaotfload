@@ -4,13 +4,13 @@
 --       AUTHOR:  Ulrike Fischer, <fischer@troubleshooting-tex.de>
 -----------------------------------------------------------------------
 
-assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
+if luaotfload_module then luaotfload_module {
     name          = "luaotfload-filelist",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
     description   = "luaotfload submodule / filelist",
     license       = "GPL v2.0"
-}
+} end
 
 --[[doc-- 
 

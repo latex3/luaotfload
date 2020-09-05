@@ -1,4 +1,5 @@
-assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
+if luaotfload_module then
+  luaotfload_module {
     name          = "luaotfload-glyphlist",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
@@ -6,7 +7,8 @@ assert(luaotfload_module, "This is a part of luaotfload and should not be loaded
     copyright   = "derived from https://raw.githubusercontent.com/adobe-type-tools/agl-aglfn/master/glyphlist.txt",
     original    = "Adobe Glyph List, version 2.0, September 20, 2002",
     dataonly    = true
-}
+  }
+end
 
 if context then
   logs.report("fatal error","this module is not for context")

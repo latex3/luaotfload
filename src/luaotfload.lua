@@ -42,7 +42,7 @@ if luaotfload_module == nil then
         if module_version ~= saved_version then
             local filenames
             if debug then
-                filenames = string.format("luaotfload.lua is found at %q\n%s.lua is found at %q\n",
+                filenames = string.format("luaotfload.lua is found at\n%q\n%s.lua is found at\n%q\n",
                     debug.getinfo(1, "S").source:sub(2),
                     module.name,
                     debug.getinfo(2, "S").source:sub(2))

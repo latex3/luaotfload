@@ -2331,8 +2331,7 @@ local path_separator = os.type == "windows" and ";" or ":"
 --[[doc--
 
     collect_font_filenames_texmf -- Scan texmf tree for font files
-    relying on the kpathsea variables $OPENTYPEFONTS and $TTFONTS of
-    texmf.cnf.
+    relying on kpathsea search paths for the respective file types.
     The current working directory comes as “.” (texlive) or absolute
     path (miktex) and will always be filtered out.
 
@@ -2358,16 +2357,19 @@ local function collect_font_filenames_texmf ()
         end
     end
 
-    fontdirs = kpseexpand_path "$OPENTYPEFONTS"
-    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$TTFONTS"
-    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$T1FONTS"
-    fontdirs = fontdirs .. path_separator .. kpseexpand_path "$AFMFONTS"
+    local kpseshow_expanded_path = function (file_type) return kpse.expand_path (kpse.show_path (file_type)) end
 
-    if stringis_empty (fontdirs) then
+    fontdirs = kpseshow_expanded_path "opentype fonts"
+    fontdirs = fontdirs .. path_separator .. kpseshow_expanded_path "truetype fonts"
+    fontdirs = fontdirs .. path_separator .. kpseshow_expanded_path "type1 fonts"
+    fontdirs = fontdirs .. path_separator .. kpseshow_expanded_path "afm"
+
+    fontdirs  = filesplitpath (fontdirs)
+    if not fontdirs then
         return { }
     end
 
-    local tasks = filter_out_pwd (filesplitpath (fontdirs))
+    local tasks = filter_out_pwd (fontdirs)
     logreport ("both", 3, "db",
                "Initiating scan of %d directories.", #tasks)
 

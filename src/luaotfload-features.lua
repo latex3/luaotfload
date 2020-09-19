@@ -40,12 +40,18 @@ local otf               = handlers.otf
 
 local config            = config or { luaotfload = { run = { } } }
 
-local as_script         = true
-local normalize         = function () end
+local as_script         = config.luaotfload.run.live
+local normalize
 
-if config.luaotfload.run.live ~= false then
+if as_script then
+    function normalize(features)
+        return {
+            axis = features and features.axis,
+            instance = features and features.instance,
+        }
+    end
+else
     normalize = otf.features.normalize
-    as_script = false
 end
 
 --[[HH (font-xtx) --

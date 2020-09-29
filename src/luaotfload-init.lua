@@ -402,6 +402,11 @@ local function init_main(early_hook)
   -- fontloader
 end --- [init_main]
 
+if not luatexbase.callbacktypes.pre_shaping_filter then
+  luatexbase.create_callback('pre_shaping_filter', 'list')
+  luatexbase.create_callback('post_shaping_filter', 'reverselist')
+end
+
 local init_post_install_callbacks = function ()
   --[[doc--
 
@@ -418,17 +423,42 @@ local init_post_install_callbacks = function ()
   local fallback = luaotfload.loaders.luaotfload "fallback".process
   local multiscript = luaotfload.loaders.luaotfload "multiscript".process
 
-  -- MK Pass current text direction to simple_font_handler
+  local call_callback = luatexbase.call_callback
+  local tex_get = tex.get
+  local flush_list = node.flush_list
   local handler = luaotfload.fontloader.nodes.simple_font_handler
-  local callback = function(head, groupcode, _, _, direction)
+  local function callback(head, groupcode, _, _, direction)
     if not direction then
-      direction = tex.get'textdirection'
+      direction = tex_get'textdirection'
     else
       direction = direction == "TRT" and 1 or 0
     end
+    local result = call_callback("pre_shaping_filter", head, groupcode, direction)
+    if result == false then
+      return false
+    elseif result ~= true then
+      head = result
+    end
     multiscript(head, nil, nil, nil, direction)
     fallback(head, nil, nil, nil, direction)
-    return handler(head, groupcode, nil, nil, direction)
+    result = handler(head, groupcode, nil, nil, direction)
+    -- handler never returns a boolean and only returns nil if it was passed in
+    -- We keep it general though for consistency
+    if result == false then
+      flush_list(head)
+      return nil
+    elseif result ~= true then
+      head = result
+    end
+    result = call_callback("post_shaping_filter", head, groupcode, direction)
+    if result == false then
+      flush_list(head)
+      return nil
+    elseif result == true then
+      return head
+    else
+      return result
+    end
   end
   luatexbase.add_to_callback("pre_linebreak_filter",
                              callback,
@@ -438,7 +468,6 @@ local init_post_install_callbacks = function ()
                              callback,
                              "luaotfload.node_processor",
                              1)
-  -- /MK
 
   local streams = fonts.hashes.streams
   luatexbase.add_to_callback("glyph_stream_provider",function(id,index,mode)

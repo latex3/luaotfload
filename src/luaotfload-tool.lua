@@ -68,7 +68,7 @@ do
     local revn     = tonumber (status.luatex_revision) or 0 --[[ : string ]]
 
     if status.luatex_version < minimum[1]
-       or status.luatex_version == minimum[1] and status.luatex_revision < minimum[2] then
+       or status.luatex_version == minimum[1] and tonumber(status.luatex_revision) < minimum[2] then
         texio.write_nl ("term and log",
                         string.format ("\tFATAL ERROR\n\z
                                         \tLuaotfload requires a Luatex version >= %d.%d.%d.\n\z

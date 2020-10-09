@@ -2357,17 +2357,18 @@ local function collect_font_filenames_texmf ()
         end
     end
 
-    local kpseshow_expanded_path = function (file_type) return kpse.expand_path (kpse.show_path (file_type)) end
+    local show_path = kpse.show_path
 
-    fontdirs = kpseshow_expanded_path "opentype fonts"
-    fontdirs = fontdirs .. path_separator .. kpseshow_expanded_path "truetype fonts"
-    fontdirs = fontdirs .. path_separator .. kpseshow_expanded_path "type1 fonts"
-    fontdirs = fontdirs .. path_separator .. kpseshow_expanded_path "afm"
-
-    fontdirs  = filesplitpath (fontdirs)
-    if not fontdirs then
-        return { }
+    local function expanded_path (file_type)
+        return kpseexpand_path (show_path (file_type))
     end
+
+    local fontdirs = expanded_path "opentype fonts"
+    fontdirs = fontdirs .. path_separator .. expanded_path "truetype fonts"
+    fontdirs = fontdirs .. path_separator .. expanded_path "type1 fonts"
+    fontdirs = fontdirs .. path_separator .. expanded_path "afm"
+
+    fontdirs = filesplitpath (fontdirs) or { }
 
     local tasks = filter_out_pwd (fontdirs)
     logreport ("both", 3, "db",

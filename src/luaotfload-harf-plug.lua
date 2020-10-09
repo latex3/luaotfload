@@ -943,8 +943,8 @@ local function post_process(head)
 
     local startactual, endactual
     if props then
-      startactual = rawget(props, startactual_p)
-      endactual = rawget(props, endactual_p)
+      startactual = props[startactual_p]
+      endactual = props[endactual_p]
     end
 
     if startactual then

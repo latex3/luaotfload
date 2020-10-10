@@ -32,6 +32,7 @@ local direct            = node.direct
 local tonode            = direct.tonode
 local todirect          = direct.todirect
 local traverse          = direct.traverse
+local traverse_list     = direct.traverse_list
 local insertbefore      = direct.insert_before
 local insertafter       = direct.insert_after
 local protectglyph      = direct.protect_glyph
@@ -74,6 +75,7 @@ local getsubtype        = direct.getsubtype
 local setsubtype        = direct.setsubtype
 local getwidth          = direct.getwidth
 local setwidth          = direct.setwidth
+local setlist           = direct.setlist
 local is_char           = direct.is_char
 local tail              = direct.tail
 
@@ -81,6 +83,7 @@ local properties        = direct.get_properties_table()
 
 local imgnode           = img.node
 
+local hlist_t           = node.id("hlist")
 local disc_t            = node.id("disc")
 local glue_t            = node.id("glue")
 local glyph_t           = node.id("glyph")
@@ -90,6 +93,7 @@ local localpar_t        = node.id("local_par")
 local whatsit_t         = node.id("whatsit")
 local pdfliteral_t      = node.subtype("pdf_literal")
 
+local line_t            = 1
 local explicitdisc_t    = 1
 local fontkern_t        = 0
 local italiccorr_t      = 3
@@ -176,7 +180,7 @@ local function itemize(head, fontid, direction)
   local lastskip, lastdir = true
   local lastrun = {}
 
-  for n, id, subtype in direct.traverse(head) do
+  for n, id, subtype in traverse(head) do
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
     local skip = lastskip
     local props = properties[n]
@@ -950,27 +954,37 @@ local function post_process(head)
     if startactual then
       local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
       head = insertbefore(head, n, pageliteral(actualtext))
+      props[startactual_p] = nil
     end
 
     if endactual then
       head = insertafter(head, n, pageliteral("EMC"))
+      props[endactual_p] = nil
     end
 
     local replace = getfield(n, "replace")
     if replace then
       setfield(n, "replace", post_process(replace))
     end
-
-    local subhead = getfield(n, "head")
-    if subhead then
-      setfield(n, "head", post_process(subhead))
-    end
   end
   return head
 end
 
-local function post_process_nodes(head, groupcode)
+local function post_process_vlist(head)
+  for n, id, subtype, list in traverse_list(head) do
+    if id == hlist_t and subtype == line_t then
+      setlist(n, post_process(list))
+    end
+  end
+  return true
+end
+
+local function post_process_nodes(head)
   return tonode(post_process(todirect(head)))
+end
+
+local function post_process_vlist_nodes(head)
+  return tonode(post_process_vlist(todirect(head)))
 end
 
 local function run_cleanup()
@@ -1050,7 +1064,8 @@ local function add_to_callback(name, func)
   end
 end
 
-add_to_callback('pre_output_filter', post_process_nodes) -- FIXME: Wrong callback, but I want to get rid of the whole function anyway
+add_to_callback('post_linebreak_filter', post_process_vlist_nodes)
+add_to_callback('hpack_filter', post_process_nodes)
 add_to_callback('wrapup_run', run_cleanup)
 add_to_callback('finish_pdffile', set_tounicode)
 add_to_callback('glyph_info', get_glyph_info)

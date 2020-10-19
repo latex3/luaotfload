@@ -1042,30 +1042,10 @@ end
 
 fonts.handlers.otf.registerplugin('harf', process)
 
--- luatexbase does not know how to handle `wrapup_run` callback, teach it.
--- TODO: Move these into ltluatex
-luatexbase.callbacktypes.wrapup_run = 1 -- simple
-luatexbase.callbacktypes.glyph_info = 1 -- simple
+local add_to_callback = luatexbase.add_to_callback
 
-local base_callback_descriptions = luatexbase.callback_descriptions
-local base_add_to_callback = luatexbase.add_to_callback
-local base_remove_from_callback = luatexbase.remove_from_callback
-
--- Remove all existing functions from given callback, insert ours, then
--- reinsert the removed ones, so ours takes a priority.
-local function add_to_callback(name, func)
-  local saved_callbacks = {}, ff, dd
-  for k, v in next, base_callback_descriptions(name) do
-    saved_callbacks[k] = { base_remove_from_callback(name, v) }
-  end
-  base_add_to_callback(name, func, "Harf "..name.." callback")
-  for _, v in next, saved_callbacks do
-    base_add_to_callback(name, v[1], v[2])
-  end
-end
-
-add_to_callback('post_linebreak_filter', post_process_vlist_nodes)
-add_to_callback('hpack_filter', post_process_nodes)
-add_to_callback('wrapup_run', run_cleanup)
-add_to_callback('finish_pdffile', set_tounicode)
-add_to_callback('glyph_info', get_glyph_info)
+add_to_callback('post_linebreak_filter', post_process_vlist_nodes, 'luaotfload.harf.finalize_vlist')
+add_to_callback('hpack_filter', post_process_nodes, 'luaotfload.harf.finalize_hlist')
+add_to_callback('wrapup_run', run_cleanup, 'luaotfload.cleanup_files')
+add_to_callback('finish_pdffile', set_tounicode, 'luaotfload.harf.finalize_unicode')
+add_to_callback('glyph_info', get_glyph_info, 'luaotfload.glyphinfo')

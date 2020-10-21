@@ -99,7 +99,57 @@ local alphnum_only do
   end
 end
 
+local uppercase, lowercase, titlecase = {}, {}, nil do
+  titlecase = nil -- Not implemented yet(?)
+  local ignored_field = (1-lpeg.P';')^0 * ';'
+  local simple_entry =
+      codepoint/0 * ';'
+    * ignored_field -- Name
+    * ignored_field -- General_Category
+    * ignored_field -- ccc
+    * ignored_field -- Bidi
+    * ignored_field -- Decomp
+    * ignored_field -- Numeric
+    * ignored_field -- Numeric
+    * ignored_field -- Numeric
+    * ignored_field -- Mirrored
+    * ignored_field -- Obsolete
+    * ignored_field -- Obsolete
+    * ';;\n'
+  local entry = simple_entry
+    + codepoint * ';'
+    * ignored_field -- Name
+    * ignored_field -- General_Category
+    * ignored_field -- ccc
+    * ignored_field -- Bidi
+    * ignored_field -- Decomp
+    * ignored_field -- Numeric
+    * ignored_field -- Numeric
+    * ignored_field -- Numeric
+    * ignored_field -- Mirrored
+    * ignored_field -- Obsolete
+    * ignored_field -- Obsolete
+    * (codepoint + lpeg.Cc(false)) * ';' -- uppercase
+    * (codepoint + lpeg.Cc(false)) * ';' -- lowercase
+    * (codepoint + lpeg.Cc(false)) * '\n' -- titlecase
+    / function(codepoint, upper, lower, title)
+      if upper then uppercase[codepoint] = upper end
+      if lower then lowercase[codepoint] = lower end
+      -- if title then titlecase[codepoint] = title end -- Not implemented yet(?)
+    end
+  local file = entry^0 * -1
+
+  local f = io.open(kpse.find_file"UnicodeData.txt")
+  assert(file:match(f:read'*a'))
+  f:close()
+end
+
 return {
   casefold = casefold,
   alphnum_only = alphnum_only,
+  casemapping = {
+    uppercase = uppercase,
+    lowercase = lowercase,
+    -- titlecase = titlecase,
+  },
 }

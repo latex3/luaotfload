@@ -3,7 +3,7 @@
 --  DESCRIPTION:  part of luaotfload / unicode
 -----------------------------------------------------------------------
 
-assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
     name          = "luaotfload-unicode",
     version       = "3.16-dev",       --TAGVERSION
     date          = "2020-09-03", --TAGDATE
@@ -129,17 +129,51 @@ local uppercase, lowercase, titlecase = {}, {}, nil do
     * ignored_field -- Mirrored
     * ignored_field -- Obsolete
     * ignored_field -- Obsolete
-    * (codepoint + lpeg.Cc(false)) * ';' -- uppercase
-    * (codepoint + lpeg.Cc(false)) * ';' -- lowercase
-    * (codepoint + lpeg.Cc(false)) * '\n' -- titlecase
+    * (codepoint + lpeg.Cc(nil)) * ';' -- uppercase
+    * (codepoint + lpeg.Cc(nil)) * ';' -- lowercase
+    * (codepoint + lpeg.Cc(nil)) * '\n' -- titlecase
     / function(codepoint, upper, lower, title)
-      if upper then uppercase[codepoint] = upper end
-      if lower then lowercase[codepoint] = lower end
+      uppercase[codepoint] = upper
+      lowercase[codepoint] = lower
       -- if title then titlecase[codepoint] = title end -- Not implemented yet(?)
     end
   local file = entry^0 * -1
 
   local f = io.open(kpse.find_file"UnicodeData.txt")
+  assert(file:match(f:read'*a'))
+  f:close()
+end
+
+do
+  local ws = lpeg.P' '^0
+  local nl = ws * ('#' * (1-lpeg.P'\n')^0)^-1 * '\n'
+  local entry = codepoint * ";"
+              * lpeg.Ct((ws * codepoint)^1 + ws) * ";"
+              * lpeg.Ct((ws * codepoint)^1 + ws) * ";"
+              * lpeg.Ct((ws * codepoint)^1 + ws) * ";"
+              * (lpeg.Ct((ws * lpeg.C(lpeg.R('AZ', 'az', '__')^1))^1) * ";")^-1
+              * ws * nl / function(cp, lower, title, upper, condition)
+                if condition then return end
+                if #lower == 1 then
+                  lower = lower[1]
+                  if lower ~= lowercase[cp] then
+                    lowercase[cp] = lower
+                  end
+                else
+                  lowercase[cp] = lower
+                end
+                if #upper == 1 then
+                  upper = upper[1]
+                  if upper ~= uppercase[cp] then
+                    uppercase[cp] = upper
+                  end
+                else
+                  uppercase[cp] = upper
+                end
+              end
+  local file = (entry + nl)^0 * -1
+
+  local f = io.open(kpse.find_file"SpecialCasing.txt")
   assert(file:match(f:read'*a'))
   f:close()
 end

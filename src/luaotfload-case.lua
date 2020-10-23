@@ -13,6 +13,9 @@ local getnext = direct.getnext
 local setchar = direct.setchar
 local setdisc = direct.setdisc
 local getdisc = direct.getdisc
+local remove = direct.remove
+local copy = direct.copy
+local insert_after = direct.insert_after
 
 local disc = node.id'disc'
 local glyph = node.id'disc'
@@ -26,13 +29,25 @@ local function process(table)
       if char then
         local mapping = table[char]
         if mapping then
-          setchar(n, mapping)
+          if tonumber(mapping) then
+            setchar(n, mapping)
+          elseif #mapping == 0 then
+            head, n = remove(head, n)
+            goto continue
+          else
+            setchar(n, mapping[1])
+            for i=2, #mapping do
+              head, n = insert_after(head, n, copy(n))
+              setchar(n, mapping[i])
+            end
+          end
         end
       elseif id == disc and uses_font(n, font) then
         local pre, post, rep = getdisc(n)
         setdisc(n, processor(pre, font), processor(post, font), processor(rep, font))
       end
       n = getnext(n)
+      ::continue::
     end
     return head
   end

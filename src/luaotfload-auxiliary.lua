@@ -907,6 +907,53 @@ function aux.get_quad(font_id)
 end
 
 -----------------------------------------------------------------------
+---                         Script/language fixup
+-----------------------------------------------------------------------
+local otftables = fonts.constructors.handlers.otf.tables
+local function setscript(tfmdata, value)
+  if value then
+    local cleanvalue = string.lower(value)
+    local scripts  = otftables and otftables.scripts
+    local properties = tfmdata.properties
+    if not scripts then
+      properties.script = cleanvalue
+    elseif scripts[value] then
+      properties.script = cleanvalue
+    else
+      properties.script = "dflt"
+    end
+  end
+  local resources = tfmdata.resources
+  local features = resources and resources.features
+  if features then
+    local properties = tfmdata.properties
+    local script, language = properties.script, properties.language
+    local script_found, language_found = false, false
+    for _, data in next, features do for _, feature_data in next, data do
+      local scr = feature_data[script]
+      if scr then
+        script_found = true
+        if scr[language] then
+          language_found = true
+          goto double_break
+        end
+      end
+    end end
+    ::double_break::
+    if not script_found then properties.script = "dflt" end
+    if not language_found then properties.language = "dflt" end
+  end
+end
+fonts.constructors.features.otf.register {
+  name         = "script",
+  initializers = {
+    base = setscript,
+    node = setscript,
+    plug = setscript,
+  },
+}
+
+-----------------------------------------------------------------------
 ---                         initialization
 -----------------------------------------------------------------------
 

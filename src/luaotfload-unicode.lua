@@ -99,14 +99,17 @@ local alphnum_only do
   end
 end
 
-local uppercase, lowercase, titlecase = {}, {}, nil do
+local uppercase, lowercase, ccc, cased, case_ignorable, titlecase = {}, {}, {}, {}, {}, nil do
   titlecase = nil -- Not implemented yet(?)
   local ignored_field = (1-lpeg.P';')^0 * ';'
+  local cased_category = lpeg.P'Ll;' + 'Lu;' + 'Lt;'
+  local case_ignore_category = lpeg.P'Mn;' + 'Me;' + 'Cf;' + 'Lm;' + 'Sk;'
+
   local simple_entry =
       codepoint/0 * ';'
     * ignored_field -- Name
-    * ignored_field -- General_Category
-    * ignored_field -- ccc
+    * (ignored_field - cased_category - case_ignore_category) -- General_Category
+    * '0;' -- ccc
     * ignored_field -- Bidi
     * ignored_field -- Decomp
     * ignored_field -- Numeric
@@ -119,8 +122,8 @@ local uppercase, lowercase, titlecase = {}, {}, nil do
   local entry = simple_entry
     + codepoint * ';'
     * ignored_field -- Name
-    * ignored_field -- General_Category
-    * ignored_field -- ccc
+    * (cased_category * lpeg.Cc(cased) + case_ignore_category * lpeg.Cc(case_ignorable) + ignored_field * lpeg.Cc(nil)) -- General_Category
+    * ('0;' * lpeg.Cc(nil) + lpeg.R'09'^1/tonumber * ';') -- ccc
     * ignored_field -- Bidi
     * ignored_field -- Decomp
     * ignored_field -- Numeric
@@ -132,7 +135,9 @@ local uppercase, lowercase, titlecase = {}, {}, nil do
     * (codepoint + lpeg.Cc(nil)) * ';' -- uppercase
     * (codepoint + lpeg.Cc(nil)) * ';' -- lowercase
     * (codepoint + lpeg.Cc(nil)) * '\n' -- titlecase
-    / function(codepoint, upper, lower, title)
+    / function(codepoint, cased_flag, ccc_val, upper, lower, title)
+      if cased_flag then cased_flag[codepoint] = true end
+      ccc[codepoint] = ccc_val
       uppercase[codepoint] = upper
       lowercase[codepoint] = lower
       -- if title then titlecase[codepoint] = title end -- Not implemented yet(?)
@@ -144,32 +149,81 @@ local uppercase, lowercase, titlecase = {}, {}, nil do
   f:close()
 end
 
+local props do
+  local ws = lpeg.P' '^0
+  local nl = ws * ('#' * (1-lpeg.P'\n')^0)^-1 * '\n'
+  local entry = codepoint * (".." * codepoint + lpeg.Cc(false)) * ws * ";" * ws * lpeg.C(lpeg.R("AZ", "az", "__")^1) * nl
+  local file = lpeg.Cf(
+      lpeg.Ct(
+          lpeg.Cg(lpeg.Ct"", "Soft_Dotted")
+        * lpeg.Cg(lpeg.Cc(cased), "Other_Lowercase")
+        * lpeg.Cg(lpeg.Cc(cased), "Other_Uppercase"))
+    * (lpeg.Cg(entry) + nl)^0
+  , function(t, cp_start, cp_end, prop)
+    local prop_table = t[prop]
+    if prop_table then
+      for cp = cp_start, cp_end or cp_start do
+        prop_table[cp] = true
+      end
+    end
+    return t
+  end) * -1
+
+  local f = io.open(kpse.find_file"PropList.txt")
+  props = file:match(f:read'*a')
+  f:close()
+end
+
 do
   local ws = lpeg.P' '^0
   local nl = ws * ('#' * (1-lpeg.P'\n')^0)^-1 * '\n'
+  local file = (codepoint * (".." * codepoint + lpeg.Cc(false)) * ws * ";" * ws * (lpeg.P'Single_Quote' + 'MidLetter' + 'MidNumLet') * nl / function(cp_start, cp_end)
+    for cp = cp_start, cp_end or cp_start do
+      case_ignorable[cp] = true
+    end
+  end + (1-lpeg.P'\n')^0 * '\n')^0 * -1
+
+  local f = io.open(kpse.find_file"WordBreakProperty.txt")
+  assert(file:match(f:read'*a'))
+  f:close()
+end
+
+do
+  local ws = lpeg.P' '^0
+  local nl = ws * ('#' * (1-lpeg.P'\n')^0)^-1 * '\n'
+  local empty = {}
+  local function set(t, cp, condition, value)
+    local old = t[cp] or cp
+    if not condition then
+      if #value == 1 and tonumber(old) then
+        t[cp] = value[1]
+        return
+      end
+      condition = empty
+    end
+    if tonumber(old or cp) then
+      old = {_ = {old}}
+      t[cp] = old
+    end
+    for i=1, #condition do
+      local cond = condition[i]
+      local step = old[cond]
+      if not step then
+        step = {}
+        old[cond] = step
+      end
+      old = step
+    end
+    old._ = value
+  end
   local entry = codepoint * ";"
               * lpeg.Ct((ws * codepoint)^1 + ws) * ";"
               * lpeg.Ct((ws * codepoint)^1 + ws) * ";"
               * lpeg.Ct((ws * codepoint)^1 + ws) * ";"
               * (lpeg.Ct((ws * lpeg.C(lpeg.R('AZ', 'az', '__')^1))^1) * ";")^-1
               * ws * nl / function(cp, lower, title, upper, condition)
-                if condition then return end
-                if #lower == 1 then
-                  lower = lower[1]
-                  if lower ~= lowercase[cp] then
-                    lowercase[cp] = lower
-                  end
-                else
-                  lowercase[cp] = lower
-                end
-                if #upper == 1 then
-                  upper = upper[1]
-                  if upper ~= uppercase[cp] then
-                    uppercase[cp] = upper
-                  end
-                else
-                  uppercase[cp] = upper
-                end
+                set(lowercase, cp, condition, lower)
+                set(uppercase, cp, condition, upper)
               end
   local file = (entry + nl)^0 * -1
 
@@ -184,6 +238,10 @@ return {
   casemapping = {
     uppercase = uppercase,
     lowercase = lowercase,
+    cased = cased,
+    case_ignorable = case_ignorable,
     -- titlecase = titlecase,
   },
+  ccc = ccc,
+  soft_dotted = props.Soft_Dotted,
 }

@@ -664,7 +664,7 @@ end
 
 do
     local function mathfontdimen(tfmdata, _, value)
-        if not next(tfmdata.mathparameters) then return end
+        if not (tfmdata.mathparameters and next(tfmdata.mathparameters)) then return end
         local parameters = tfmdata.parameters
         local mathparameters = tfmdata.mathparameters
         if value == 'xetex' then

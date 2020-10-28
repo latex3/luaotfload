@@ -384,8 +384,6 @@ function shape(head, firstnode, run)
         cluster = glyph.cluster
         for i = nodeindex, cluster do node = getnext(node) end
         nodeindex = cluster + 1
-        local hex = ""
-        local str = ""
         local nextcluster
         for j = i+1, #glyphs do
           nextcluster = glyphs[j].cluster
@@ -399,31 +397,29 @@ function shape(head, firstnode, run)
           glyph.nglyphs = #glyphs + 1 - i
         ::NEXTCLUSTERFOUND:: -- end
         glyph.nextcluster = nextcluster
+        local disc, discindex
         do
+          local hex = ""
+          local str = ""
           local node = node
-          for j = cluster,nextcluster-1 do
-            local id = getid(node)
-            if id == glyph_t or (id == glue_t and getsubtype(node) == spaceskip_t) then
-              local code = codes[j + 1]
-              hex = hex..to_utf16_hex(code)
-              str = str..utf8.char(code)
+          for j = cluster+1,nextcluster do
+            local char, id = is_char(node, fontid)
+            if char then
+              -- assert(char == codes[j])
+              hex = hex .. to_utf16_hex(char)
+              str = str .. utf8.char(char)
+            elseif not discindex and id == disc_t then
+              local props = properties[disc]
+              if not (props and props.zwnj) then
+                disc, discindex = node, j
+              end
             end
+            node = getnext(node)
           end
           glyph.tounicode = hex
           glyph.string = str
         end
-        if not fordisc then
-          local discindex = nil
-          local disc = node
-          for j = cluster + 1, nextcluster do
-            local props = properties[disc]
-            if (not (props and props.zwnj)) and getid(disc) == disc_t then
-              discindex = j
-              break
-            end
-            disc = getnext(disc)
-          end
-          if discindex then
+        if not fordisc and discindex then
             -- Discretionary found.
             local startindex, stopindex = nil, nil
             local startglyph, stopglyph = nil, nil
@@ -551,7 +547,6 @@ function shape(head, firstnode, run)
             node = disc
             cluster = glyph.cluster
             nodeindex = cluster + 1
-          end
         end
       end
     end

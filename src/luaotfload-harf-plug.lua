@@ -420,133 +420,133 @@ function shape(head, firstnode, run)
           glyph.string = str
         end
         if not fordisc and discindex then
-            -- Discretionary found.
-            local startindex, stopindex = nil, nil
-            local startglyph, stopglyph = nil, nil
+          -- Discretionary found.
+          local startindex, stopindex = nil, nil
+          local startglyph, stopglyph = nil, nil
 
-            -- Find the previous glyph that is safe to break at.
-            local startglyph = i
-            while startglyph > 1
-              and codes[glyphs[startglyph - 1].cluster + 1] ~= 0x20
-              and codes[glyphs[startglyph - 1].cluster + 1] ~= 0xFFFC
-              and (unsafetobreak(glyphs[startglyph])
-                or glyphs[startglyph].cluster == glyphs[startglyph-1].cluster) do
-              startglyph = startglyph - 1
-            end
-            -- Get the corresponding character index.
-            startindex = glyphs[startglyph].cluster + 1
+          -- Find the previous glyph that is safe to break at.
+          local startglyph = i
+          while startglyph > 1
+            and codes[glyphs[startglyph - 1].cluster + 1] ~= 0x20
+            and codes[glyphs[startglyph - 1].cluster + 1] ~= 0xFFFC
+            and (unsafetobreak(glyphs[startglyph])
+              or glyphs[startglyph].cluster == glyphs[startglyph-1].cluster) do
+            startglyph = startglyph - 1
+          end
+          -- Get the corresponding character index.
+          startindex = glyphs[startglyph].cluster + 1
 
-            -- Find the next glyph that is safe to break at.
-            stopglyph = i + 1
-            local lastcluster = glyphs[i].cluster
-            while stopglyph <= #glyphs
-              and codes[glyphs[stopglyph].cluster + 1] ~= 0x20
-              and codes[glyphs[stopglyph].cluster + 1] ~= 0xFFFC
-              and (unsafetobreak(glyphs[stopglyph])
-                or lastcluster == glyphs[stopglyph].cluster) do
-              lastcluster = glyphs[stopglyph].cluster
-              stopglyph = stopglyph + 1
-            end
+          -- Find the next glyph that is safe to break at.
+          stopglyph = i + 1
+          local lastcluster = glyphs[i].cluster
+          while stopglyph <= #glyphs
+            and codes[glyphs[stopglyph].cluster + 1] ~= 0x20
+            and codes[glyphs[stopglyph].cluster + 1] ~= 0xFFFC
+            and (unsafetobreak(glyphs[stopglyph])
+              or lastcluster == glyphs[stopglyph].cluster) do
+            lastcluster = glyphs[stopglyph].cluster
+            stopglyph = stopglyph + 1
+          end
 
-            stopindex = stopglyph <= #glyphs and glyphs[stopglyph].cluster + 1
-                                              or offset + len
+          stopindex = stopglyph <= #glyphs and glyphs[stopglyph].cluster + 1
+                                            or offset + len
 
-            local startnode, stopnode = node, node
-            for j=nodeindex - 1, startindex, -1 do
-              startnode = getprev(startnode)
-            end
-            for j=nodeindex + 1, stopindex do
-              stopnode = getnext(stopnode)
-            end
+          local startnode, stopnode = node, node
+          for j=nodeindex - 1, startindex, -1 do
+            startnode = getprev(startnode)
+          end
+          for j=nodeindex + 1, stopindex do
+            stopnode = getnext(stopnode)
+          end
 
-            glyphs[startglyph] = glyph
-            glyph.cluster = startindex - 1
-            glyph.nextcluster = startindex
-            for j = stopglyph, #glyphs do
-              local glyph = glyphs[j]
-              glyph.cluster = glyph.cluster - (stopindex - startindex) + 1
-            end
-            len = len - (stopindex - startindex) + 1
-            table.move(glyphs, stopglyph, #glyphs + stopglyph - startglyph - 1, startglyph + 1)
+          glyphs[startglyph] = glyph
+          glyph.cluster = startindex - 1
+          glyph.nextcluster = startindex
+          for j = stopglyph, #glyphs do
+            local glyph = glyphs[j]
+            glyph.cluster = glyph.cluster - (stopindex - startindex) + 1
+          end
+          len = len - (stopindex - startindex) + 1
+          table.move(glyphs, stopglyph, #glyphs + stopglyph - startglyph - 1, startglyph + 1)
 
-            local subcodes, subindex = {}
-            do
-              local node = startnode
-              while node ~= stopnode do
-                if node == disc then
-                  subindex = #subcodes
-                  startindex = startindex + 1
-                  node = getnext(node)
-                elseif getid(node) == disc_t then
-                  local oldnode = node
-                  startnode, node = removenode(startnode, node)
-                  freenode(oldnode)
-                  tableremove(codes, startindex)
-                else
-                  subcodes[#subcodes + 1] = tableremove(codes, startindex)
-                  node = getnext(node)
-                end
-              end
-            end
-            
-            local pre, post, rep, lastpre, lastpost, lastrep = getdisc(disc, true)
-            local precodes, postcodes, repcodes = {}, {}, {}
-            table.move(subcodes, 1, subindex, 1, repcodes)
-            for n, id, subtype in traverse(rep) do
-              repcodes[#repcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
-            end
-            table.move(subcodes, subindex + 1, #subcodes, #repcodes + 1, repcodes)
-            table.move(subcodes, 1, subindex, 1, precodes)
-            for n, id, subtype in traverse(pre) do
-              precodes[#precodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
-            end
-            for n, id, subtype in traverse(post) do
-              postcodes[#postcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
-            end
-            table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
-            if startnode ~= disc then
-              local newpre = copynodelist(startnode, disc)
-              setnext(tail(newpre), pre)
-              pre = newpre
-            end
-            if post then
-              setnext(lastpost, copynodelist(getnext(disc), stopnode))
-            else
-              post = copynodelist(getnext(disc), stopnode)
-            end
-            if startnode ~= disc then
-              local predisc = getprev(disc)
-              setnext(predisc, rep)
-              setprev(rep, predisc)
-              if firstnode == startnode then
-                firstnode = disc
-              end
-              if startnode == head then
-                head = disc
+          local subcodes, subindex = {}
+          do
+            local node = startnode
+            while node ~= stopnode do
+              if node == disc then
+                subindex = #subcodes
+                startindex = startindex + 1
+                node = getnext(node)
+              elseif getid(node) == disc_t then
+                local oldnode = node
+                startnode, node = removenode(startnode, node)
+                freenode(oldnode)
+                tableremove(codes, startindex)
               else
-                local before = getprev(startnode)
-                setnext(before, disc)
-                setprev(disc, before)
+                subcodes[#subcodes + 1] = tableremove(codes, startindex)
+                node = getnext(node)
               end
-              setprev(startnode, nil)
-              rep = startnode
-              lastrep = lastrep or predisc
             end
-            if getnext(disc) ~= stopnode then
-              setnext(getprev(stopnode), nil)
-              setprev(stopnode, disc)
-              setprev(getnext(disc), lastrep)
-              setnext(lastrep, getnext(disc))
-              rep = rep or getnext(disc)
-              setnext(disc, stopnode)
+          end
+          
+          local pre, post, rep, lastpre, lastpost, lastrep = getdisc(disc, true)
+          local precodes, postcodes, repcodes = {}, {}, {}
+          table.move(subcodes, 1, subindex, 1, repcodes)
+          for n, id, subtype in traverse(rep) do
+            repcodes[#repcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
+          end
+          table.move(subcodes, subindex + 1, #subcodes, #repcodes + 1, repcodes)
+          table.move(subcodes, 1, subindex, 1, precodes)
+          for n, id, subtype in traverse(pre) do
+            precodes[#precodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
+          end
+          for n, id, subtype in traverse(post) do
+            postcodes[#postcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
+          end
+          table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
+          if startnode ~= disc then
+            local newpre = copynodelist(startnode, disc)
+            setnext(tail(newpre), pre)
+            pre = newpre
+          end
+          if post then
+            setnext(lastpost, copynodelist(getnext(disc), stopnode))
+          else
+            post = copynodelist(getnext(disc), stopnode)
+          end
+          if startnode ~= disc then
+            local predisc = getprev(disc)
+            setnext(predisc, rep)
+            setprev(rep, predisc)
+            if firstnode == startnode then
+              firstnode = disc
             end
-            glyph.replace = makesub(run, repcodes, rep)
-            glyph.pre = makesub(run, precodes, pre)
-            glyph.post = makesub(run, postcodes, post)
-            i = startglyph
-            node = disc
-            cluster = glyph.cluster
-            nodeindex = cluster + 1
+            if startnode == head then
+              head = disc
+            else
+              local before = getprev(startnode)
+              setnext(before, disc)
+              setprev(disc, before)
+            end
+            setprev(startnode, nil)
+            rep = startnode
+            lastrep = lastrep or predisc
+          end
+          if getnext(disc) ~= stopnode then
+            setnext(getprev(stopnode), nil)
+            setprev(stopnode, disc)
+            setprev(getnext(disc), lastrep)
+            setnext(lastrep, getnext(disc))
+            rep = rep or getnext(disc)
+            setnext(disc, stopnode)
+          end
+          glyph.replace = makesub(run, repcodes, rep)
+          glyph.pre = makesub(run, precodes, pre)
+          glyph.post = makesub(run, postcodes, post)
+          i = startglyph
+          node = disc
+          cluster = glyph.cluster
+          nodeindex = cluster + 1
         end
       end
     end

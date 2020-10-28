@@ -189,8 +189,9 @@ local function itemize(head, fontid, direction)
       code = 0x200C
       -- skip = false -- Not sure about this, but lastskip should be a bit faster
     elseif id == glyph_t then
-      if is_char(n) and getfont(n) == fontid then
-        code = getchar(n)
+      local char = is_char(n, fontid)
+      if char then
+        code = char
         skip = false
       else
         skip = true

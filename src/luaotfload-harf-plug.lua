@@ -668,7 +668,7 @@ local function tonodes(head, node, run, glyphs)
     end
     local gid = glyph.codepoint
     local char = nominals[gid] or gid_offset + gid
-    local id = getid(node)
+    local orig_char, id = is_char(node, fontid)
 
     if glyph.replace then
       -- For discretionary the glyph itself is skipped and a discretionary node
@@ -687,7 +687,7 @@ local function tonodes(head, node, run, glyphs)
       nodeindex = nodeindex + 1
     else
       if lastprops and lastprops.zwnj and nodeindex == glyph.cluster + 1 then
-      elseif id == glyph_t then
+      elseif orig_char then
         local done
         local fontglyph = fontglyphs[gid]
         local character = characters[char]
@@ -795,7 +795,7 @@ local function tonodes(head, node, run, glyphs)
           end
         end
         if not done then
-          local oldcharacter = characters[getchar(node)]
+          local oldcharacter = characters[orig_char]
           -- If the glyph index of current font character is the same as shaped
           -- glyph, keep the node char unchanged. Helps with primitives that
           -- take characters as input but actually work on glyphs, like

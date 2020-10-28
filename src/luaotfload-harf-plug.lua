@@ -680,11 +680,6 @@ local function tonodes(head, node, run, glyphs)
                     tonodes(rep.head, rep.head, rep.run, rep.glyphs))
       node = getnext(node)
       nodeindex = nodeindex + 1
-    elseif glyph.skip then
-      local oldnode = node
-      head, node = removenode(head, node)
-      freenode(oldnode)
-      nodeindex = nodeindex + 1
     else
       if lastprops and lastprops.zwnj and nodeindex == glyph.cluster + 1 then
       elseif orig_char then

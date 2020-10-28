@@ -43,6 +43,7 @@ local removenode        = direct.remove
 local copynodelist      = direct.copy_list
 local ischar            = direct.is_char
 local uses_font         = direct.uses_font
+local length            = direct.length
 
 local getattrs          = direct.getattributelist
 local setattrs          = direct.setattributelist
@@ -78,10 +79,10 @@ local setwidth          = direct.setwidth
 local setlist           = direct.setlist
 local is_char           = direct.is_char
 local tail              = direct.tail
+local getboth           = direct.getboth
+local setlink           = direct.setlink
 
 local properties        = direct.get_properties_table()
-
-local imgnode           = img.node
 
 local hlist_t           = node.id("hlist")
 local disc_t            = node.id("disc")
@@ -179,8 +180,12 @@ local function itemize(head, fontid, direction)
   local currdir = direction or 0
   local lastskip, lastdir = true
   local lastrun = {}
+  local lastdisc
+  local in_disc
 
   for n, id, subtype in traverse(head) do
+    if in_disc == n then in_disc = nil end
+    local disc
     local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
     local skip = lastskip
     local props = properties[n]
@@ -200,8 +205,27 @@ local function itemize(head, fontid, direction)
       code = 0x0020 -- SPACE
     elseif id == disc_t then
       if uses_font(n, fontid) then
-        code = 0x00AD -- SOFT HYPHEN
+        local _, _, rep, _, _, rep_tail = getdisc(n, true)
+        setfield(n, 'replace', nil)
+        local prev, next = getboth(n)
+        in_disc = next
+        disc = {
+          disc = n,
+          anchor_cluster = #codes - (lastrun.start or 0),
+          after_cluster = #codes - (lastrun.start or 0) + length(rep),
+        }
+        if rep then
+          setlink(prev, rep)
+          setlink(rep_tail, next)
+          setnext(n, rep) -- This one is just to keep the loop going
+        else
+          setlink(prev, next)
+        end
+        code = nil
         skip = false
+        if not prev then
+          head = n
+        end
       else
         skip = true
       end
@@ -221,26 +245,39 @@ local function itemize(head, fontid, direction)
       currdir = getdirection(n)
     end
 
-    codes[#codes + 1] = code
+    local ncodes = #codes -- Necessary to count discs correctly
+    codes[ncodes + 1] = code
 
     if lastdir ~= currdir or lastskip ~= skip then
+      if disc then
+        disc.after_cluster = disc.after_cluster - disc.anchor_cluster
+        disc.anchor_cluster = 0
+      end
       lastrun.after = n
       lastrun = {
-        start = #codes,
-        len = 1,
+        start = ncodes + 1,
+        len = code and 1 or 0,
         font = fontid,
         dir = currdir == 1 and dir_rtl or dir_ltr,
         skip = skip,
         codes = codes,
+        discs = disc,
       }
       runs[#runs + 1] = lastrun
-      lastdir, lastskip = currdir, skip
-    else
+      lastdir, lastskip, lastdisc = currdir, skip, disc
+    elseif code then
       lastrun.len = lastrun.len + 1
+    elseif disc then
+      if lastdisc then
+        lastdisc.next = disc
+        lastdisc = disc
+      else
+        lastrun.discs, lastdisc = disc, disc
+      end
     end
   end
 
-  return runs
+  return head, runs
 end
 
 
@@ -261,7 +298,6 @@ local function makesub(run, codes, nodelist)
     font = run.font,
     dir = run.dir,
     fordisc = true,
-    node = nodelist,
     codes = codes,
   }
   local glyphs
@@ -296,13 +332,12 @@ function shape(head, firstnode, run)
   local node = firstnode
   local codes = run.codes
   local offset = run.start
-  local nodeindex = offset
   run.start = offset
   local len = run.len
   local fontid = run.font
   local dir = run.dir
-  local fordisc = run.fordisc
-  local cluster = offset - 2
+  local cluster
+  local discs = (not run.fordisc) and run.discs
 
   local fontdata = font.getfont(fontid)
   local hbdata = fontdata.hb
@@ -372,182 +407,177 @@ function shape(head, firstnode, run)
 
     local glyphs = buf:get_glyphs()
 
+    local break_glyph, break_cluster, break_node = 1, offset-1, node
+    local disc_glyph, disc_cluster, disc_node
+    local disc_cluster
+    -- local disc2_node, disc2_index -- TODO: Hopefully later
     local i = 0
-    while i < #glyphs do
-      i = i + 1
-      local glyph = glyphs[i]
+    local glyph
+    -- The following is a repeat {...} while glyph {...} loop.
+    while true do
+      repeat
+        i = i+1
+        glyph = glyphs[i]
+      until not glyph or glyph.cluster ~= cluster
+      do
+        local oldcluster = cluster
+        cluster = glyph and glyph.cluster or offset + len - 1
+        if oldcluster then
+          for _ = oldcluster+1, cluster do
+            node = getnext(node)
+          end
+        end
+      end
 
+        -- Is this a safe breakpoint?
+      if discs and ((not glyph) or codes[cluster+1] == 0x20 or codes[cluster+1] == 0xFFFC
+          or not unsafetobreak(glyph)) then
+        -- Should we change the discretionary state?
+        local anchor_cluster, after_cluster = offset + discs.anchor_cluster, offset + discs.after_cluster
+        while disc_cluster and after_cluster <= cluster
+           or not disc_cluster and anchor_cluster <= cluster do
+          if disc_cluster then
+
+            local rep_glyphs = table.move(glyphs, disc_glyph, i - 1, 1, {})
+            for j = 1, #rep_glyphs do
+              local glyph = rep_glyphs[j]
+              glyph.cluster = glyph.cluster - disc_cluster
+              glyph.nextcluster = glyph.nextcluster - disc_cluster
+            end
+            do
+              local cluster_offset = 1 + disc_cluster - cluster -- The offset the glyph indices will move
+              for j = i, #glyphs do
+                local glyph = glyphs[j]
+                glyph.cluster = glyph.cluster + cluster_offset
+              end
+              len = len + cluster_offset
+              table.move(glyphs, i, #glyphs + i - disc_glyph, disc_glyph + 1)
+
+              local discs = discs.next
+              while discs do
+                discs.anchor_cluster = discs.anchor_cluster + cluster_offset
+                discs.after_cluster = discs.after_cluster + cluster_offset
+                discs = discs.next
+              end
+            end
+
+            -- TODO: Remove nested discretionaries from discs
+
+            local pre, post, _, _, lastpost, _ = getdisc(discs.disc, true)
+            local precodes, postcodes = {}, {}
+            table.move(codes, disc_cluster + 1, anchor_cluster, 1, precodes)
+            for n in traverse(pre) do
+              precodes[#precodes + 1] = is_char(n, fontid) or 0xFFFC
+            end
+            for n in traverse(post) do
+              postcodes[#postcodes + 1] = is_char(n, fontid) or 0xFFFC
+            end
+            table.move(codes, after_cluster + 1, cluster, #postcodes + 1, postcodes)
+            table.move(codes, cluster + 1, #codes + cluster - disc_cluster - 1, disc_cluster + 2)
+            codes[disc_cluster + 1] = 0xFFFC
+
+            do
+              local iter = disc_node
+              for _ = disc_cluster, anchor_cluster-1 do iter = getnext(iter) end
+              if iter ~= disc_node then
+                local newpre = copynodelist(disc_node, iter)
+                setlink(tail(newpre), pre)
+                pre = newpre
+              end
+              for _ = anchor_cluster, after_cluster-1 do iter = getnext(iter) end
+              if post then
+                setlink(lastpost, copynodelist(iter, node))
+              else
+                post = copynodelist(iter, node)
+              end
+            end
+            local prev = getprev(disc_node)
+            if disc_cluster ~= cluster then
+              setprev(disc_node, nil)
+              setnext(getprev(node), nil)
+            end
+            setlink(prev, discs.disc, node)
+            if disc_node == firstnode then
+              firstnode = discs.disc
+              if head == disc_node then
+                head = firstnode
+              end
+            end
+            glyphs[disc_glyph] = {
+              replace = {
+                glyphs = rep_glyphs,
+                head = disc_node ~= node and disc_node or nil,
+                run = {
+                  start = 1,
+                  font = run.font,
+                  dir = run.dir,
+                },
+              },
+              pre = makesub(run, precodes, pre),
+              post = makesub(run, postcodes, post),
+              cluster = disc_cluster,
+              nextcluster = disc_cluster + 1,
+              codepoint = 0xFFFC,
+            }
+            i = disc_glyph
+            node = discs.disc
+            cluster = disc_cluster
+
+            disc_cluster = nil
+            discs = discs.next
+            if not discs then break end
+            anchor_cluster, after_cluster = offset + discs.anchor_cluster, offset + discs.after_cluster
+          elseif anchor_cluster == cluster then
+            disc_glyph, disc_cluster, disc_node = i, cluster, node
+          else
+            disc_glyph, disc_cluster, disc_node = break_glyph, break_cluster, break_node
+          end
+        end
+        break_glyph, break_cluster, break_node = i, cluster, node
+      end
+
+      if not glyph then break end
+
+      local nextcluster
+      for j = i+1, #glyphs do
+        nextcluster = glyphs[j].cluster
+        if cluster ~= nextcluster then
+          glyph.nglyphs = j - i
+          goto NEXTCLUSTERFOUND -- break
+        end
+      end -- else -- only executed if the loop reached the end without
+                  -- finding another cluster
+        nextcluster = offset + len - 1
+        glyph.nglyphs = #glyphs + 1 - i
+      ::NEXTCLUSTERFOUND:: -- end
+      glyph.nextcluster = nextcluster
+
+      local disc, discindex
       -- Calculate the Unicode code points of this glyph. If cluster did not
       -- change then this is a glyph inside a complex cluster and will be
       -- handled with the start of its cluster.
-      if cluster ~= glyph.cluster then
-        cluster = glyph.cluster
-        for i = nodeindex, cluster do node = getnext(node) end
-        nodeindex = cluster + 1
-        local nextcluster
-        for j = i+1, #glyphs do
-          nextcluster = glyphs[j].cluster
-          if cluster ~= nextcluster then
-            glyph.nglyphs = j - i
-            goto NEXTCLUSTERFOUND -- break
-          end
-        end -- else -- only executed if the loop reached the end without
-                    -- finding another cluster
-          nextcluster = offset + len - 1
-          glyph.nglyphs = #glyphs + 1 - i
-        ::NEXTCLUSTERFOUND:: -- end
-        glyph.nextcluster = nextcluster
-        local disc, discindex
-        do
-          local hex = ""
-          local str = ""
-          local node = node
-          for j = cluster+1,nextcluster do
-            local char, id = is_char(node, fontid)
-            if char then
-              -- assert(char == codes[j])
-              hex = hex .. to_utf16_hex(char)
-              str = str .. utf8.char(char)
-            elseif not discindex and id == disc_t then
-              local props = properties[disc]
-              if not (props and props.zwnj) then
-                disc, discindex = node, j
-              end
+      do
+        local hex = ""
+        local str = ""
+        local node = node
+        for j = cluster+1,nextcluster do
+          local char, id = is_char(node, fontid)
+          if char then
+            -- assert(char == codes[j])
+            hex = hex .. to_utf16_hex(char)
+            str = str .. utf8.char(char)
+          elseif not discindex and id == disc_t then
+            local props = properties[disc]
+            if not (props and props.zwnj) then
+              disc, discindex = node, j
             end
-            node = getnext(node)
           end
-          glyph.tounicode = hex
-          glyph.string = str
+          node = getnext(node)
         end
-        if not fordisc and discindex then
-          -- Discretionary found.
-          local startindex, stopindex = nil, nil
-          local startglyph, stopglyph = nil, nil
-
-          -- Find the previous glyph that is safe to break at.
-          local startglyph = i
-          while startglyph > 1
-            and codes[glyphs[startglyph - 1].cluster + 1] ~= 0x20
-            and codes[glyphs[startglyph - 1].cluster + 1] ~= 0xFFFC
-            and (unsafetobreak(glyphs[startglyph])
-              or glyphs[startglyph].cluster == glyphs[startglyph-1].cluster) do
-            startglyph = startglyph - 1
-          end
-          -- Get the corresponding character index.
-          startindex = glyphs[startglyph].cluster + 1
-
-          -- Find the next glyph that is safe to break at.
-          stopglyph = i + 1
-          local lastcluster = glyphs[i].cluster
-          while stopglyph <= #glyphs
-            and codes[glyphs[stopglyph].cluster + 1] ~= 0x20
-            and codes[glyphs[stopglyph].cluster + 1] ~= 0xFFFC
-            and (unsafetobreak(glyphs[stopglyph])
-              or lastcluster == glyphs[stopglyph].cluster) do
-            lastcluster = glyphs[stopglyph].cluster
-            stopglyph = stopglyph + 1
-          end
-
-          stopindex = stopglyph <= #glyphs and glyphs[stopglyph].cluster + 1
-                                            or offset + len
-
-          local startnode, stopnode = node, node
-          for j=nodeindex - 1, startindex, -1 do
-            startnode = getprev(startnode)
-          end
-          for j=nodeindex + 1, stopindex do
-            stopnode = getnext(stopnode)
-          end
-
-          glyphs[startglyph] = glyph
-          glyph.cluster = startindex - 1
-          glyph.nextcluster = startindex
-          for j = stopglyph, #glyphs do
-            local glyph = glyphs[j]
-            glyph.cluster = glyph.cluster - (stopindex - startindex) + 1
-          end
-          len = len - (stopindex - startindex) + 1
-          table.move(glyphs, stopglyph, #glyphs + stopglyph - startglyph - 1, startglyph + 1)
-
-          local subcodes, subindex = {}
-          do
-            local node = startnode
-            while node ~= stopnode do
-              if node == disc then
-                subindex = #subcodes
-                startindex = startindex + 1
-                node = getnext(node)
-              elseif getid(node) == disc_t then
-                local oldnode = node
-                startnode, node = removenode(startnode, node)
-                freenode(oldnode)
-                tableremove(codes, startindex)
-              else
-                subcodes[#subcodes + 1] = tableremove(codes, startindex)
-                node = getnext(node)
-              end
-            end
-          end
-          
-          local pre, post, rep, lastpre, lastpost, lastrep = getdisc(disc, true)
-          local precodes, postcodes, repcodes = {}, {}, {}
-          table.move(subcodes, 1, subindex, 1, repcodes)
-          for n, id, subtype in traverse(rep) do
-            repcodes[#repcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
-          end
-          table.move(subcodes, subindex + 1, #subcodes, #repcodes + 1, repcodes)
-          table.move(subcodes, 1, subindex, 1, precodes)
-          for n, id, subtype in traverse(pre) do
-            precodes[#precodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
-          end
-          for n, id, subtype in traverse(post) do
-            postcodes[#postcodes + 1] = getfont(n) == fontid and getchar(n) or 0xFFFC
-          end
-          table.move(subcodes, subindex + 1, #subcodes, #postcodes + 1, postcodes)
-          if startnode ~= disc then
-            local newpre = copynodelist(startnode, disc)
-            setnext(tail(newpre), pre)
-            pre = newpre
-          end
-          if post then
-            setnext(lastpost, copynodelist(getnext(disc), stopnode))
-          else
-            post = copynodelist(getnext(disc), stopnode)
-          end
-          if startnode ~= disc then
-            local predisc = getprev(disc)
-            setnext(predisc, rep)
-            setprev(rep, predisc)
-            if firstnode == startnode then
-              firstnode = disc
-            end
-            if startnode == head then
-              head = disc
-            else
-              local before = getprev(startnode)
-              setnext(before, disc)
-              setprev(disc, before)
-            end
-            setprev(startnode, nil)
-            rep = startnode
-            lastrep = lastrep or predisc
-          end
-          if getnext(disc) ~= stopnode then
-            setnext(getprev(stopnode), nil)
-            setprev(stopnode, disc)
-            setprev(getnext(disc), lastrep)
-            setnext(lastrep, getnext(disc))
-            rep = rep or getnext(disc)
-            setnext(disc, stopnode)
-          end
-          glyph.replace = makesub(run, repcodes, rep)
-          glyph.pre = makesub(run, precodes, pre)
-          glyph.post = makesub(run, postcodes, post)
-          i = startglyph
-          node = disc
-          cluster = glyph.cluster
-          nodeindex = cluster + 1
-        end
+        glyph.tounicode = hex
+        glyph.string = str
+      end
+      if not fordisc and discindex then
       end
     end
     return head, firstnode, glyphs, run.len - len
@@ -583,7 +613,7 @@ local function color_to_rgba(color)
   end
 end
 
--- Cache of color glyph PNG data for bookkeeping, only because I couldn’t
+-- Cache of color glyph PNG data for bookkeeping, only because I couldn't
 -- figure how to make the engine load the image from the binary data directly.
 local pngcache = {}
 local pngcachefiles = {}
@@ -708,7 +738,7 @@ local function tonodes(head, node, run, glyphs)
                   character.depth = layerchar.depth
                 end
                 -- color_index has a special value, 0x10000, that mean use text
-                -- color, we don’t check for it here explicitly since we will
+                -- color, we don't check for it here explicitly since we will
                 -- get nil anyway.
                 local color = palette[layer.color_index]
                 if not color or color.alpha ~= 0 then
@@ -778,7 +808,7 @@ local function tonodes(head, node, run, glyphs)
               -- Color bitmap font with no glyph outlines (like Noto
               -- Color Emoji) but has no bitmap for current glyph (most likely
               -- `.notdef` glyph). The engine does not know how to embed such
-              -- fonts, so we don’t want them to reach the backend as it will cause
+              -- fonts, so we don't want them to reach the backend as it will cause
               -- a fatal error. We use `nullfont` instead.  That is a hack, but I
               -- think it is good enough for now. We could make the glyph virtual
               -- with empty commands suh that LuaTeX ignores it, but we still want
@@ -815,7 +845,7 @@ local function tonodes(head, node, run, glyphs)
           -- overfull messages, otherwise it will be trying to print our
           -- invalid pseudo Unicode code points.
           -- If the string is empty it means this glyph is part of a larger
-          -- cluster and we don’t to print anything for it as the first glyph
+          -- cluster and we don't to print anything for it as the first glyph
           -- in the cluster will have the string of the whole cluster.
           local props = properties[node]
           if not props then
@@ -828,7 +858,7 @@ local function tonodes(head, node, run, glyphs)
           -- * Find how many characters in this cluster and how many glyphs,
           -- * If there is more than 0 characters
           --   * One glyph: one to one or one to many mapping, can be
-          --     represented by font’s /ToUnicode
+          --     represented by font's /ToUnicode
           --   * More than one: many to one or many to many mapping, can be
           --     represented by /ActualText spans.
           -- * If there are zero characters, then this glyph is part of complex
@@ -874,7 +904,7 @@ local function tonodes(head, node, run, glyphs)
         end
       elseif id == kern_t and getsubtype(node) == italiccorr_t then
         -- If this is an italic correction node and the previous node is a
-        -- glyph, update its kern value with the glyph’s italic correction.
+        -- glyph, update its kern value with the glyph's italic correction.
         local prevchar, prevfontid = ischar(getprev(node))
         if prevfontid == fontid and prevchar and prevchar > 0 then
           local italic = characters[prevchar].italic
@@ -910,8 +940,8 @@ local function shape_run(head, current, run)
 end
 
 function process(head, font, _attr, direction)
-  local newhead, current = head, head
-  local runs = itemize(head, font, direction)
+  local newhead, runs = itemize(head, font, direction)
+  local current = newhead
 
   local offset = 0
   for i = 1,#runs do

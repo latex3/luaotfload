@@ -461,8 +461,6 @@ function shape(head, firstnode, run)
               end
             end
 
-            -- TODO: Remove nested discretionaries from discs
-
             local pre, post, _, _, lastpost, _ = getdisc(discs.disc, true)
             local precodes, postcodes = {}, {}
             table.move(codes, disc_cluster + 1, anchor_cluster, 1, precodes)
@@ -525,6 +523,10 @@ function shape(head, firstnode, run)
 
             disc_cluster = nil
             discs = discs.next
+            while discs and discs.anchor_cluster + offset < cluster do
+              free(discs.disc)
+              discs = discs.next
+            end
             if not discs then break end
             anchor_cluster, after_cluster = offset + discs.anchor_cluster, offset + discs.after_cluster
           elseif anchor_cluster == cluster then

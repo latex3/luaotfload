@@ -470,7 +470,7 @@ function shape(head, firstnode, run)
               postcodes[#postcodes + 1] = is_char(n, fontid) or 0xFFFC
             end
             table.move(codes, after_cluster + 1, cluster, #postcodes + 1, postcodes)
-            table.move(codes, cluster + 1, #codes + cluster - disc_cluster - 1, disc_cluster + 2)
+            table.move(codes, cluster + 1, #codes + cluster - disc_cluster, disc_cluster + 2)
             codes[disc_cluster + 1] = 0xFFFC
 
             do

@@ -215,12 +215,13 @@ local function itemize(head, fontid, direction)
           after_cluster = #codes - (lastrun.start or 0) + 1 + length(rep),
         }
         if rep then
-          setlink(prev, rep)
           setlink(rep_tail, next)
           setnext(n, rep) -- This one is just to keep the loop going
+          n = rep
         else
-          setlink(prev, next)
+          n = next
         end
+        setlink(prev, n)
         code = nil
         skip = false
         if not prev then
@@ -248,7 +249,7 @@ local function itemize(head, fontid, direction)
     local ncodes = #codes -- Necessary to count discs correctly
     codes[ncodes + 1] = code
 
-    if lastdir ~= currdir or lastskip ~= skip then
+    if (disc or not in_disc) and (lastdir ~= currdir or lastskip ~= skip) then
       if disc then
         disc.after_cluster = disc.after_cluster - disc.anchor_cluster
         disc.anchor_cluster = 0
@@ -708,7 +709,7 @@ local function tonodes(head, node, run, glyphs)
 
       setdisc(node, tonodes(pre.head, pre.head, pre.run, pre.glyphs),
                     tonodes(post.head, post.head, post.run, post.glyphs),
-                    tonodes(rep.head, rep.head, rep.run, rep.glyphs))
+                   (tonodes(rep.head, rep.head, rep.run, rep.glyphs)))
       node = getnext(node)
       nodeindex = nodeindex + 1
     else

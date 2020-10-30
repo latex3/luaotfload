@@ -211,8 +211,8 @@ local function itemize(head, fontid, direction)
         in_disc = next
         disc = {
           disc = n,
-          anchor_cluster = #codes - (lastrun.start or 0),
-          after_cluster = #codes - (lastrun.start or 0) + length(rep),
+          anchor_cluster = #codes - (lastrun.start or 0) + 1,
+          after_cluster = #codes - (lastrun.start or 0) + 1 + length(rep),
         }
         if rep then
           setlink(prev, rep)
@@ -331,8 +331,7 @@ end
 function shape(head, firstnode, run)
   local node = firstnode
   local codes = run.codes
-  local offset = run.start
-  run.start = offset
+  local offset = run.start - 1 -- -1 because we want the cluster
   local len = run.len
   local fontid = run.font
   local dir = run.dir
@@ -359,7 +358,7 @@ function shape(head, firstnode, run)
   buf:set_script(script)
   buf:set_language(lang)
   buf:set_cluster_level(buf.CLUSTER_LEVEL_MONOTONE_CHARACTERS)
-  buf:add_codepoints(codes, offset - 1, len)
+  buf:add_codepoints(codes, offset, len)
 
   local hscale = hbdata.hscale
   local vscale = hbdata.vscale
@@ -369,7 +368,7 @@ function shape(head, firstnode, run)
     features = table.merged(features) -- We don't want to modify the global features
     local current_features = {}
     local n = node
-    for i = offset-1, offset+len-2 do
+    for i = offset, offset+len-1 do
       local props = properties[n] or empty_table
       if props then
         local local_feat = props.glyph_features or empty_table
@@ -407,7 +406,7 @@ function shape(head, firstnode, run)
 
     local glyphs = buf:get_glyphs()
 
-    local break_glyph, break_cluster, break_node = 1, offset-1, node
+    local break_glyph, break_cluster, break_node = 1, offset, node
     local disc_glyph, disc_cluster, disc_node
     local disc_cluster
     -- local disc2_node, disc2_index -- TODO: Hopefully later
@@ -421,7 +420,7 @@ function shape(head, firstnode, run)
       until not glyph or glyph.cluster ~= cluster
       do
         local oldcluster = cluster
-        cluster = glyph and glyph.cluster or offset + len - 1
+        cluster = glyph and glyph.cluster or offset + len
         if oldcluster then
           for _ = oldcluster+1, cluster do
             node = getnext(node)
@@ -549,7 +548,7 @@ function shape(head, firstnode, run)
         end
       end -- else -- only executed if the loop reached the end without
                   -- finding another cluster
-        nextcluster = offset + len - 1
+        nextcluster = offset + len
         glyph.nglyphs = #glyphs + 1 - i
       ::NEXTCLUSTERFOUND:: -- end
       glyph.nextcluster = nextcluster

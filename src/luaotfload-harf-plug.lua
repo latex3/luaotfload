@@ -96,6 +96,8 @@ local pdfliteral_t      = node.subtype("pdf_literal")
 
 local line_t            = 1
 local explicitdisc_t    = 1
+local firstdisc_t       = 4
+local seconddisc_t      = 5
 local fontkern_t        = 0
 local italiccorr_t      = 3
 local regulardisc_t     = 3
@@ -410,7 +412,6 @@ function shape(head, firstnode, run)
     local break_glyph, break_cluster, break_node = 1, offset, node
     local disc_glyph, disc_cluster, disc_node
     local disc_cluster
-    -- local disc2_node, disc2_index -- TODO: Hopefully later
     local i = 0
     local glyph
     -- The following is a repeat {...} while glyph {...} loop.
@@ -434,10 +435,19 @@ function shape(head, firstnode, run)
           or not unsafetobreak(glyph)) then
         -- Should we change the discretionary state?
         local anchor_cluster, after_cluster = offset + discs.anchor_cluster, offset + discs.after_cluster
+        local saved_anchor, saved_after = (discs.next and discs.next.anchor_cluster or math.huge) + offset
         while disc_cluster and after_cluster <= cluster
            or not disc_cluster and anchor_cluster <= cluster do
           if disc_cluster then
-
+            if not saved_after and saved_anchor < cluster then
+              saved_after = discs.next.after_cluster + offset
+              if saved_after > cluster then
+                saved_after, after_cluster = after_cluster, saved_after
+                break
+              end
+            elseif saved_after then
+              saved_after, after_cluster = after_cluster, saved_after
+            end
             local rep_glyphs = table.move(glyphs, disc_glyph, i - 1, 1, {})
             for j = 1, #rep_glyphs do
               local glyph = rep_glyphs[j]
@@ -445,13 +455,13 @@ function shape(head, firstnode, run)
               glyph.nextcluster = glyph.nextcluster - disc_cluster
             end
             do
-              local cluster_offset = 1 + disc_cluster - cluster -- The offset the glyph indices will move
+              local cluster_offset = disc_cluster - cluster + (saved_after and 2 or 1) -- The offset the glyph indices will move
               for j = i, #glyphs do
                 local glyph = glyphs[j]
                 glyph.cluster = glyph.cluster + cluster_offset
               end
               len = len + cluster_offset
-              table.move(glyphs, i, #glyphs + i - disc_glyph, disc_glyph + 1)
+              table.move(glyphs, i, #glyphs + i - disc_glyph, disc_glyph + (saved_after and 2 or 1))
 
               local discs = discs.next
               while discs do
@@ -462,7 +472,7 @@ function shape(head, firstnode, run)
             end
 
             local pre, post, _, _, lastpost, _ = getdisc(discs.disc, true)
-            local precodes, postcodes = {}, {}
+            local precodes, postcodes, repcodes = {}, {}
             table.move(codes, disc_cluster + 1, anchor_cluster, 1, precodes)
             for n in traverse(pre) do
               precodes[#precodes + 1] = is_char(n, fontid) or 0xFFFC
@@ -471,8 +481,15 @@ function shape(head, firstnode, run)
               postcodes[#postcodes + 1] = is_char(n, fontid) or 0xFFFC
             end
             table.move(codes, after_cluster + 1, cluster, #postcodes + 1, postcodes)
-            table.move(codes, cluster + 1, #codes + cluster - disc_cluster, disc_cluster + 2)
-            codes[disc_cluster + 1] = 0xFFFC
+
+            if saved_after then
+              repcodes = table.move(codes, disc_cluster + 1, cluster, 1, {})
+              table.move(codes, cluster + 1, #codes + cluster - disc_cluster, disc_cluster + 3)
+              codes[disc_cluster + 1], codes[disc_cluster + 2] = 0xFFFC, 0xFFFC
+            else
+              table.move(codes, cluster + 1, #codes + cluster - disc_cluster, disc_cluster + 2)
+              codes[disc_cluster + 1] = 0xFFFC
+            end
 
             do
               local iter = disc_node
@@ -517,6 +534,71 @@ function shape(head, firstnode, run)
               nextcluster = disc_cluster + 1,
               codepoint = 0xFFFC,
             }
+            if saved_after then
+              local next_disc = discs.next
+              setlink(discs.disc, next_disc.disc, node)
+              local next_pre, next_post, _, _, next_lastpost, _ = getdisc(next_disc.disc, true)
+              local next_rep = copynodelist(next_pre)
+              -- Let's play the game again. We need three parts:
+              -- The pre and post branches in the outer post branch
+              local next_precodes, next_postcodes, next_repcodes = {}, {}, {}
+              do
+                local saved_offset = length(post) - cluster
+                local saved_anchor, saved_after = saved_anchor + saved_offset, saved_after + saved_offset
+                table.move(postcodes, 1, saved_anchor, 1, next_precodes)
+                for n in traverse(next_pre) do
+                  next_precodes[#next_precodes + 1] = is_char(n, fontid) or 0xFFFC
+                end
+                for n in traverse(next_post) do
+                  next_postcodes[#next_postcodes + 1] = is_char(n, fontid) or 0xFFFC
+                end
+                table.move(postcodes, saved_after + 1, #postcodes, #next_postcodes + 1, next_postcodes)
+
+                local iter = post
+                for _ = 1, saved_anchor do iter = getnext(iter) end
+                if iter ~= post then
+                  local newpre = copynodelist(post, iter)
+                  setlink(tail(newpre), next_pre)
+                  next_pre = newpre
+                end
+                for _ = saved_anchor, saved_after - 1 do iter = getnext(iter) end
+                if next_post then
+                  setlink(next_lastpost, copynodelist(iter))
+                else
+                  next_post = copynodelist(iter)
+                end
+              end
+              -- The pre branch in the outer replace branch. The post branch is implicitly the same as the previous one
+              do
+                local saved_anchor = saved_anchor - disc_cluster
+                table.move(repcodes, 1, saved_anchor, 1, next_repcodes)
+                for n in traverse(next_rep) do
+                  next_repcodes[#next_repcodes + 1] = is_char(n, fontid) or 0xFFFC
+                end
+
+                local rep = glyphs[disc_glyph].replace.head
+                local iter = rep
+                for _ = 1, saved_anchor do iter = getnext(iter) end
+                if iter ~= rep then
+                  local newpre = copynodelist(rep, iter)
+                  setlink(tail(newpre), next_rep)
+                  next_rep = newpre
+                end
+              end
+              setsubtype(discs.disc, firstdisc_t)
+              setsubtype(next_disc.disc, seconddisc_t)
+              discs = discs.next
+              disc_glyph = disc_glyph + 1
+              disc_cluster = disc_cluster + 1
+              glyphs[disc_glyph] = {
+                replace = makesub(run, next_repcodes, next_rep),
+                pre = makesub(run, next_precodes, next_pre),
+                post = makesub(run, next_postcodes, next_post),
+                cluster = disc_cluster,
+                nextcluster = disc_cluster + 1,
+                codepoint = 0xFFFC,
+              }
+            end
             i = disc_glyph
             node = discs.disc
             cluster = disc_cluster
@@ -529,6 +611,7 @@ function shape(head, firstnode, run)
             end
             if not discs then break end
             anchor_cluster, after_cluster = offset + discs.anchor_cluster, offset + discs.after_cluster
+            saved_anchor, saved_after = (discs.next and discs.next.anchor_cluster or math.huge) + offset
           elseif anchor_cluster == cluster then
             disc_glyph, disc_cluster, disc_node = i, cluster, node
           else

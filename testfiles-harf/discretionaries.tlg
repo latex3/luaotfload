@@ -252,7 +252,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 1.21
-...\hbox(8.17+2.62)x345.0, glue set 215.48997fil, direction TLT
+...\hbox(8.17+2.62)x345.0, glue set 215.38997fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -266,8 +266,10 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
+.....> \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "d" 0064 +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "—" 2014 +0:+0 (ligature "-" 002D +0:+0"-" 002D +0:+0"-" 002D +0:+0)
-....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "d" 0064 +0:+0
+.....= \kern0.1 (font)
+.....= \TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "d" 0064 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "e" 0065 +0:+0
 ....\kern-0.07 (font)
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "v" 0076 +0:+0
@@ -311,11 +313,10 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "m" 006D +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
+....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
 ....\discretionary (penalty 50)
 .....< \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
-.....< \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
 .....> \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "d" 0064 +0:+0
-.....= \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
 .....= \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "-" 002D +0:+0
 .....= \kern0.1 (font)
 .....= \TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "d" 0064 +0:+0
@@ -655,7 +656,7 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\baselineskip) 3.01
-...\hbox(7.05+1.94)x345.0, glue set 235.79fil, direction TLT
+...\hbox(7.05+1.94)x345.0, glue set 236.62fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -668,10 +669,9 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "o" 006F +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "m" 006D +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
-....\TU/lmroman10-regular.otf(1)/m/n/10 "--" 2013 +0:+0
 ....\discretionary (penalty 50)
-.....< \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
-.....= \TU/lmroman10-regular.otf(1)/m/n/10 "-" 002D +0:+0
+.....< \TU/lmroman10-regular.otf(1)/m/n/10 "---" F6DE +0:+0
+.....= \TU/lmroman10-regular.otf(1)/m/n/10 "---" F6DE +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "d" 0064 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "e" 0065 +0:+0
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "v" 0076 +0:+0

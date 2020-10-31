@@ -599,14 +599,14 @@ function shape(head, firstnode, run)
                 codepoint = 0xFFFC,
               }
             end
-            i = disc_glyph
-            node = discs.disc
-            cluster = disc_cluster
+            i = disc_glyph + 1
+            assert(node == getnext(discs.disc))
+            cluster = disc_cluster + 1
 
             disc_cluster = nil
             discs = discs.next
             while discs and discs.anchor_cluster + offset < cluster do
-              free(discs.disc)
+              freenode(discs.disc)
               discs = discs.next
             end
             if not discs then break end

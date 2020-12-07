@@ -431,7 +431,7 @@ function shape(head, firstnode, run)
       end
 
         -- Is this a safe breakpoint?
-      if discs and ((not glyph) or codes[cluster+1] == 0x20 or codes[cluster+1] == 0xFFFC
+      if discs and ((not glyph) or codes[cluster] == 0x20 or codes[cluster+1] == 0x20 or codes[cluster+1] == 0xFFFC
           or not unsafetobreak(glyph)) then
         -- Should we change the discretionary state?
         local anchor_cluster, after_cluster = offset + discs.anchor_cluster, offset + discs.after_cluster

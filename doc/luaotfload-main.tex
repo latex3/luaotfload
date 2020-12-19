@@ -64,8 +64,16 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \beginsection{Changes}
 \beginsubsection {New in version 3.16 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
-  \item TODO
-\end{itemize}
+  \item The entry point is called \identifier{luaotfload.lua} instead of 
+     \identifier{luaotfload-main.lua} (but the old name is still provided for compatibility).
+  \item  \inlinecode{pre/post_shaping_filter} callbacks has been added.
+  \item  The number of \abbrev{lua}-files and submodules shown in the \abbrev{log}-file has been reduced. But it  
+   is extended again by setting the environment variable \inlinecode{LUAOTFLOAD_TRACE_SUBMODULES=1}.
+  \item first/second discretionaries ??
+  \item Variable fonts ??
+  \item Upper/Lower ??  
+  \item A number of small bugfixes.
+ \end{itemize}
 \endsubsection
 
 \beginsubsection {New in version 3.15 (by Ulrike Fischer/Marcel Krüger)}

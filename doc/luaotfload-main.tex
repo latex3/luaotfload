@@ -69,9 +69,19 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
   \item  \inlinecode{pre/post_shaping_filter} callbacks has been added.
   \item  The number of \abbrev{lua}-files and submodules shown in the \abbrev{log}-file has been reduced. But it  
    is extended again by setting the environment variable \inlinecode{LUAOTFLOAD_TRACE_SUBMODULES=1}.
-  \item first/second discretionaries ??
-  \item Variable fonts ??
-  \item Upper/Lower ??  
+  \item The HarfBuzz based shaper will, in some sitations drop hyphenaton
+   points. This happens less requently now since the new version uses
+   first/second discretionaries (the mechanism described in the LuaTeX manual,
+   section 5.6 for the of-f-ice example) to support a limited amount of
+   nesting.
+  \item When the \texttt{node} shaper is used, experimental support for OpenType variable
+   fonts has been added. To use them, set the font feature \texttt{axis} to
+   a comma separated list of axis names and values. (E.g.  \texttt{axis={weight=600}})
+   The supported axis names and value range depend on the font.
+ \item The font features \texttt{upper} and \texttt{lower} can be used to map
+   the text of a font to upper or lowercase before displaying it. Currently
+   this implements the untailored Unicode case mapping algorithm, but it is
+   planned to add tailoring later.
   \item A number of small bugfixes.
  \end{itemize}
 \endsubsection

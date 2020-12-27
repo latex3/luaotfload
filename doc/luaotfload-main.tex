@@ -64,14 +64,24 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \beginsection{Changes}
 \beginsubsection {New in version 3.16 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
-  \item The entry point is called \identifier{luaotfload.lua} instead of 
+  \item The entry point is called \identifier{luaotfload.lua} instead of
      \identifier{luaotfload-main.lua} (but the old name is still provided for compatibility).
   \item  \inlinecode{pre/post_shaping_filter} callbacks has been added.
-  \item  The number of \abbrev{lua}-files and submodules shown in the \abbrev{log}-file has been reduced. But it  
+  \item  The number of \abbrev{lua}-files and submodules shown in the \abbrev{log}-file has been reduced. But it
    is extended again by setting the environment variable \inlinecode{LUAOTFLOAD_TRACE_SUBMODULES=1}.
-  \item first/second discretionaries ??
-  \item Variable fonts ??
-  \item Upper/Lower ??  
+  \item The HarfBuzz based shaper will in some situations drop hyphenation
+   points. This happens less frequently now since the new version uses
+   first/second discretionaries (the mechanism described in the LuaTeX manual,
+   section 5.6 for the of-f-ice example) to support a limited amount of
+   nesting.
+  \item When the \texttt{node} shaper is used, experimental support for OpenType variable
+   fonts has been added. To use them, set the font feature \texttt{axis} to
+   a comma separated list of axis names and values. (E.g.  \texttt{axis={weight=600}})
+   The supported axis names and value range depend on the font (see~page~\pageref{variablefonts}).
+ \item The font features \texttt{upper} and \texttt{lower} can be used to map
+   the text of a font to upper or lowercase before displaying it. Currently
+   this implements the untailored Unicode case mapping algorithm, but it is
+   planned to add tailoring later (see~page~\pageref{upperlower}).
   \item A number of small bugfixes.
  \end{itemize}
 \endsubsection
@@ -1180,8 +1190,8 @@ obviously, \inlinecode{random}.
 
   \endaltitem
 
-  \beginaltitem {multiscript}\phantomsection\label{multiscript}
-   In\marginpar{New in 3.12 -- experimental} fonts many shaping rules are implemented only for specific scripts and so you get correct typesetting only if the \identifier{script} feature is correctly set. This means that to write a text which uses more than one script you have to declare a font for each script and switch fonts even if the font contains glyphs for all scripts.
+  \beginaltitem {multiscript}
+   In\phantomsection\label{multiscript}\marginpar{New in 3.12 -- experimental} fonts many shaping rules are implemented only for specific scripts and so you get correct typesetting only if the \identifier{script} feature is correctly set. This means that to write a text which uses more than one script you have to declare a font for each script and switch fonts even if the font contains glyphs for all scripts.
    \identifier{multiscript} tries to help here. The feature is experimental and bound to change. Feedback is welcome but you use it at your risk.
 
    \identifier{multiscript} allows you to declare fonts for various script. The value is either \identifier{auto} described below, or a name which has been previously declared or a combination of both. An example for such a named multiscript could look like this (the colors are only for demonstration):
@@ -1235,8 +1245,10 @@ obviously, \inlinecode{random}.
 
   \endaltitem
 
-   \beginaltitem {fallback}\label{fallback}
-   This\marginpar{New in 3.12 -- experimental} allows you to define a chain of fonts which are used if glyphs are missing in the main font. It works only for text fonts, not for math fonts set with the  \identifier{unicode-math} package.
+   \beginaltitem {fallback}
+   This\label{fallback}\marginpar{New in 3.12 -- experimental} 
+   allows you to define a chain of fonts which are used if glyphs are missing in the main font. 
+   It works only for text fonts, not for math fonts set with the  \identifier{unicode-math} package.
    The feature is experimental and bound to change. Feedback is welcome but you use it at your risk.
    For example
 
@@ -1290,7 +1302,69 @@ obviously, \inlinecode{random}.
 
    As with the \identifier{multiscript} key more control over the used glyph and script in edge cases will be needed.
    \endaltitem
-\enddescriptions
+   
+  \beginaltitem {upper/lower}
+   The\phantomsection\label{upperlower}\marginpar{New in 3.16} 
+   font features \texttt{upper} and \texttt{lower} can be used to map
+   the text of a font to upper or lowercase before displaying it. Currently
+   this implements the untailored Unicode case mapping algorithm, but it is
+   planned to add tailoring later. For example
+   
+   \beginlisting
+   \font\test={name:LatinModernRoman:mode=node;+upper;}
+   \test Grüße 
+   \endlisting
+   
+   {\Large\font\test={name:LatinModernRoman:mode=node;+upper;}\test Grüße}    
+   
+  \endaltitem  
+  
+  \beginaltitem {Variable fonts}
+   When\phantomsection\label{variablefonts}\marginpar{New in 3.16} 
+   the \texttt{node} shaper is used, 
+   experimental support for OpenType variable
+   fonts has been added. To use them, set the font feature \texttt{axis} to
+   a comma separated list of axis names and values. (E.g.  \texttt{axis={weight=600}})
+   The supported axis names and value range depend on the font (see~page~\pageref{variablefonts}). 
+   The following listing shows an example with the Source Code Variable font:
+   
+  \begin{lstlisting}[columns=fullflexible]
+\documentclass{article}
+ \DeclareFontFamily{TU}{sourcecode-variable}{}
+ \newcommand\DeclareSourceVariable[2]{%
+   \DeclareFontShape{TU}{sourcecode-variable}{#1}{n}{%
+     <-> \UnicodeFontFile{SourceCodeVariable-Roman.otf}
+         {\UnicodeFontTeXLigatures axis={weight=#2};}%
+   }{}%
+   \DeclareFontShape{TU}{sourcecode-variable}{#1}{it}{%
+     <-> \UnicodeFontFile{SourceCodeVariable-Italic.otf}
+        {\UnicodeFontTeXLigatures axis={weight=#2};}%
+   }{}%
+ }
+ \DeclareSourceVariable{ul}{200}
+ \DeclareSourceVariable{el}{250}
+ \DeclareSourceVariable{l}{300}
+ \DeclareSourceVariable{sl}{350}
+ \DeclareSourceVariable{m}{400}
+ \DeclareSourceVariable{sb}{500}
+ \DeclareSourceVariable{b}{600}
+ \DeclareSourceVariable{eb}{700}
+ \DeclareSourceVariable{ub}{900}
+ \begin{document}
+ \fontfamily{sourcecode-variable}\selectfont
+ \fontseries{ul}\selectfont a\textit{b}
+ \fontseries{el}\selectfont c\textit{d}
+ \fontseries{l}\selectfont e\textit{f}
+ \fontseries{sl}\selectfont g\textit{h}
+ \fontseries{m}\selectfont i\textit{j}
+ \fontseries{sb}\selectfont k\textit{l}
+ \fontseries{b}\selectfont m\textit{n}
+ \fontseries{eb}\selectfont o\textit{p}
+ \fontseries{ub}\selectfont q\textit{r}
+ \end{document}
+\end{lstlisting}
+
+  \enddescriptions
 
 \endsubsection
 
@@ -1353,6 +1427,7 @@ Currently (2014) there are three of them:
 \enddescriptions
 
 \endsubsection
+
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -300,7 +300,10 @@ methods["already loaded"] = function(name)
 end
 
 methods["preload table"] = function(name)
-    return builtin["preload table"](name)
+    local f = builtin["preload table"]
+    if f then
+        return f(name)
+    end
 end
 
 methods["qualified path"]=function(name)
@@ -316,17 +319,26 @@ methods["lib extra list"] = function(name)
 end
 
 methods["path specification"] = function(name)
-    getluapaths() -- triggers list building and tracing
-    return builtin["path specification"](name)
+    local f = builtin["path specification"]
+    if f then
+        getluapaths() -- triggers list building and tracing
+        return f(name)
+    end
 end
 
 methods["cpath specification"] = function(name)
-    getlibpaths() -- triggers list building and tracing
-    return builtin["cpath specification"](name)
+    local f = builtin["cpath specification"]
+    if f then
+        getlibpaths() -- triggers list building and tracing
+        return f(name)
+    end
 end
 
 methods["all in one fallback"] = function(name)
-    return builtin["all in one fallback"](name)
+    local f = builtin["all in one fallback"]
+    if f then
+        return f(name)
+    end
 end
 
 methods["not loaded"] = function(name)

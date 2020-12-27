@@ -1246,8 +1246,8 @@ obviously, \inlinecode{random}.
   \endaltitem
 
    \beginaltitem {fallback}
-   This\label{fallback}\marginpar{New in 3.12 -- experimental} 
-   allows you to define a chain of fonts which are used if glyphs are missing in the main font. 
+   This\label{fallback}\marginpar{New in 3.12 -- experimental}
+   allows you to define a chain of fonts which are used if glyphs are missing in the main font.
    It works only for text fonts, not for math fonts set with the  \identifier{unicode-math} package.
    The feature is experimental and bound to change. Feedback is welcome but you use it at your risk.
    For example
@@ -1302,32 +1302,32 @@ obviously, \inlinecode{random}.
 
    As with the \identifier{multiscript} key more control over the used glyph and script in edge cases will be needed.
    \endaltitem
-   
+
   \beginaltitem {upper/lower}
-   The\phantomsection\label{upperlower}\marginpar{New in 3.16} 
+   The\phantomsection\label{upperlower}\marginpar{New in 3.16}
    font features \texttt{upper} and \texttt{lower} can be used to map
    the text of a font to upper or lowercase before displaying it. Currently
    this implements the untailored Unicode case mapping algorithm, but it is
    planned to add tailoring later. For example
-   
+
    \beginlisting
    \font\test={name:LatinModernRoman:mode=node;+upper;}
-   \test Grüße 
+   \test Grüße
    \endlisting
-   
-   {\Large\font\test={name:LatinModernRoman:mode=node;+upper;}\test Grüße}    
-   
-  \endaltitem  
-  
+
+   {\Large\font\test={name:LatinModernRoman:mode=node;+upper;}\test Grüße}
+
+  \endaltitem
+
   \beginaltitem {Variable fonts}
-   When\phantomsection\label{variablefonts}\marginpar{New in 3.16} 
-   the \texttt{node} shaper is used, 
+   When\phantomsection\label{variablefonts}\marginpar{New in 3.16}
+   the \texttt{node} shaper is used,
    experimental support for OpenType variable
    fonts has been added. To use them, set the font feature \texttt{axis} to
    a comma separated list of axis names and values. (E.g.  \texttt{axis={weight=600}})
-   The supported axis names and value range depend on the font (see~page~\pageref{variablefonts}). 
+   The supported axis names and value range depend on the font (see~page~\pageref{variablefonts}).
    The following listing shows an example with the Source Code Variable font:
-   
+
   \begin{lstlisting}[columns=fullflexible]
 \documentclass{article}
  \DeclareFontFamily{TU}{sourcecode-variable}{}

@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Mon Dec 21 23:44:02 2020
+-- merge date  : Mon Aug 31 23:16:26 2020
 
 do -- begin closure to overcome local limits and interference
 
@@ -358,10 +358,7 @@ methods["already loaded"]=function(name)
  return package.loaded[name]
 end
 methods["preload table"]=function(name)
- local f=builtin["preload table"]
- if f then
-  return f(name)
- end
+ return builtin["preload table"](name)
 end
 methods["qualified path"]=function(name)
   return loadedbyname(addsuffix(lualibfile(name),"lua"),name)
@@ -373,24 +370,15 @@ methods["lib extra list"]=function(name)
  return loadedbypath(addsuffix(lualibfile(name),os.libsuffix),name,getextralibpaths(),true,"lib")
 end
 methods["path specification"]=function(name)
- local f=builtin["path specification"]
- if f then
-  getluapaths() 
-  return f(name)
- end
+ getluapaths() 
+ return builtin["path specification"](name)
 end
 methods["cpath specification"]=function(name)
- local f=builtin["cpath specification"]
- if f then
-  getlibpaths() 
-  return f(name)
- end
+ getlibpaths() 
+ return builtin["cpath specification"](name)
 end
 methods["all in one fallback"]=function(name)
- local f=builtin["all in one fallback"]
- if f then
-  return f(name)
- end
+ return builtin["all in one fallback"](name)
 end
 methods["not loaded"]=function(name)
  if helpers.trace then
@@ -3370,8 +3358,6 @@ elseif name=="macosx" then
    platform="osx-intel"
   elseif find(architecture,"x86_64",1,true) then
    platform="osx-64"
-  elseif find(architecture,"arm64",1,true) then
-   platform="osx-64"
   else
    platform="osx-ppc"
   end
@@ -4698,7 +4684,6 @@ if not modules then modules={} end modules ['l-unicode']={
  license="see context related readme files"
 }
 utf=utf or {}
--- unicode=nil
 if not string.utfcharacters then
  local gmatch=string.gmatch
  function string.characters(str)

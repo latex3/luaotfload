@@ -260,7 +260,7 @@
   local stringsub       = string.sub
   local stringgsub      = string.gsub
   %local backslash       = unicode.utf8.char (0x200c)
-  local backslash       = unicode.utf8.char (0x5c)
+  local backslash = string.char(0x5c)
   local escaped         = [[\string\string\string\]]
   document.printlines = function (buffer)
     local lines = string.explode (buffer, "\noexpand\n")

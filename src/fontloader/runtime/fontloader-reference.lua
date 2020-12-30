@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2020-08-31 22:01
+-- merge date  : 2020-12-30 16:42
 
 do -- begin closure to overcome local limits and interference
 
@@ -4939,6 +4939,7 @@ nuts.getkern=direct.getkern
 nuts.getlist=direct.getlist
 nuts.getnext=direct.getnext
 nuts.getoffsets=direct.getoffsets
+nuts.getoptions=direct.getoptions or function() return 0 end
 nuts.getprev=direct.getprev
 nuts.getsubtype=direct.getsubtype
 nuts.getwidth=direct.getwidth
@@ -5022,6 +5023,15 @@ local traverse_id=nuts.traverse_id
 local copy_node=nuts.copy_node
 local glyph_code=nodes.nodecodes.glyph
 local ligature_code=nodes.glyphcodes.ligature
+do 
+ local p=nodecodes.localpar or nodecodes.local_par
+ if p then
+  nodecodes.par=p
+  nodecodes[p]="par"
+  nodecodes.localpar=p 
+  nodecodes.local_par=p 
+ end
+end
 do
  local get_components=node.direct.getcomponents
  local set_components=node.direct.setcomponents
@@ -5074,11 +5084,14 @@ do
   end
   return 0
  end
+ local function flush_components()
+ end
  nuts.set_components=set_components
  nuts.get_components=get_components
  nuts.copy_only_glyphs=copy_only_glyphs
  nuts.copy_no_components=copy_no_components
  nuts.count_components=count_components
+ nuts.flush_components=flush_components
 end
 nuts.uses_font=direct.uses_font
 do
@@ -15147,7 +15160,7 @@ local function mergecomposites(glyphs,shapes)
   shape.components=nil
   return contours,points
  end
- for index=0,#glyphs-1 do
+ for index=0,#glyphs do
   local shape=shapes[index]
   if shape then
    local components=shape.components
@@ -15577,7 +15590,7 @@ local function repackpoints(glyphs,shapes)
  local result={} 
  local xpoints={} 
  local ypoints={} 
- for index=0,#glyphs-1 do
+ for index=0,#glyphs do
   local shape=shapes[index]
   if shape then
    local r=0
@@ -16840,7 +16853,7 @@ local function readfirst(f,offset)
  end
  return { readushort(f) }
 end
-function readarray(f,offset)
+local function readarray(f,offset)
  if offset then
   setposition(f,offset)
  end
@@ -20766,7 +20779,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.111 
+otf.version=3.112 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -21131,7 +21144,6 @@ local function copytotfm(data,cache_id)
   parameters.units=units
   parameters.vheight=metadata.defaultvheight
   properties.space=spacer
-  properties.encodingbytes=2
   properties.format=data.format or formats.otf
   properties.filename=filename
   properties.fontname=fontname
@@ -21139,6 +21151,9 @@ local function copytotfm(data,cache_id)
   properties.psname=psname
   properties.name=filename or fullname
   properties.subfont=subfont
+if not CONTEXTLMTXMODE or CONTEXTLMTXMODE==0 then
+  properties.encodingbytes=2
+end
   properties.private=properties.private or data.private or privateoffset
   return {
    characters=characters,
@@ -26617,6 +26632,7 @@ local copy_only_glyphs=nuts.copy_only_glyphs
 local count_components=nuts.count_components
 local set_components=nuts.set_components
 local get_components=nuts.get_components
+local flush_components=nuts.flush_components
 local ischar=nuts.ischar
 local usesfont=nuts.uses_font
 local insert_node_after=nuts.insert_after
@@ -26639,7 +26655,7 @@ local glue_code=nodecodes.glue
 local disc_code=nodecodes.disc
 local math_code=nodecodes.math
 local dir_code=nodecodes.dir
-local localpar_code=nodecodes.localpar
+local par_code=nodecodes.par
 local lefttoright_code=nodes.dirvalues.lefttoright
 local righttoleft_code=nodes.dirvalues.righttoleft
 local discretionarydisc_code=disccodes.discretionary
@@ -26821,11 +26837,23 @@ local function markstoligature(head,start,stop,char)
   setsubtype(base,ligatureglyph_code)
   set_components(base,start)
   setlink(prev,base,next)
+  flush_components(start)
   return head,base
  end
 end
+local no_left_ligature_code=1
+local no_right_ligature_code=2
+local no_left_kern_code=4
+local no_right_kern_code=8
+local has_glyph_option=node.direct.has_glyph_option or function(n,c)
+ if c==no_left_ligature_code or c==no_right_ligature_code then
+  return getattr(n,a_noligature)==1
+ else
+  return false
+ end
+end
 local function toligature(head,start,stop,char,dataset,sequence,skiphash,discfound,hasmarks) 
- if getattr(start,a_noligature)==1 then
+ if has_glyph_option(start,no_right_ligature_code) then
   return head,start
  end
  if start==stop and getchar(start)==char then
@@ -26889,6 +26917,7 @@ local function toligature(head,start,stop,char,dataset,sequence,skiphash,discfou
     break
    end
   end
+  flush_components(components)
  else
   local discprev,discnext=getboth(discfound)
   if discprev and discnext then
@@ -27175,78 +27204,86 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
  return head,start,false,false
 end
 function handlers.gpos_single(head,start,dataset,sequence,kerns,rlmode,skiphash,step,injection)
- local startchar=getchar(start)
- local format=step.format
- if format=="single" or type(kerns)=="table" then 
-  local dx,dy,w,h=setposition(0,start,factor,rlmode,kerns,injection)
-  if trace_kerns then
-   logprocess("%s: shifting single %s by %s xy (%p,%p) and wh (%p,%p)",pref(dataset,sequence),gref(startchar),format,dx,dy,w,h)
-  end
- else
-  local k=(format=="move" and setmove or setkern)(start,factor,rlmode,kerns,injection)
-  if trace_kerns then
-   logprocess("%s: shifting single %s by %s %p",pref(dataset,sequence),gref(startchar),format,k)
-  end
- end
- return head,start,true
-end
-function handlers.gpos_pair(head,start,dataset,sequence,kerns,rlmode,skiphash,step,injection)
- local snext=getnext(start)
- if not snext then
+ if has_glyph_option(start,no_right_kern_code) then
   return head,start,false
  else
-  local prev=start
-  while snext do
-   local nextchar=ischar(snext,currentfont)
-   if nextchar then
-    if skiphash and skiphash[nextchar] then 
-     prev=snext
-     snext=getnext(snext)
-    else
-     local krn=kerns[nextchar]
-     if not krn then
-      break
-     end
-     local format=step.format
-     if format=="pair" then
-      local a=krn[1]
-      local b=krn[2]
-      if a==true then
-      elseif a then 
-       local x,y,w,h=setposition(1,start,factor,rlmode,a,injection)
-       if trace_kerns then
-        local startchar=getchar(start)
-        logprocess("%s: shifting first of pair %s and %s by xy (%p,%p) and wh (%p,%p) as %s",pref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h,injection or "injections")
-       end
-      end
-      if b==true then
-       start=snext 
-      elseif b then 
-       local x,y,w,h=setposition(2,snext,factor,rlmode,b,injection)
-       if trace_kerns then
-        local startchar=getchar(start)
-        logprocess("%s: shifting second of pair %s and %s by xy (%p,%p) and wh (%p,%p) as %s",pref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h,injection or "injections")
-       end
-       start=snext 
-      elseif forcepairadvance then
-       start=snext 
-      end
-      return head,start,true
-     elseif krn~=0 then
-      local k=(format=="move" and setmove or setkern)(snext,factor,rlmode,krn,injection)
-      if trace_kerns then
-       logprocess("%s: inserting %s %p between %s and %s as %s",pref(dataset,sequence),format,k,gref(getchar(prev)),gref(nextchar),injection or "injections")
-      end
-      return head,start,true
-     else 
-      break
-     end
-    end
-   else
-    break
+  local startchar=getchar(start)
+  local format=step.format
+  if format=="single" or type(kerns)=="table" then 
+   local dx,dy,w,h=setposition(0,start,factor,rlmode,kerns,injection)
+   if trace_kerns then
+    logprocess("%s: shifting single %s by %s xy (%p,%p) and wh (%p,%p)",pref(dataset,sequence),gref(startchar),format,dx,dy,w,h)
+   end
+  else
+   local k=(format=="move" and setmove or setkern)(start,factor,rlmode,kerns,injection)
+   if trace_kerns then
+    logprocess("%s: shifting single %s by %s %p",pref(dataset,sequence),gref(startchar),format,k)
    end
   end
+  return head,start,true
+ end
+end
+function handlers.gpos_pair(head,start,dataset,sequence,kerns,rlmode,skiphash,step,injection)
+ if has_glyph_option(start,no_right_kern_code) then
   return head,start,false
+ else
+  local snext=getnext(start)
+  if not snext then
+   return head,start,false
+  else
+   local prev=start
+   while snext do
+    local nextchar=ischar(snext,currentfont)
+    if nextchar then
+     if skiphash and skiphash[nextchar] then 
+      prev=snext
+      snext=getnext(snext)
+     else
+      local krn=kerns[nextchar]
+      if not krn then
+       break
+      end
+      local format=step.format
+      if format=="pair" then
+       local a=krn[1]
+       local b=krn[2]
+       if a==true then
+       elseif a then 
+        local x,y,w,h=setposition(1,start,factor,rlmode,a,injection)
+        if trace_kerns then
+         local startchar=getchar(start)
+         logprocess("%s: shifting first of pair %s and %s by xy (%p,%p) and wh (%p,%p) as %s",pref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h,injection or "injections")
+        end
+       end
+       if b==true then
+        start=snext 
+       elseif b then 
+        local x,y,w,h=setposition(2,snext,factor,rlmode,b,injection)
+        if trace_kerns then
+         local startchar=getchar(start)
+         logprocess("%s: shifting second of pair %s and %s by xy (%p,%p) and wh (%p,%p) as %s",pref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h,injection or "injections")
+        end
+        start=snext 
+       elseif forcepairadvance then
+        start=snext 
+       end
+       return head,start,true
+      elseif krn~=0 then
+       local k=(format=="move" and setmove or setkern)(snext,factor,rlmode,krn,injection)
+       if trace_kerns then
+        logprocess("%s: inserting %s %p between %s and %s as %s",pref(dataset,sequence),format,k,gref(getchar(prev)),gref(nextchar),injection or "injections")
+       end
+       return head,start,true
+      else 
+       break
+      end
+     end
+    else
+     break
+    end
+   end
+   return head,start,false
+  end
  end
 end
 function handlers.gpos_mark2base(head,start,dataset,sequence,markanchors,rlmode,skiphash)
@@ -27676,89 +27713,93 @@ function chainprocs.gsub_ligature(head,start,stop,dataset,sequence,currentlookup
  return head,start,false,0,false
 end
 function chainprocs.gpos_single(head,start,stop,dataset,sequence,currentlookup,rlmode,skiphash,chainindex)
- local mapping=currentlookup.mapping
- if mapping==nil then
-  mapping=getmapping(dataset,sequence,currentlookup)
- end
- if mapping then
-  local startchar=getchar(start)
-  local kerns=mapping[startchar]
-  if kerns then
-   local format=currentlookup.format
-   if format=="single" then
-    local dx,dy,w,h=setposition(0,start,factor,rlmode,kerns) 
-    if trace_kerns then
-     logprocess("%s: shifting single %s by %s (%p,%p) and correction (%p,%p)",cref(dataset,sequence),gref(startchar),format,dx,dy,w,h)
+ if not has_glyph_option(start,no_right_kern_code) then
+  local mapping=currentlookup.mapping
+  if mapping==nil then
+   mapping=getmapping(dataset,sequence,currentlookup)
+  end
+  if mapping then
+   local startchar=getchar(start)
+   local kerns=mapping[startchar]
+   if kerns then
+    local format=currentlookup.format
+    if format=="single" then
+     local dx,dy,w,h=setposition(0,start,factor,rlmode,kerns) 
+     if trace_kerns then
+      logprocess("%s: shifting single %s by %s (%p,%p) and correction (%p,%p)",cref(dataset,sequence),gref(startchar),format,dx,dy,w,h)
+     end
+    else 
+     local k=(format=="move" and setmove or setkern)(start,factor,rlmode,kerns,injection)
+     if trace_kerns then
+      logprocess("%s: shifting single %s by %s %p",cref(dataset,sequence),gref(startchar),format,k)
+     end
     end
-   else 
-    local k=(format=="move" and setmove or setkern)(start,factor,rlmode,kerns,injection)
-    if trace_kerns then
-     logprocess("%s: shifting single %s by %s %p",cref(dataset,sequence),gref(startchar),format,k)
-    end
+    return head,start,true
    end
-   return head,start,true
   end
  end
  return head,start,false
 end
-function chainprocs.gpos_pair(head,start,stop,dataset,sequence,currentlookup,rlmode,skiphash,chainindex) 
- local mapping=currentlookup.mapping
- if mapping==nil then
-  mapping=getmapping(dataset,sequence,currentlookup)
- end
- if mapping then
-  local snext=getnext(start)
-  if snext then
-   local startchar=getchar(start)
-   local kerns=mapping[startchar] 
-   if kerns then
-    local prev=start
-    while snext do
-     local nextchar=ischar(snext,currentfont)
-     if not nextchar then
-      break
-     end
-     if skiphash and skiphash[nextchar] then
-      prev=snext
-      snext=getnext(snext)
-     else
-      local krn=kerns[nextchar]
-      if not krn then
+function chainprocs.gpos_pair(head,start,stop,dataset,sequence,currentlookup,rlmode,skiphash,chainindex)
+ if not has_glyph_option(start,no_right_kern_code) then
+  local mapping=currentlookup.mapping
+  if mapping==nil then
+   mapping=getmapping(dataset,sequence,currentlookup)
+  end
+  if mapping then
+   local snext=getnext(start)
+   if snext then
+    local startchar=getchar(start)
+    local kerns=mapping[startchar] 
+    if kerns then
+     local prev=start
+     while snext do
+      local nextchar=ischar(snext,currentfont)
+      if not nextchar then
        break
       end
-      local format=currentlookup.format
-      if format=="pair" then
-       local a=krn[1]
-       local b=krn[2]
-       if a==true then
-       elseif a then
-        local x,y,w,h=setposition(1,start,factor,rlmode,a,"injections") 
-        if trace_kerns then
-         local startchar=getchar(start)
-         logprocess("%s: shifting first of pair %s and %s by (%p,%p) and correction (%p,%p)",cref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h)
-        end
-       end
-       if b==true then
-        start=snext 
-       elseif b then 
-        local x,y,w,h=setposition(2,snext,factor,rlmode,b,"injections")
-        if trace_kerns then
-         local startchar=getchar(start)
-         logprocess("%s: shifting second of pair %s and %s by (%p,%p) and correction (%p,%p)",cref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h)
-        end
-        start=snext 
-       elseif forcepairadvance then
-        start=snext 
-       end
-       return head,start,true
-      elseif krn~=0 then
-       local k=(format=="move" and setmove or setkern)(snext,factor,rlmode,krn)
-       if trace_kerns then
-        logprocess("%s: inserting %s %p between %s and %s",cref(dataset,sequence),format,k,gref(getchar(prev)),gref(nextchar))
-       end
-       return head,start,true
+      if skiphash and skiphash[nextchar] then
+       prev=snext
+       snext=getnext(snext)
       else
-       break
+       local krn=kerns[nextchar]
+       if not krn then
+        break
+       end
+       local format=currentlookup.format
+       if format=="pair" then
+        local a=krn[1]
+        local b=krn[2]
+        if a==true then
+        elseif a then
+         local x,y,w,h=setposition(1,start,factor,rlmode,a,"injections") 
+         if trace_kerns then
+          local startchar=getchar(start)
+          logprocess("%s: shifting first of pair %s and %s by (%p,%p) and correction (%p,%p)",cref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h)
+         end
+        end
+        if b==true then
+         start=snext 
+        elseif b then 
+         local x,y,w,h=setposition(2,snext,factor,rlmode,b,"injections")
+         if trace_kerns then
+          local startchar=getchar(start)
+          logprocess("%s: shifting second of pair %s and %s by (%p,%p) and correction (%p,%p)",cref(dataset,sequence),gref(startchar),gref(nextchar),x,y,w,h)
+         end
+         start=snext 
+        elseif forcepairadvance then
+         start=snext 
+        end
+        return head,start,true
+       elseif krn~=0 then
+        local k=(format=="move" and setmove or setkern)(snext,factor,rlmode,krn)
+        if trace_kerns then
+         logprocess("%s: inserting %s %p between %s and %s",cref(dataset,sequence),format,k,gref(getchar(prev)),gref(nextchar))
+        end
+        return head,start,true
+       else
+        break
+       end
       end
      end
     end
@@ -29580,7 +29621,7 @@ do
    checkstep(head)
   end
   local initialrl=0
-  if getid(head)==localpar_code and start_of_par(head) then
+  if getid(head)==par_code and start_of_par(head) then
    initialrl=pardirstate(head)
   elseif direction==righttoleft_code then
    initialrl=-1
@@ -34675,7 +34716,6 @@ local function copytotfm(data)
   parameters.descender=abs(metadata.descender or 0)
   parameters.units=1000
   properties.spacer=spacer
-  properties.encodingbytes=2
   properties.format=fonts.formats[filename] or "type1"
   properties.filename=filename
   properties.fontname=fontname
@@ -34683,6 +34723,9 @@ local function copytotfm(data)
   properties.psname=fullname
   properties.name=filename or fullname or fontname
   properties.private=properties.private or data.private or privateoffset
+if not CONTEXTLMTXMODE or CONTEXTLMTXMODE==0 then
+  properties.encodingbytes=2
+end
   if next(characters) then
    return {
     characters=characters,
@@ -35993,7 +36036,7 @@ if not modules then modules={} end modules ['font-shp']={
 }
 local tonumber,next=tonumber,next
 local concat=table.concat
-local formatters=string.formatters
+local formatters,lower=string.formatters,string.lower
 local otf=fonts.handlers.otf
 local afm=fonts.handlers.afm
 local pfb=fonts.handlers.pfb
@@ -36186,7 +36229,7 @@ end
 local function loadstreams(cache,filename,sub,instance)
  local base=file.basename(filename)
  local name=file.removesuffix(base)
- local kind=file.suffix(filename)
+ local kind=lower(file.suffix(filename))
  local attr=lfs.attributes(filename)
  local size=attr and attr.size or 0
  local time=attr and attr.modification or 0
@@ -37084,56 +37127,74 @@ local rules={
  "FractionRuleThickness",
  "UnderbarRuleThickness",
 }
-local function setmathparameters(tfmdata,characters,mathparameters,dx,dy,squeeze)
- if delta~=0 then
-  for i=1,#rules do
-   local name=rules[i]
-   local value=mathparameters[name]
-   if value then
-      mathparameters[name]=(squeeze or 1)*(value+dx)
+local setmathparameters
+local setmathcharacters
+if CONTEXTLMTXMODE and CONTEXTLMTXMODE>0 then
+ setmathparameters=function(tfmdata,characters,mathparameters,dx,dy,squeeze,multiplier)
+  if delta~=0 then
+   for i=1,#rules do
+    local name=rules[i]
+    local value=mathparameters[name]
+    if value then
+       mathparameters[name]=(squeeze or 1)*(value+dy)
+    end
    end
   end
  end
-end
-local function setmathcharacters(tfmdata,characters,mathparameters,dx,dy,squeeze,wdelta,hdelta,ddelta)
- local function wdpatch(char)
-  if wsnap~=0 then
-   char.width=char.width+wdelta/2
-  end
+ setmathcharacters=function()
  end
- local function htpatch(char)
-  if hsnap~=0 then
-   local height=char.height
-   if height then
-    char.height=char.height+2*dy
+else
+ setmathparameters=function(tfmdata,characters,mathparameters,dx,dy,squeeze,multiplier)
+  if delta~=0 then
+   for i=1,#rules do
+    local name=rules[i]
+    local value=mathparameters[name]
+    if value then
+       mathparameters[name]=(squeeze or 1)*(value+dy)
+    end
    end
   end
  end
- local character=characters[0x221A]
- if character and character.next then
-  local char=character
-  local next=character.next
-  wdpatch(char)
-  htpatch(char)
-  while next do
-   char=characters[next]
+ setmathcharacters=function(tfmdata,characters,mathparameters,dx,dy,squeeze,wdelta,hdelta,ddelta)
+  local function wdpatch(char)
+   if wsnap~=0 then
+    char.width=char.width+wdelta/2
+   end
+  end
+  local function htpatch(char)
+   if hsnap~=0 then
+    local height=char.height
+    if height then
+     char.height=char.height+2*dy
+    end
+   end
+  end
+  local character=characters[0x221A]
+  if character and character.next then
+   local char=character
+   local next=character.next
    wdpatch(char)
    htpatch(char)
-   next=char.next
-  end
-  if char then
-   local v=char.vert_variants
-   if v then
-    local top=v[#v]
-    if top then
-     local char=characters[top.glyph]
-     htpatch(char)
+   while next do
+    char=characters[next]
+    wdpatch(char)
+    htpatch(char)
+    next=char.next
+   end
+   if char then
+    local v=char.vert_variants
+    if v then
+     local top=v[#v]
+     if top then
+      local char=characters[top.glyph]
+      htpatch(char)
+     end
     end
    end
   end
  end
 end
-local shiftmode=CONTEXTLMTXMODE>0
+local shiftmode=CONTEXTLMTXMODE and CONTEXTLMTXMODE>0
 local function manipulateeffect(tfmdata)
  local effect=tfmdata.properties.effect
  if effect then
@@ -37205,7 +37266,7 @@ local function manipulateeffect(tfmdata)
    end
   end
   if mathparameters then
-   setmathparameters(tfmdata,characters,mathparameters,dx,dy,squeeze)
+   setmathparameters(tfmdata,characters,mathparameters,dx,dy,squeeze,multiplier)
    setmathcharacters(tfmdata,characters,mathparameters,dx,dy,squeeze,wdelta,hdelta,ddelta)
   end
   parameters.factor=factor

@@ -823,7 +823,7 @@ end
 
 -- quite often 0, 1, 2
 
-function readarray(f,offset)
+local function readarray(f,offset)
     if offset then
         setposition(f,offset)
     end

@@ -144,6 +144,11 @@ texlua scripts/mkstatus --fontloader=./src/auto/fontloader-2019-07-04.lua
 3. Adapt/Check ctan.ann, ctanreadme
 4. create ctan package
 --> l3build ctan
+
+CHECK if in fontloader-basics-gen.lua line 192 is
+   caches.namespace= 'generic'
+(should be set by l3build tag)
+
 5. upload
  -->l3build upload
 

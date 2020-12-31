@@ -1,17 +1,24 @@
-2020-09-02 luaotfload v3.15
-    * The font database is updated more reliably if fonts get deleted.
-    * In multiple error cases, error messages are shown instead of silently
-      generating bad output.
-    * Write glyph ids instead of internal identifiers to DVI files. This
-      allows using OpenType fonts when working with dvilualatex.
-      (This requires additional support from the DVI reader)
-    * The set of font features which are enabled by default has been 
-      changed to be more similar to HarfBuzz.
-      Especially Above-base mark Positioning (abvm),
-      Below-base mark Positioning (blwm), Contextual
-      Alternates (calt), Cursive Positioning (curs),
-      Distances (dist), and Required Contextual Alternates
-     (rclt) are now enabled by default for all scripts.
-    * Added a mathfontdimen font feature which allows emulating
-      fontdimen values from xetex or traditional \TeX\ math fonts.
-    * Initial support for variable fonts in node mode.
+2020-12-30 luaotfload v3.16
+    *  The fontloader has been synced with the context code from 2020-12-30
+    *  The entry point is called luaotfload.lua instead of
+       luaotfload-main.lua (but the old name is still provided for 
+       compatibility).
+    *  pre/post_shaping_filter callbacks has been added.
+    *  The number of lua-files and submodules shown in the log-file 
+       has been reduced. But it is extended again by setting the environment 
+       variable LUAOTFLOAD_TRACE_SUBMODULES=1.
+    *  The HarfBuzz based shaper will in some situations drop hyphenation
+       points. This happens less frequently now since the new version uses
+       first/second discretionaries (the mechanism described in the LuaTeX manual,
+       section 5.6 for the of-f-ice example) to support a limited amount of
+       nesting.
+    *  When the node shaper is used, experimental support for 
+       OpenType variable fonts has been added. To use them, set the font 
+       feature axis to a comma separated list of axis names and values. 
+       (E.g.  axis={weight=600}) The supported axis names and value 
+       range depend on the font.
+    *  The font features upper and lower can be used to map
+       the text of a font to upper or lowercase before displaying it. Currently
+       this implements the untailored Unicode case mapping algorithm, but it is
+       planned to add tailoring later.
+    *  A number of small bugfixes.

@@ -1,6 +1,6 @@
 -- merged file : lualibs-extended-merged.lua
 -- parent file : lualibs-extended.lua
--- merge date  : Mon Aug 31 23:16:16 2020
+-- merge date  : Wed Dec 30 17:55:44 2020
 
 do -- begin closure to overcome local limits and interference
 
@@ -2700,8 +2700,6 @@ local dimenfactors=allocate {
  ["pc"]=(1/12)/65536,
  ["dd"]=(1157/1238)/65536,
  ["cc"]=(1157/14856)/65536,
- ["nd"]=(20320/21681)/65536,
- ["nc"]=(5080/65043)/65536
 }
 local f_none=formatters["%s%s"]
 local f_true=formatters["%0.5F%s"]
@@ -2733,8 +2731,6 @@ function number.tobasepoints  (n,fmt) return numbertodimen(n,"bp",fmt) end
 function number.topicas    (n,fmt) return numbertodimen(n "pc",fmt) end
 function number.todidots   (n,fmt) return numbertodimen(n,"dd",fmt) end
 function number.tociceros  (n,fmt) return numbertodimen(n,"cc",fmt) end
-function number.tonewdidots   (n,fmt) return numbertodimen(n,"nd",fmt) end
-function number.tonewciceros  (n,fmt) return numbertodimen(n,"nc",fmt) end
 local amount=(S("+-")^0*R("09")^0*P(".")^0*R("09")^0)+Cc("0")
 local unit=R("az")^1+P("%")
 local dimenpair=amount/tonumber*(unit^1/dimenfactors+Cc(1)) 

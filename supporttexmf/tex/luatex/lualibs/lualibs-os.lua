@@ -358,6 +358,8 @@ elseif name == "macosx" then
             platform = "osx-intel"
         elseif find(architecture,"x86_64",1,true) then
             platform = "osx-64"
+        elseif find(architecture,"arm64",1,true) then
+            platform = "osx-64"
         else
             platform = "osx-ppc"
         end

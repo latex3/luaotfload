@@ -7,7 +7,7 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
     name          = "luaotfload-init",
-    version       = "3.16",       --TAGVERSION
+    version       = "3.17-dev",       --TAGVERSION
     date          = "2020-12-31", --TAGDATE
     description   = "luaotfload submodule / initialization",
     license       = "GPL v2.0"

@@ -5,7 +5,7 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-szss",
-    version       = "3.16",       --TAGVERSION
+    version       = "3.17-dev",       --TAGVERSION
     date          = "2020-12-31", --TAGDATE
     description   = "luaotfload submodule / Special feature handling",
     license       = "GPL v2.0",

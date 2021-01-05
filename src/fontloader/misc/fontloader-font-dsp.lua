@@ -503,31 +503,29 @@ local function readvariationdata(f,storeoffset,factors) -- store
         regions[i] = t
     end
     -- deltas
-    if factors then
-        for i=1,nofdeltadata do
-            setposition(f,storeoffset+deltadata[i])
-            local nofdeltasets = readushort(f)
-            local nofshorts    = readushort(f)
-            local nofregions   = readushort(f)
-            local usedregions  = { }
-            local deltas       = { }
-            for i=1,nofregions do
-                usedregions[i] = regions[readushort(f)+1]
-            end
-            -- we could test before and save a for
-            for i=1,nofdeltasets do
-                local t = readintegertable(f,nofshorts,short)
-                for i=nofshorts+1,nofregions do
-                    t[i] = readinteger(f)
-                end
-                deltas[i] = t
-            end
-            deltadata[i] = {
-                regions = usedregions,
-                deltas  = deltas,
-                scales  = factors and getscales(usedregions,factors) or nil,
-            }
+    for i=1,nofdeltadata do
+        setposition(f,storeoffset+deltadata[i])
+        local nofdeltasets = readushort(f)
+        local nofshorts    = readushort(f)
+        local nofregions   = readushort(f)
+        local usedregions  = { }
+        local deltas       = { }
+        for i=1,nofregions do
+            usedregions[i] = regions[readushort(f)+1]
         end
+        -- we could test before and save a for
+        for i=1,nofdeltasets do
+            local t = readintegertable(f,nofshorts,short)
+            for i=nofshorts+1,nofregions do
+                t[i] = readinteger(f)
+            end
+            deltas[i] = t
+        end
+        deltadata[i] = {
+            regions = usedregions,
+            deltas  = deltas,
+            scales  = factors and getscales(usedregions,factors) or nil,
+        }
     end
     setposition(f,position)
     return regions, deltadata

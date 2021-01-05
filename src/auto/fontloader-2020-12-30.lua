@@ -10540,7 +10540,7 @@ do
  local reginit=false
  local function updateregions(n) 
   if regions then
-   local current=regions[n] or regions[1]
+   local current=regions[n+1] or regions[1]
    nofregions=#current
    if axis and n~=reginit then
     factors={}
@@ -11109,7 +11109,11 @@ do
   popped=3
   seacs={}
   if regions then
-   regions={ regions } 
+   regions={}
+   local deltas=data.deltas
+   for i=1,#deltas do
+    regions[i]=deltas[i].regions
+   end
    axis=data.factors or false
   end
  end
@@ -13096,30 +13100,28 @@ local function readvariationdata(f,storeoffset,factors)
   end
   regions[i]=t
  end
- if factors then
-  for i=1,nofdeltadata do
-   setposition(f,storeoffset+deltadata[i])
-   local nofdeltasets=readushort(f)
-   local nofshorts=readushort(f)
-   local nofregions=readushort(f)
-   local usedregions={}
-   local deltas={}
-   for i=1,nofregions do
-    usedregions[i]=regions[readushort(f)+1]
-   end
-   for i=1,nofdeltasets do
-    local t=readintegertable(f,nofshorts,short)
-    for i=nofshorts+1,nofregions do
-     t[i]=readinteger(f)
-    end
-    deltas[i]=t
-   end
-   deltadata[i]={
-    regions=usedregions,
-    deltas=deltas,
-    scales=factors and getscales(usedregions,factors) or nil,
-   }
+ for i=1,nofdeltadata do
+  setposition(f,storeoffset+deltadata[i])
+  local nofdeltasets=readushort(f)
+  local nofshorts=readushort(f)
+  local nofregions=readushort(f)
+  local usedregions={}
+  local deltas={}
+  for i=1,nofregions do
+   usedregions[i]=regions[readushort(f)+1]
   end
+  for i=1,nofdeltasets do
+   local t=readintegertable(f,nofshorts,short)
+   for i=nofshorts+1,nofregions do
+    t[i]=readinteger(f)
+   end
+   deltas[i]=t
+  end
+  deltadata[i]={
+   regions=usedregions,
+   deltas=deltas,
+   scales=factors and getscales(usedregions,factors) or nil,
+  }
  end
  setposition(f,position)
  return regions,deltadata

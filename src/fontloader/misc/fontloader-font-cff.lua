@@ -1431,7 +1431,7 @@ do
 
     local function updateregions(n) -- n + 1
         if regions then
-            local current = regions[n] or regions[1]
+            local current = regions[n + 1] or regions[1]
             nofregions = #current
             if axis and n ~= reginit then
                 factors = { }
@@ -2155,7 +2155,11 @@ do
         popped   = 3
         seacs    = { }
         if regions then
-            regions = { regions } -- needs checking
+            regions = { }
+            local deltas = data.deltas
+            for i = 1, #deltas do
+                regions[i] = deltas[i].regions
+            end
             axis = data.factors or false
         end
     end

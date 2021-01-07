@@ -1425,13 +1425,15 @@ do
     -- to wrap my head around the rather complex variable font specification
     -- with regions and axis, the following approach kind of works but is more
     -- some trial and error trick. It's still not clear how much of the complex
-    -- truetype description applies to cff.
+    -- truetype description applies to cff. Once there are fonts out there we'll
+    -- get there. (Marcel and friends did some tests with recent cff2 fonts so
+    -- the code has been adapted accordingly.)
 
     local reginit = false
 
     local function updateregions(n) -- n + 1
         if regions then
-            local current = regions[n] or regions[1]
+            local current = regions[n+1] or regions[1]
             nofregions = #current
             if axis and n ~= reginit then
                 factors = { }
@@ -2155,7 +2157,14 @@ do
         popped   = 3
         seacs    = { }
         if regions then
-            regions = { regions } -- needs checking
+            -- this was:
+         -- regions = { regions } -- needs checking
+            -- and is now (MFC):
+            regions = { }
+            local deltas = data.deltas
+            for i = 1, #deltas do
+                regions[i] = deltas[i].regions
+            end
             axis = data.factors or false
         end
     end

@@ -503,7 +503,7 @@ local function readvariationdata(f,storeoffset,factors) -- store
         regions[i] = t
     end
     -- deltas
-    if factors then
+ -- if factors then
         for i=1,nofdeltadata do
             setposition(f,storeoffset+deltadata[i])
             local nofdeltasets = readushort(f)
@@ -528,7 +528,7 @@ local function readvariationdata(f,storeoffset,factors) -- store
                 scales  = factors and getscales(usedregions,factors) or nil,
             }
         end
-    end
+ -- end
     setposition(f,position)
     return regions, deltadata
 end

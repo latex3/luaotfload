@@ -829,6 +829,9 @@ function handlers.gsub_ligature(head,start,dataset,sequence,ligature,rlmode,skip
         -- of{f-}{}{f}e  o{f-}{}{f}fe  o{-}{}{ff}e (oe and ff ligature)
         -- we can end up here when we have a start run .. testruns start at a disc but
         -- so here we have the other case: char + disc
+        --
+        -- Challenge for Kai (latinmodern):  \hyphenation{fii-f-f-iif} fiiffiif
+        --
         if discfound then
             -- don't assume marks in a disc and we don't run over a disc (for now)
             local pre, post, replace = getdisc(discfound)

@@ -1,9 +1,9 @@
 --[[info-----------------------------------------------------------------------
   Luaotfload fontloader package
-  build 2020-12-30 17:29:34
+  build 2021-01-07 23:19:37
 -------------------------------------------------------------------------------
 
-  © 2020 PRAGMA ADE / ConTeXt Development Team
+  © 2021 PRAGMA ADE / ConTeXt Development Team
 
   The code in this file is provided under the GPL v2.0 license. See the
   file COPYING in the Luaotfload repository for details.
@@ -63,7 +63,7 @@
 --info]]-----------------------------------------------------------------------
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “data-con” 23a0f5386d46a1c157ae82a373e35fa0] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “data-con” 23a0f5386d46a1c157ae82a373e35fa0] ---
 
 if not modules then modules={} end modules ['data-con']={
  version=1.100,
@@ -184,10 +184,10 @@ function containers.cleanname(name)
  return (gsub(lower(name),"[^%w\128-\255]+","-")) 
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “data-con”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “data-con”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “basics-nod” 4b5c3c63e19df1b3f37fae7f87c25bda] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “basics-nod” 4b5c3c63e19df1b3f37fae7f87c25bda] ---
 
 if not modules then modules={} end modules ['luatex-fonts-nod']={
  version=1.001,
@@ -450,10 +450,10 @@ do
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “basics-nod”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “basics-nod”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “basics-chr” 64fafe4eaf55d64aead6513c1e74a024] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “basics-chr” 64fafe4eaf55d64aead6513c1e74a024] ---
 
 
 characters=characters or {}
@@ -4063,10 +4063,10 @@ characters.indicgroups={
  },
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “basics-chr”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “basics-chr”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ini” 5343de60613adb24cdd7a8d2ee1d153c] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ini” 5343de60613adb24cdd7a8d2ee1d153c] ---
 
 if not modules then modules={} end modules ['font-ini']={
  version=1.001,
@@ -4107,10 +4107,10 @@ if node and not tex.getfontoffamily then
  tex.getfontoffamily=node.family_font 
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ini”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ini”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-mis” 17e967c9ec4d001deefd43ddf25e98f7] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-mis” 17e967c9ec4d001deefd43ddf25e98f7] ---
 
 if not modules then modules={} end modules ['luatex-font-mis']={
  version=1.001,
@@ -4142,10 +4142,10 @@ function font.each()
  return table.sortedhash(fonts.hashes.identifiers)
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-mis”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-mis”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-con” a3eb543fa5946fa1faf0e1e50d5b3b91] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-con” 724e5dd14aec2d4d189f8619898004cf] ---
 
 if not modules then modules={} end modules ['font-con']={
  version=1.001,
@@ -4599,6 +4599,9 @@ function constructors.scale(tfmdata,specification)
   properties.hasmath=true
   target.nomath=false
   target.MathConstants=target.mathparameters
+  local oldmath=properties.oldmath
+  targetproperties.oldmath=oldmath
+  target.oldmath=oldmath
  else
   properties.hasmath=false
   target.nomath=true
@@ -5510,10 +5513,10 @@ function constructors.addcoreunicodes(unicodes)
  return unicodes
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-con”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-con”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-enc” 5ff4ca50493d7c4ecea0e15c203099f0] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-enc” 5ff4ca50493d7c4ecea0e15c203099f0] ---
 
 if not modules then modules={} end modules ['luatex-font-enc']={
  version=1.001,
@@ -5582,10 +5585,10 @@ function encodings.load(filename)
  return containers.write(encodings.cache,name,data)
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-enc”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-enc”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-cid” 22b0367742fb253deef84ef7ccf5e8de] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-cid” 22b0367742fb253deef84ef7ccf5e8de] ---
 
 if not modules then modules={} end modules ['font-cid']={
  version=1.001,
@@ -5736,10 +5739,10 @@ function cid.getmap(specification)
  return found
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-cid”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-cid”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-map” c4a39db5ad822b348aa61bca5f4a599a] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-map” c4a39db5ad822b348aa61bca5f4a599a] ---
 
 if not modules then modules={} end modules ['font-map']={
  version=1.001,
@@ -6147,10 +6150,10 @@ function mappings.addtounicode(data,filename,checklookups,forceligatures)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-map”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-map”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-vfc” a81c29eda98cd62cbebdb6c93544b50d] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-vfc” a81c29eda98cd62cbebdb6c93544b50d] ---
 
 if not modules then modules={} end modules ['font-vfc']={
  version=1.001,
@@ -6247,10 +6250,10 @@ helpers.commands=utilities.storage.allocate {
  dummy=dummy,
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-vfc”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-vfc”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otr” 64dcbbc7107538723990e1119a80a9f8] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otr” 64dcbbc7107538723990e1119a80a9f8] ---
 
 if not modules then modules={} end modules ['font-otr']={
  version=1.001,
@@ -8094,10 +8097,10 @@ function readers.extend(fontdata)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otr”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otr”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-oti” 309a75f9c14b77d87e94eba827dc4e71] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-oti” 309a75f9c14b77d87e94eba827dc4e71] ---
 
 if not modules then modules={} end modules ['font-oti']={
  version=1.001,
@@ -8240,10 +8243,10 @@ function otffeatures.checkeddefaultlanguage(featuretype,autolanguage,languages)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-oti”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-oti”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ott” 673ed11e1d159997f535bfec5fa73808] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ott” 673ed11e1d159997f535bfec5fa73808] ---
 
 if not modules then modules={} end modules ["font-ott"]={
  version=1.001,
@@ -9359,10 +9362,10 @@ function otffeatures.normalize(features,wrap)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ott”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ott”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-cff” 802a10ad12ac32329f540881f940e3f2] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-cff” 2b677fad52d9999d0685e8525271a8cc] ---
 
 if not modules then modules={} end modules ['font-cff']={
  version=1.001,
@@ -10540,7 +10543,7 @@ do
  local reginit=false
  local function updateregions(n) 
   if regions then
-   local current=regions[n] or regions[1]
+   local current=regions[n+1] or regions[1]
    nofregions=#current
    if axis and n~=reginit then
     factors={}
@@ -11109,7 +11112,11 @@ do
   popped=3
   seacs={}
   if regions then
-   regions={ regions } 
+   regions={}
+   local deltas=data.deltas
+   for i=1,#deltas do
+    regions[i]=deltas[i].regions
+   end
    axis=data.factors or false
   end
  end
@@ -11557,10 +11564,10 @@ function readers.cffcheck(filename)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-cff”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-cff”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ttf” ffffc827e1bcddc33a2b615340ecff7f] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ttf” ffffc827e1bcddc33a2b615340ecff7f] ---
 
 if not modules then modules={} end modules ['font-ttf']={
  version=1.001,
@@ -12731,10 +12738,10 @@ function readers.gvar(f,fontdata,specification,glyphdata,shapedata)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ttf”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ttf”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-dsp” 18c85a4857f45c31a3555bf1faac434a] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-dsp” 174ce11f3ba0bddf270f48d8d2addd56] ---
 
 if not modules then modules={} end modules ['font-dsp']={
  version=1.001,
@@ -13096,7 +13103,6 @@ local function readvariationdata(f,storeoffset,factors)
   end
   regions[i]=t
  end
- if factors then
   for i=1,nofdeltadata do
    setposition(f,storeoffset+deltadata[i])
    local nofdeltasets=readushort(f)
@@ -13120,7 +13126,6 @@ local function readvariationdata(f,storeoffset,factors)
     scales=factors and getscales(usedregions,factors) or nil,
    }
   end
- end
  setposition(f,position)
  return regions,deltadata
 end
@@ -16012,10 +16017,10 @@ function readers.mvar(f,fontdata,specification)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-dsp”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-dsp”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-oup” 6f46aa00ae1c20c43f8ffaf329dc8695] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-oup” 6f46aa00ae1c20c43f8ffaf329dc8695] ---
 
 if not modules then modules={} end modules ['font-oup']={
  version=1.001,
@@ -18656,10 +18661,10 @@ function readers.expand(data)
  expandlookups(sublookups)
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-oup”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-oup”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otl” 6c4b718ceacfb0cbeb2c03c423f97aec] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otl” f4e6652a191003493389de230b14cfb3] ---
 
 if not modules then modules={} end modules ['font-otl']={
  version=1.001,
@@ -18687,7 +18692,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.112 
+otf.version=3.113 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -19365,10 +19370,10 @@ otf.coverup={
  end
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otl”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otl”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-oto” 2b1d6bc63b2ebf8f2655a15e1cda6541] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-oto” 2b1d6bc63b2ebf8f2655a15e1cda6541] ---
 
 if not modules then modules={} end modules ['font-oto']={ 
  version=1.001,
@@ -19826,10 +19831,10 @@ registerotffeature {
 }
 otf.basemodeinitializer=featuresinitializer
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-oto”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-oto”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otj” 8de59cb9b043e5f73c6b9f7cc8f6978e] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otj” 8de59cb9b043e5f73c6b9f7cc8f6978e] ---
 
 if not modules then modules={} end modules ['font-otj']={
  version=1.001,
@@ -21324,10 +21329,10 @@ function injections.handler(head,where)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otj”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otj”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ota” ad1d5de06400f88829509e1f3ff2b473] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ota” ad1d5de06400f88829509e1f3ff2b473] ---
 
 if not modules then modules={} end modules ['font-ota']={
  version=1.001,
@@ -21821,10 +21826,10 @@ directives.register("otf.analyze.useunicodemarks",function(v)
  analyzers.useunicodemarks=v
 end)
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ota”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ota”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ots” 91c79619c386e4a96954f3115f398b94] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ots” c780a471147527f4ddc139e017927ffe] ---
 
 if not modules then modules={} end modules ['font-ots']={ 
  version=1.001,
@@ -25442,10 +25447,10 @@ registerotffeature {
  },
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ots”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ots”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-osd” 73c9531c79df5ada320cb20777f7ed49] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-osd” 73c9531c79df5ada320cb20777f7ed49] ---
 
 if not modules then modules={} end modules ['font-osd']={ 
  version=1.001,
@@ -27878,10 +27883,10 @@ for i=1,nofscripts do
  methods[scripts_two[i]]=method_two
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-osd”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-osd”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ocl” 797b5c71bf819c5f4fb314a4d646e9a7] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ocl” 797b5c71bf819c5f4fb314a4d646e9a7] ---
 
 if not modules then modules={} end modules ['font-ocl']={
  version=1.001,
@@ -28424,10 +28429,10 @@ if context then
  }
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-ocl”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-ocl”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otc” 0f12230ea07b5151f75d52726977e91f] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otc” 0f12230ea07b5151f75d52726977e91f] ---
 
 if not modules then modules={} end modules ['font-otc']={
  version=1.001,
@@ -29184,10 +29189,10 @@ end
 otf.enhancers.enhance=enhance
 otf.enhancers.register("check extra features",enhance)
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-otc”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-otc”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-onr” 6d161533f3437435e12a0ad64866df44] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-onr” 6d161533f3437435e12a0ad64866df44] ---
 
 if not modules then modules={} end modules ['font-onr']={
  version=1.001,
@@ -29560,10 +29565,10 @@ function readers.getinfo(filename)
  end
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-onr”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-onr”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-one” 53cd565030e919da984b50471cc3be37] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-one” 53cd565030e919da984b50471cc3be37] ---
 
 if not modules then modules={} end modules ['font-one']={
  version=1.001,
@@ -30277,10 +30282,10 @@ registerafmenhancer("normalize features",enhance_normalize_features)
 registerafmenhancer("check extra features",otfenhancers.enhance)
 registerafmenhancer("fix names",enhance_fix_names)
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-one”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-one”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-afk” 9da14e0fb22129c053acc599d1312544] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-afk” 9da14e0fb22129c053acc599d1312544] ---
 
 if not modules then modules={} end modules ['font-afk']={
  version=1.001,
@@ -30447,10 +30452,10 @@ fonts.handlers.afm.helpdata={
  }
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-afk”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-afk”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-tfm” f0eb5e2a8068b17ad401bb7efdba1630] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-tfm” f0eb5e2a8068b17ad401bb7efdba1630] ---
 
 if not modules then modules={} end modules ['luatex-fonts-tfm']={
  version=1.001,
@@ -30965,10 +30970,10 @@ registertfmfeature {
  }
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-tfm”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-tfm”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-lua” 1fbfdf7b689b2bdfd0e3bb9bf74ce136] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-lua” 1fbfdf7b689b2bdfd0e3bb9bf74ce136] ---
 
 if not modules then modules={} end modules ['font-lua']={
  version=1.001,
@@ -31008,10 +31013,10 @@ function readers.lua(specification)
  return check_lua(specification,fullname)
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-lua”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-lua”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-def” b9d908c2338b7dc443ce9d1e9fcb7139] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-def” b9d908c2338b7dc443ce9d1e9fcb7139] ---
 
 if not modules then modules={} end modules ['font-def']={
  version=1.001,
@@ -31411,10 +31416,10 @@ if not context then
  callbacks.register('define_font',definers.read,"definition of fonts (tfmdata preparation)")
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-def”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-def”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-shp” 5ff497c993112d4fef4c148348d964eb] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-shp” 5ff497c993112d4fef4c148348d964eb] ---
 
 if not modules then modules={} end modules ['font-shp']={
  version=1.001,
@@ -31779,10 +31784,10 @@ callback.register("glyph_stream_provider",function(id,index,mode)
  return ""
 end)
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-shp”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-shp”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-def” f435e0875f203f343157baeff876ec9c] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-def” f435e0875f203f343157baeff876ec9c] ---
 
 if not modules then modules={} end modules ['luatex-fonts-def']={
  version=1.001,
@@ -31863,10 +31868,10 @@ function fonts.definers.applypostprocessors(tfmdata)
  return tfmdata
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-def”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-def”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-ext” 32013cbc5d5d336be8b1d1e5879d86c4] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-ext” 32013cbc5d5d336be8b1d1e5879d86c4] ---
 
 if not modules then modules={} end modules ['luatex-fonts-ext']={
  version=1.001,
@@ -32052,10 +32057,10 @@ registerotffeature {
  }
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-ext”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-ext”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-tex” ceb087ef6fa2f89aed7179f60ddf8f35] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-tex” ceb087ef6fa2f89aed7179f60ddf8f35] ---
 
 if not modules then modules={} end modules ['font-imp-tex']={
  version=1.001,
@@ -32154,10 +32159,10 @@ registerotffeature {
  description="arabic digits",
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-tex”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-tex”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-ligatures” 26ffcf089391445f7af59536c8814364] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-ligatures” 26ffcf089391445f7af59536c8814364] ---
 
 if not modules then modules={} end modules ['font-imp-ligatures']={
  version=1.001,
@@ -32271,10 +32276,10 @@ if context then
  }
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-ligatures”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-ligatures”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-italics” ae563638fa29a4ff3e8e4d1e81fd35ae] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-italics” defcb415bc1e0a0999b27773902adc18] ---
 
 if not modules then modules={} end modules ['font-imp-italics']={
  version=1.001,
@@ -32378,10 +32383,10 @@ if context then
  registerafmfeature(dimensions_specification)
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-italics”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-italics”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-effects” a2dde5e071fcb3fc7b90f2bcd5aa4f22] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-effects” a2dde5e071fcb3fc7b90f2bcd5aa4f22] ---
 
 if not modules then modules={} end modules ['font-imp-effects']={
  version=1.001,
@@ -32764,10 +32769,10 @@ local specification={
 registerotffeature(specification)
 registerafmfeature(specification)
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “font-imp-effects”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “font-imp-effects”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-lig” fbd251eea3810a43a8d5542319361d68] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-lig” fbd251eea3810a43a8d5542319361d68] ---
 
 
 fonts.handlers.otf.addfeature {
@@ -34836,10 +34841,10 @@ fonts.handlers.otf.addfeature {
  ["type"]="ligature",
 }
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-lig”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-lig”] ---
 
 
-do  --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-gbn” 10ecdf01e7c926e5128ad8a9dff4d677] ---
+do  --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-gbn” 10ecdf01e7c926e5128ad8a9dff4d677] ---
 
 if not modules then modules={} end modules ['luatex-fonts-gbn']={
  version=1.001,
@@ -35104,7 +35109,7 @@ function nodes.simple_font_handler(head,groupcode,size,packtype,direction)
  return head
 end
 
-end --- [luaotfload, fontloader-2020-12-30.lua scope for “fonts-gbn”] ---
+end --- [luaotfload, fontloader-2021-01-07.lua scope for “fonts-gbn”] ---
 
 
 --- vim:ft=lua:sw=2:ts=8:et:tw=79

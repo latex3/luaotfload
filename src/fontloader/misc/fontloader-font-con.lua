@@ -600,13 +600,17 @@ function constructors.scale(tfmdata,specification)
     --
     if hasmath then
         constructors.assignmathparameters(target,tfmdata) -- does scaling and whatever is needed
-        properties.hasmath      = true
-        target.nomath           = false
-        target.MathConstants    = target.mathparameters
+        properties.hasmath       = true
+        target.nomath            = false
+        target.MathConstants     = target.mathparameters
+        --
+        local oldmath            = properties.oldmath
+        targetproperties.oldmath = oldmath
+        target.oldmath           = oldmath
     else
-        properties.hasmath      = false
-        target.nomath           = true
-        target.mathparameters   = nil -- nop
+        properties.hasmath       = false
+        target.nomath            = true
+        target.mathparameters    = nil -- nop
     end
     --
     -- Here we support some context specific trickery (this might move to a plugin). During the

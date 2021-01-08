@@ -1,5 +1,10 @@
 Change History
 --------------
+2021-01-08 luaotfload v3.17
+
+    *  The fontloader has been synced with the context code from 2021-01-07.
+       This improves support for advanced CFF based OpenType variable fonts.
+
 2020-12-31 luaotfload v3.16
 
     *  The fontloader has been synced with the context code from 2020-12-30

@@ -5,8 +5,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-colors",
-    version       = "3.17-dev",       --TAGVERSION
-    date          = "2020-12-31", --TAGDATE
+    version       = "3.17",       --TAGVERSION
+    date          = "2020-01-08", --TAGDATE
     description   = "luaotfload submodule / color",
     license       = "GPL v2.0",
     author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Dohyun Kim, David Carlisle",

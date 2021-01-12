@@ -5,7 +5,7 @@
 do -- block to avoid to many local variables error
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-harf-define",
-     version       = "3.17",       --TAGVERSION
+     version       = "3.18-dev",       --TAGVERSION
      date          = "2020-01-08", --TAGDATE
      description   = "luaotfload submodule / HarfBuzz font loading",
      license       = "GPL v2.0",

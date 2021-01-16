@@ -6,7 +6,7 @@ do -- block to avoid to many local variables error
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-database",
      version       = "3.17",       --TAGVERSION
-     date          = "2020-01-08", --TAGDATE
+     date          = "2021-01-08", --TAGDATE
      description   = "luaotfload submodule / database",
      license       = "GPL v2.0",
      author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",

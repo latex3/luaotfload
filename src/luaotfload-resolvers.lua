@@ -12,7 +12,7 @@
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-resolvers",
     version       = "3.18-dev",       --TAGVERSION
-    date          = "2020-01-08", --TAGDATE
+    date          = "2021-01-08", --TAGDATE
     description   = "luaotfload submodule / resolvers",
     license       = "GPL v2.0"
 }

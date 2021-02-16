@@ -59,6 +59,12 @@ local setkern            = nodedirect.setkern
 local getglue            = nodedirect.getglue
 local setglue            = nodedirect.setglue
 
+local hasattribute       = nodedirect.has_attribute
+local setattribute       = nodedirect.set_attribute
+
+local getattributelist   = nodedirect.getattributelist
+local setattributelist   = nodedirect.setattributelist
+
 local find_node_tail     = nodedirect.tail
 local todirect           = nodedirect.todirect
 local tonode             = nodedirect.tonode
@@ -79,6 +85,9 @@ local identifiers        = fonthashes.identifiers
 local chardata           = fonthashes.characters
 local otffeatures        = fonts.constructors.newfeatures "otf"
 local markdata
+
+local attribute_table    = {}
+local attr = luatexbase.new_attribute("luaotfload.letterspace_done")
 
 local function getprevreal(n)
   repeat
@@ -243,6 +252,10 @@ kerncharacters = function (head)
     local id = getid(start)
     if id == glyph_code then
       --- 1) look up kern factor (slow, but cached rudimentarily)
+      if hasattribute(start, attr, 1) then -- We already kerned this node
+        firstkern = false -- TODO: I'm not sure about this one yet
+        goto nextnode
+      end
       local fontid = getfont(start)
       local krn, fillup = unpack(kernamounts[fontid])
       if not krn or krn == 0 then
@@ -426,6 +439,14 @@ kerncharacters = function (head)
             setfield(disc, "replace", kern_injector(false, krn))
           end --[[if replace and prv and nxt]]
         end --[[if not pid]]
+        local attr_list = getattributelist(start)
+        local new_attr_list = attribute_table[attr_list]
+        if new_attr_list then
+          setattributelist(start, new_attr_list)
+        else
+          setattribute(start, attr, 1)
+          attribute_table[attr_list] = getattributelist(start)
+        end
       end --[[if prev]]
     end --[[if id == glyph_code]]
 
@@ -478,6 +499,9 @@ local function enablefontkerning ( )
       logreport ("both", 0, "letterspace",
                  "kerncharacters() failed to return a valid new head")
     end
+
+    for k in next, attribute_table do attribute_table[k] = nil end
+
     return tonode (direct_hd)
   end
 

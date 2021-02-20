@@ -439,6 +439,7 @@ function shape(head, firstnode, run)
         while disc_cluster and after_cluster <= cluster
            or not disc_cluster and anchor_cluster <= cluster do
           if disc_cluster then
+            if false then -- The saved_... are for nested (aka first/second or init/select) discretionary nodes. The code is currently disabled because the linebreaking for these is broken on the engine level.
             if not saved_after and saved_anchor < cluster then
               saved_after = discs.next.after_cluster + offset
               if saved_after > cluster then
@@ -447,6 +448,7 @@ function shape(head, firstnode, run)
               end
             elseif saved_after then
               saved_after, after_cluster = after_cluster, saved_after
+            end
             end
             local rep_glyphs = table.move(glyphs, disc_glyph, i - 1, 1, {})
             for j = 1, #rep_glyphs do

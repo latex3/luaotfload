@@ -394,7 +394,7 @@ local function init_main(early_hook)
   ---load_fontloader_module "font-odv.lua" --- <= Devanagari support from Context
 
   logreport ("log", 0, "init",
-             "Context OpenType loader version %q",
+             "Context OpenType loader version %.3f",
              fonts.handlers.otf.version)
   callback.register = trapped_register
   nodes = context_environment.nodes

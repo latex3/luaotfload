@@ -179,7 +179,8 @@ local function itemize(head, fontid, direction)
   local dirstack = {}
   local currdir = direction or 0
   local lastskip, lastdir = true
-  local lastrun = {}
+  local dummyrun = { start = 0, len = 0 }
+  local lastrun = dummyrun
   local lastdisc
   local in_disc
 
@@ -224,9 +225,6 @@ local function itemize(head, fontid, direction)
         setlink(prev, n)
         code = nil
         skip = false
-        if not prev then
-          head = n
-        end
       else
         skip = true
       end
@@ -270,6 +268,9 @@ local function itemize(head, fontid, direction)
       lastrun.len = lastrun.len + 1
     elseif disc then
       if lastdisc then
+        if lastrun.len == 0 then
+          runs[#runs - 1].after = n
+        end
         lastdisc.next = disc
         lastdisc = disc
       else
@@ -278,7 +279,7 @@ local function itemize(head, fontid, direction)
     end
   end
 
-  return head, runs
+  return dummyrun.after, runs
 end
 
 

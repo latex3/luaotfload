@@ -12,10 +12,14 @@ TU/newfoo/m/n:
   [texgyreheros-regular.otf]:color=FFAA00
 USING FONTSPEC:
 TU/foo/m/n:
-  "[texgyrepagella-regular.otf]:mode=node;script=latn;language=dflt;color=FF0000FF ;"
+  "[texgyrepagella-regular.otf]:mode=node;script=latn;language=dflt;color=FF000
+0FF ;"
 TU/foo/m/sc:
-  "[texgyrepagella-regular.otf]:mode=node;script=latn;language=dflt;+smcp;color=FF0000FF ;"
+  "[texgyrepagella-regular.otf]:mode=node;script=latn;language=dflt;+smcp;color
+=FF0000FF ;"
 TU/foo/m/n:
-  "[texgyreheros-regular.otf]:mode=node;script=latn;language=dflt;color=FF00FFFF ;"
+  "[texgyreheros-regular.otf]:mode=node;script=latn;language=dflt;color=FF00FFF
+F ;"
 TU/foo/m/sc:
-  "[texgyreheros-regular.otf]:mode=node;script=latn;language=dflt;+smcp;color=FF00FFFF ;"
+  "[texgyreheros-regular.otf]:mode=node;script=latn;language=dflt;+smcp;color=F
+F00FFFF ;"

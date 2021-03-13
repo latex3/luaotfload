@@ -452,7 +452,9 @@ function shape(head, firstnode, run)
             for j = 1, #rep_glyphs do
               local glyph = rep_glyphs[j]
               glyph.cluster = glyph.cluster - disc_cluster
-              glyph.nextcluster = glyph.nextcluster - disc_cluster
+              if glyph.nextcluster then
+                glyph.nextcluster = glyph.nextcluster - disc_cluster
+              end
             end
             do
               local cluster_offset = disc_cluster - cluster + (saved_after and 2 or 1) -- The offset the glyph indices will move

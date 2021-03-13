@@ -2,17 +2,15 @@
 --         FILE:  luaotfload-harf-plug.lua
 --  DESCRIPTION:  part of luaotfload / HarfBuzz / fontloader plugin
 -----------------------------------------------------------------------
-do -- block to avoid to many local variables error
- assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
-     name          = "luaotfload-harf-plug",
-     version       = "3.18-dev",       --TAGVERSION
-     date          = "2021-01-08", --TAGDATE
-     description   = "luaotfload submodule / HarfBuzz shaping",
-     license       = "GPL v2.0",
-     author        = "Khaled Hosny, Marcel Krüger",
-     copyright     = "Luaotfload Development Team",     
- }
-end
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
+  name          = "luaotfload-harf-plug",
+  version       = "3.18-dev",       --TAGVERSION
+  date          = "2021-01-08", --TAGDATE
+  description   = "luaotfload submodule / HarfBuzz shaping",
+  license       = "GPL v2.0",
+  author        = "Khaled Hosny, Marcel Krüger",
+  copyright     = "Luaotfload Development Team",
+}
 
 local hb                = luaotfload.harfbuzz
 local logreport         = luaotfload.log.report
@@ -639,7 +637,6 @@ function shape(head, firstnode, run)
       ::NEXTCLUSTERFOUND:: -- end
       glyph.nextcluster = nextcluster
 
-      local disc, discindex
       -- Calculate the Unicode code points of this glyph. If cluster did not
       -- change then this is a glyph inside a complex cluster and will be
       -- handled with the start of its cluster.
@@ -653,18 +650,11 @@ function shape(head, firstnode, run)
             -- assert(char == codes[j])
             hex = hex .. to_utf16_hex(char)
             str = str .. utf8.char(char)
-          elseif not discindex and id == disc_t then
-            local props = properties[disc]
-            if not (props and props.zwnj) then
-              disc, discindex = node, j
-            end
           end
           node = getnext(node)
         end
         glyph.tounicode = hex
         glyph.string = str
-      end
-      if not fordisc and discindex then
       end
     end
     return head, firstnode, glyphs, run.len - len

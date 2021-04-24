@@ -9,12 +9,12 @@
 export PATH=/tmp/texlive/bin/x86_64-linux:$PATH
 if ! command -v texlua > /dev/null; then
   # Obtain TeX Live
-  wget http://pretest.math.hamburg/install-tl-unx.tar.gz
+  wget http://mirror.ctan.org/systems/texlive/tlnet/install-tl-unx.tar.gz
   tar -xzf install-tl-unx.tar.gz
   cd install-tl-20*
 
   # Install a minimal system
-  ./install-tl --profile=../texlive.profile -repository https://pretest.math.hamburg
+  ./install-tl --profile=../texlive.profile
 
   cd ..
 fi

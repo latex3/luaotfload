@@ -509,6 +509,17 @@ do
         end
         return factors
     end
+
+    -- Additionally we patch trytosharefont to ensure that variable fonts work
+    -- with default values whenever no explicit values are passed.
+    local original_trytosharefont = fonts.constructors.trytosharefont
+    function fonts.constructors.trytosharefont(target, tfmdata)
+        original_trytosharefont(target, tfmdata)
+        if not target.streamprovider and tfmdata.resources.variabledata then
+            local format = tfmdata.properties.format
+            target.streamprovider = format == 'opentype' and 1 or format == 'truetype' and 2 or 0
+        end
+    end
 end
 
 -- MK: Added

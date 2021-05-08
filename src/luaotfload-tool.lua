@@ -1401,11 +1401,41 @@ function actions.aliases (job)
     local name_index = fonts.names.data() or fonts.names.load()
     local mappings   = name_index.mappings
     local fontnames  = name_index.fontnames.texmf
-    local formats = { 'ttf', 'otf', }
+    local families   = name_index.families.texmf
+    local formats    = { 'ttf', 'otf', }
     for _, format in ipairs(formats) do
         for name, mapping in pairs(fontnames[format]) do
             mapping = mappings[mapping]
             print(string.format('%s %s', mapping.basename, name))
+        end
+    end
+    local function best_match(options, target)
+        if not options then return end
+        if options.default then return mappings[options.default] end
+        local best, best_diff = nil, math.huge
+        for _, option in ipairs(options) do
+            local diff = math.abs(option[1]-target)
+            if diff < best_diff then
+                best, best_diff = option[4], diff
+            end
+        end
+        return mappings[best]
+    end
+    for _, format in ipairs(formats) do
+        for name, family in pairs(families[format]) do
+            local r = best_match(family.r, 655360, mappings)
+            local b = best_match(family.b, 655360, mappings)
+            local i = best_match(family.i, 655360, mappings)
+            local bi = best_match(family.bi, 655360, mappings)
+            r = r or b or i or bi -- Not sure if this is still needed
+            if r then
+                b, i, bi = b or r, i or r, bi or r
+                print(string.format('%s %s\n%s %s-b\n%s %s-i\n%s %s-bi',
+                    r.basename, name,
+                    b.basename, name,
+                    i.basename, name,
+                    bi.basename, name))
+            end
         end
     end
     return true

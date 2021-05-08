@@ -736,7 +736,7 @@ local action_sequence = {
     "config"   , "loglevel" , "help"      , "version" ,
     "dumpconf" , "diagnose" , "blacklist" , "cache"   ,
     "flush"    , "bisect"   , "generate"  , "list"    ,
-    "query"    ,
+    "query"    , "aliases"  ,
 }
 
 local action_pending  = tabletohash(action_sequence, false)
@@ -1396,6 +1396,21 @@ function actions.diagnose (job)
     return diagnose (job)
 end
 
+function actions.aliases (job)
+    --- Help XeTeX find fonts
+    local name_index = fonts.names.data() or fonts.names.load()
+    local mappings   = name_index.mappings
+    local fontnames  = name_index.fontnames.texmf
+    local formats = { 'ttf', 'otf', }
+    for _, format in ipairs(formats) do
+        for name, mapping in pairs(fontnames[format]) do
+            mapping = mappings[mapping]
+            print(string.format('%s %s', mapping.basename, name))
+        end
+    end
+    return true
+end
+
 --- stuff to be carried out prior to exit
 
 local finalizers = { }
@@ -1434,6 +1449,7 @@ local function process_cmdline ( ) -- unit -> jobspec
     }
 
     local long_options = {
+        aliases            = 0,
         ["bisect"]         = 1,
         cache              = 1,
         conf               = 1,
@@ -1587,6 +1603,8 @@ local function process_cmdline ( ) -- unit -> jobspec
             action_pending["dumpconf"] = true
         elseif v == "print-conf" then
             result.print_config = true
+        elseif v == "aliases" then
+            action_pending["aliases"] = true
         end
     end
 

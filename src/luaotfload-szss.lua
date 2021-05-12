@@ -90,6 +90,7 @@ otfregister {
       end
       tfmdata.extend = value * 1000
       tfmdata.hb.hscale = tfmdata.units_per_em * value
+      tfmdata.hb.space = tfmdata.hb.space * value
       local parameters = tfmdata.parameters
       parameters.slant = parameters.slant * value
       parameters.space = parameters.space * value

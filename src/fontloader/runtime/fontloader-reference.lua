@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2021-01-07 16:56
+-- merge date  : 2021-05-09 17:12
 
 do -- begin closure to overcome local limits and interference
 
@@ -3158,25 +3158,59 @@ local function points(n)
  n=n*ptf
  if n%1==0 then
   return format("%ipt",n)
+ else
+  return lpegmatch(stripzeros,format("%.5fpt",n)) 
  end
- return lpegmatch(stripzeros,format("%.5fpt",n)) 
 end
-local function basepoints(n)
+local function nupoints(n)
  if n==0 then
-  return "0pt"
+  return "0"
  end
  n=tonumber(n)
  if not n or n==0 then
-  return "0pt"
+  return "0"
+ end
+ n=n*ptf
+ if n%1==0 then
+  return format("%i",n)
+ else
+  return format("%.5f",n) 
+ end
+end
+local function basepoints(n)
+ if n==0 then
+  return "0bp"
+ end
+ n=tonumber(n)
+ if not n or n==0 then
+  return "0bp"
  end
  n=n*bpf
  if n%1==0 then
   return format("%ibp",n)
+ else
+  return lpegmatch(stripzeros,format("%.5fbp",n)) 
  end
- return lpegmatch(stripzeros,format("%.5fbp",n)) 
+end
+local function nubasepoints(n)
+ if n==0 then
+  return "0"
+ end
+ n=tonumber(n)
+ if not n or n==0 then
+  return "0"
+ end
+ n=n*bpf
+ if n%1==0 then
+  return format("%i",n)
+ else
+  return format("%.5f",n) 
+ end
 end
 number.points=points
+number.nupoints=nupoints
 number.basepoints=basepoints
+number.nubasepoints=nubasepoints
 local rubish=spaceortab^0*newline
 local anyrubish=spaceortab+newline
 local stripped=(spaceortab^1/"")*newline
@@ -3454,7 +3488,9 @@ local environment={
  concat=table.concat,
  signed=number.signed,
  points=number.points,
+ nupoints=number.nupoints,
  basepoints=number.basepoints,
+ nubasepoints=number.nubasepoints,
  utfchar=utf.char,
  utfbyte=utf.byte,
  lpegmatch=lpeg.match,
@@ -3649,9 +3685,17 @@ local format_p=function()
  n=n+1
  return format("points(a%s)",n)
 end
+local format_P=function()
+ n=n+1
+ return format("nupoints(a%s)",n)
+end
 local format_b=function()
  n=n+1
  return format("basepoints(a%s)",n)
+end
+local format_B=function()
+ n=n+1
+ return format("nubasepoints(a%s)",n)
 end
 local format_t=function(f)
  n=n+1
@@ -3805,7 +3849,7 @@ local builder=Cs { "start",
 +V("n") 
 +V("N") 
 +V("k")
-+V("r")+V("h")+V("H")+V("u")+V("U")+V("p")+V("b")+V("t")+V("T")+V("l")+V("L")+V("I")+V("w") 
++V("r")+V("h")+V("H")+V("u")+V("U")+V("p")+V("P")+V("b")+V("B")+V("t")+V("T")+V("l")+V("L")+V("I")+V("w") 
 +V("W") 
 +V("a") 
 +V("A") 
@@ -3843,7 +3887,9 @@ local builder=Cs { "start",
  ["u"]=(prefix_any*P("u"))/format_u,
  ["U"]=(prefix_any*P("U"))/format_U,
  ["p"]=(prefix_any*P("p"))/format_p,
+ ["P"]=(prefix_any*P("P"))/format_P,
  ["b"]=(prefix_any*P("b"))/format_b,
+ ["B"]=(prefix_any*P("B"))/format_B,
  ["t"]=(prefix_tab*P("t"))/format_t,
  ["T"]=(prefix_tab*P("T"))/format_T,
  ["l"]=(prefix_any*P("l"))/format_l,
@@ -21237,6 +21283,7 @@ local function read_from_otf(specification)
  if tfmdata then
   tfmdata.properties.name=specification.name
   tfmdata.properties.sub=specification.sub
+  tfmdata.properties.id=specification.id
   tfmdata=constructors.scale(tfmdata,specification)
   local allfeatures=tfmdata.shared.features or specification.features.normal
   constructors.applymanipulators("otf",tfmdata,allfeatures,trace_features,report_otf)
@@ -28525,254 +28572,32 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
    goto next
   end
   local s=seq.n 
-  local l=ck[5] 
-  local current=start
-  local last=start
   if s==1 then
-   goto next
-  end
-  if l>f then
-   local discfound 
-   local n=f+1
-   last=startnext 
-   while n<=l do
-    if postreplace and not last then
-     last=getnext(sweepnode)
-     sweeptype=nil
-    end
-    if last then
-     local char,id=ischar(last,currentfont)
-     if char then
-      if skiphash and skiphash[char] then
-       skipped=true
-       if trace_skips then
-        show_skip(dataset,sequence,char,ck,classes[char])
-       end
-       last=getnext(last)
-      elseif seq[n][char] then
-       if n<l then
-        last=getnext(last)
-       end
-       n=n+1
-      elseif discfound then
-       notmatchreplace[discfound]=true
-       if notmatchpre[discfound] then
-        goto next
-       else
-        break
-       end
-      else
-       goto next
-      end
-     elseif char==false then
-      if discfound then
-       notmatchreplace[discfound]=true
-       if notmatchpre[discfound] then
-        goto next
-       else
-        break
-       end
-      else
-       goto next
-      end
-     elseif id==disc_code then
-      discseen=true
-      discfound=last
-      notmatchpre[last]=nil
-      notmatchpost[last]=true
-      notmatchreplace[last]=nil
-      local pre,post,replace=getdisc(last)
-      if pre then
-       local n=n
-       while pre do
-        if seq[n][getchar(pre)] then
-         n=n+1
-         if n>l then
-          break
-         end
-         pre=getnext(pre)
-        else
-         notmatchpre[last]=true
-         break
-        end
-       end
-       if n<=l then
-        notmatchpre[last]=true
-       end
-      else
-       notmatchpre[last]=true
-      end
-      if replace then
-       while replace do
-        if seq[n][getchar(replace)] then
-         n=n+1
-         if n>l then
-          break
-         end
-         replace=getnext(replace)
-        else
-         notmatchreplace[last]=true
-         if notmatchpre[last] then
-          goto next
-         else
-          break
-         end
-        end
-       end
-       if notmatchpre[last] then
-        goto next
-       end
-      end
-      last=getnext(last)
-     else
-      goto next
-     end
-    else
-     goto next
-    end
-   end
-  end
-  if f>1 then
-   if startprev then
-    local prev=startprev
-    if prereplace and prev==checkdisc then
-     prev=getprev(sweepnode)
-    end
-    if prev then
-     local discfound 
-     local n=f-1
-     while n>=1 do
-      if prev then
-       local char,id=ischar(prev,currentfont)
-       if char then
-        if skiphash and skiphash[char] then
-         skipped=true
-         if trace_skips then
-          show_skip(dataset,sequence,char,ck,classes[char])
-         end
-         prev=getprev(prev)
-        elseif seq[n][char] then
-         if n>1 then
-          prev=getprev(prev)
-         end
-         n=n-1
-        elseif discfound then
-         notmatchreplace[discfound]=true
-         if notmatchpost[discfound] then
-          goto next
-         else
-          break
-         end
-        else
-         goto next
-        end
-       elseif char==false then
-        if discfound then
-         notmatchreplace[discfound]=true
-         if notmatchpost[discfound] then
-          goto next
-         end
-        else
-         goto next
-        end
-        break
-       elseif id==disc_code then
-        discseen=true
-        discfound=prev
-        notmatchpre[prev]=true
-        notmatchpost[prev]=nil
-        notmatchreplace[prev]=nil
-        local pre,post,replace,pretail,posttail,replacetail=getdisc(prev,true)
-        if pre~=start and post~=start and replace~=start then
-         if post then
-          local n=n
-          while posttail do
-           if seq[n][getchar(posttail)] then
-            n=n-1
-            if posttail==post or n<1 then
-             break
-            else
-             posttail=getprev(posttail)
-            end
-           else
-            notmatchpost[prev]=true
-            break
-           end
-          end
-          if n>=1 then
-           notmatchpost[prev]=true
-          end
-         else
-          notmatchpost[prev]=true
-         end
-         if replace then
-          while replacetail do
-           if seq[n][getchar(replacetail)] then
-            n=n-1
-            if replacetail==replace or n<1 then
-             break
-            else
-             replacetail=getprev(replacetail)
-            end
-           else
-            notmatchreplace[prev]=true
-            if notmatchpost[prev] then
-             goto next
-            else
-             break
-            end
-           end
-          end
-         else
-         end
-        end
-        prev=getprev(prev)
-       elseif id==glue_code then
-        local sn=seq[n]
-        if (sn[32] and spaces[prev]) or sn[0xFFFC] then
-         n=n-1
-         prev=getprev(prev)
-        else
-         goto next
-        end
-       elseif seq[n][0xFFFC] then
-        n=n-1
-        prev=getprev(prev)
-       else
-        goto next
-       end
-      else
-       goto next
-      end
-     end
-    else
-     goto next
-    end
-   else
-    goto next
-   end
-  end
-  if s>l then
-   local current=last and getnext(last)
-   if not current and postreplace then
-    current=getnext(sweepnode)
-   end
-   if current then
+  else
+   local l=ck[5] 
+   local current=start
+   local last=start
+   if l>f then
     local discfound 
-    local n=l+1
-    while n<=s do
-     if current then
-      local char,id=ischar(current,currentfont)
+    local n=f+1
+    last=startnext 
+    while n<=l do
+     if postreplace and not last then
+      last=getnext(sweepnode)
+      sweeptype=nil
+     end
+     if last then
+      local char,id=ischar(last,currentfont)
       if char then
        if skiphash and skiphash[char] then
         skipped=true
         if trace_skips then
          show_skip(dataset,sequence,char,ck,classes[char])
         end
-        current=getnext(current) 
+        last=getnext(last)
        elseif seq[n][char] then
-        if n<s then 
-         current=getnext(current) 
+        if n<l then
+         last=getnext(last)
         end
         n=n+1
        elseif discfound then
@@ -28798,64 +28623,53 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
        end
       elseif id==disc_code then
        discseen=true
-       discfound=current
-       notmatchpre[current]=nil
-       notmatchpost[current]=true
-       notmatchreplace[current]=nil
-       local pre,post,replace=getdisc(current)
+       discfound=last
+       notmatchpre[last]=nil
+       notmatchpost[last]=true
+       notmatchreplace[last]=nil
+       local pre,post,replace=getdisc(last)
        if pre then
         local n=n
         while pre do
          if seq[n][getchar(pre)] then
           n=n+1
-          if n>s then
+          if n>l then
            break
-          else
-           pre=getnext(pre)
           end
+          pre=getnext(pre)
          else
-          notmatchpre[current]=true
+          notmatchpre[last]=true
           break
          end
         end
-        if n<=s then
-         notmatchpre[current]=true
+        if n<=l then
+         notmatchpre[last]=true
         end
        else
-        notmatchpre[current]=true
+        notmatchpre[last]=true
        end
        if replace then
         while replace do
          if seq[n][getchar(replace)] then
           n=n+1
-          if n>s then
+          if n>l then
            break
-          else
-           replace=getnext(replace)
           end
+          replace=getnext(replace)
          else
-          notmatchreplace[current]=true
-          if notmatchpre[current] then
+          notmatchreplace[last]=true
+          if notmatchpre[last] then
            goto next
           else
            break
           end
          end
         end
-       else
+        if notmatchpre[last] then
+         goto next
+        end
        end
-       current=getnext(current)
-      elseif id==glue_code then
-       local sn=seq[n]
-       if (sn[32] and spaces[current]) or sn[0xFFFC] then
-        n=n+1
-        current=getnext(current)
-       else
-        goto next
-       end
-      elseif seq[n][0xFFFC] then
-       n=n+1
-       current=getnext(current)
+       last=getnext(last)
       else
        goto next
       end
@@ -28863,8 +28677,241 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
       goto next
      end
     end
-   else
-    goto next
+   end
+   if f>1 then
+    if startprev then
+     local prev=startprev
+     if prereplace and prev==checkdisc then
+      prev=getprev(sweepnode)
+     end
+     if prev then
+      local discfound 
+      local n=f-1
+      while n>=1 do
+       if prev then
+        local char,id=ischar(prev,currentfont)
+        if char then
+         if skiphash and skiphash[char] then
+          skipped=true
+          if trace_skips then
+           show_skip(dataset,sequence,char,ck,classes[char])
+          end
+          prev=getprev(prev)
+         elseif seq[n][char] then
+          if n>1 then
+           prev=getprev(prev)
+          end
+          n=n-1
+         elseif discfound then
+          notmatchreplace[discfound]=true
+          if notmatchpost[discfound] then
+           goto next
+          else
+           break
+          end
+         else
+          goto next
+         end
+        elseif char==false then
+         if discfound then
+          notmatchreplace[discfound]=true
+          if notmatchpost[discfound] then
+           goto next
+          end
+         else
+          goto next
+         end
+         break
+        elseif id==disc_code then
+         discseen=true
+         discfound=prev
+         notmatchpre[prev]=true
+         notmatchpost[prev]=nil
+         notmatchreplace[prev]=nil
+         local pre,post,replace,pretail,posttail,replacetail=getdisc(prev,true)
+         if pre~=start and post~=start and replace~=start then
+          if post then
+           local n=n
+           while posttail do
+            if seq[n][getchar(posttail)] then
+             n=n-1
+             if posttail==post or n<1 then
+              break
+             else
+              posttail=getprev(posttail)
+             end
+            else
+             notmatchpost[prev]=true
+             break
+            end
+           end
+           if n>=1 then
+            notmatchpost[prev]=true
+           end
+          else
+           notmatchpost[prev]=true
+          end
+          if replace then
+           while replacetail do
+            if seq[n][getchar(replacetail)] then
+             n=n-1
+             if replacetail==replace or n<1 then
+              break
+             else
+              replacetail=getprev(replacetail)
+             end
+            else
+             notmatchreplace[prev]=true
+             if notmatchpost[prev] then
+              goto next
+             else
+              break
+             end
+            end
+           end
+          else
+          end
+         end
+         prev=getprev(prev)
+        elseif id==glue_code then
+         local sn=seq[n]
+         if (sn[32] and spaces[prev]) or sn[0xFFFC] then
+          n=n-1
+          prev=getprev(prev)
+         else
+          goto next
+         end
+        elseif seq[n][0xFFFC] then
+         n=n-1
+         prev=getprev(prev)
+        else
+         goto next
+        end
+       else
+        goto next
+       end
+      end
+     else
+      goto next
+     end
+    else
+     goto next
+    end
+   end
+   if s>l then
+    local current=last and getnext(last)
+    if not current and postreplace then
+     current=getnext(sweepnode)
+    end
+    if current then
+     local discfound 
+     local n=l+1
+     while n<=s do
+      if current then
+       local char,id=ischar(current,currentfont)
+       if char then
+        if skiphash and skiphash[char] then
+         skipped=true
+         if trace_skips then
+          show_skip(dataset,sequence,char,ck,classes[char])
+         end
+         current=getnext(current) 
+        elseif seq[n][char] then
+         if n<s then 
+          current=getnext(current) 
+         end
+         n=n+1
+        elseif discfound then
+         notmatchreplace[discfound]=true
+         if notmatchpre[discfound] then
+          goto next
+         else
+          break
+         end
+        else
+         goto next
+        end
+       elseif char==false then
+        if discfound then
+         notmatchreplace[discfound]=true
+         if notmatchpre[discfound] then
+          goto next
+         else
+          break
+         end
+        else
+         goto next
+        end
+       elseif id==disc_code then
+        discseen=true
+        discfound=current
+        notmatchpre[current]=nil
+        notmatchpost[current]=true
+        notmatchreplace[current]=nil
+        local pre,post,replace=getdisc(current)
+        if pre then
+         local n=n
+         while pre do
+          if seq[n][getchar(pre)] then
+           n=n+1
+           if n>s then
+            break
+           else
+            pre=getnext(pre)
+           end
+          else
+           notmatchpre[current]=true
+           break
+          end
+         end
+         if n<=s then
+          notmatchpre[current]=true
+         end
+        else
+         notmatchpre[current]=true
+        end
+        if replace then
+         while replace do
+          if seq[n][getchar(replace)] then
+           n=n+1
+           if n>s then
+            break
+           else
+            replace=getnext(replace)
+           end
+          else
+           notmatchreplace[current]=true
+           if notmatchpre[current] then
+            goto next
+           else
+            break
+           end
+          end
+         end
+        else
+        end
+        current=getnext(current)
+       elseif id==glue_code then
+        local sn=seq[n]
+        if (sn[32] and spaces[current]) or sn[0xFFFC] then
+         n=n+1
+         current=getnext(current)
+        else
+         goto next
+        end
+       elseif seq[n][0xFFFC] then
+        n=n+1
+        current=getnext(current)
+       else
+        goto next
+       end
+      else
+       goto next
+      end
+     end
+    else
+     goto next
+    end
    end
   end
   if trace_contexts then
@@ -29902,44 +29949,52 @@ do
   return head
  end
 end
-local plugins={}
-otf.plugins=plugins
-local report=logs.reporter("fonts")
-function otf.registerplugin(name,f)
- if type(name)=="string" and type(f)=="function" then
-  plugins[name]={ name,f }
-  report()
-  report("plugin %a has been loaded, please be aware of possible side effects",name)
-  report()
-  if logs.pushtarget then
-   logs.pushtarget("log")
-  end
-  report("Plugins are not officially supported unless stated otherwise. This is because")
-  report("they bypass the regular font handling and therefore some features in ConTeXt")
-  report("(especially those related to fonts) might not work as expected or might not work")
-  report("at all. Some plugins are for testing and development only and might change")
-  report("whenever we feel the need for it.")
-  report()
-  if logs.poptarget then
-   logs.poptarget()
+do
+ local plugins={}
+ otf.plugins=plugins
+ local report=logs.reporter("fonts")
+ local warned=false
+ local okay={ text=true }
+ function otf.registerplugin(name,f)
+  if type(name)=="string" and type(f)=="function" then
+   plugins[name]={ name,f }
+   if okay[name] then
+   else
+    report("plugin %a has been loaded, please be aware of possible side effects",name)
+    if not warned then
+     if logs.pushtarget then
+      logs.pushtarget("log")
+     end
+     report("Plugins are not officially supported unless stated otherwise. This is because")
+     report("they bypass the regular font handling and therefore some features in ConTeXt")
+     report("(especially those related to fonts) might not work as expected or might not work")
+     report("at all. Some plugins are for testing and development only and might change")
+     report("whenever we feel the need for it.")
+     report()
+     if logs.poptarget then
+      logs.poptarget()
+     end
+     warned=true
+    end
+   end
   end
  end
-end
-function otf.plugininitializer(tfmdata,value)
- if type(value)=="string" then
-  tfmdata.shared.plugin=plugins[value]
- end
-end
-function otf.pluginprocessor(head,font,attr,direction) 
- local s=fontdata[font].shared
- local p=s and s.plugin
- if p then
-  if trace_plugins then
-   report_process("applying plugin %a",p[1])
+ function otf.plugininitializer(tfmdata,value)
+  if type(value)=="string" then
+   tfmdata.shared.plugin=plugins[value]
   end
-  return p[2](head,font,attr,direction)
- else
-  return head,false
+ end
+ function otf.pluginprocessor(head,font,dynamic,direction) 
+  local s=fontdata[font].shared
+  local p=s and s.plugin
+  if p then
+   if trace_plugins then
+    report_process("applying plugin %a",p[1])
+   end
+   return p[2](head,font,dynamic,direction)
+  else
+   return head,false
+  end
  end
 end
 function otf.featuresinitializer(tfmdata,value)
@@ -34833,6 +34888,7 @@ local function read_from_afm(specification)
  local tfmdata=afmtotfm(specification)
  if tfmdata then
   tfmdata.properties.name=specification.name
+  tfmdata.properties.id=specification.id
   tfmdata=constructors.scale(tfmdata,specification)
   local allfeatures=tfmdata.shared.features or specification.features.normal
   constructors.applymanipulators("afm",tfmdata,allfeatures,trace_features,report_afm)
@@ -37132,74 +37188,55 @@ local rules={
  "FractionRuleThickness",
  "UnderbarRuleThickness",
 }
-local setmathparameters
-local setmathcharacters
-if CONTEXTLMTXMODE and CONTEXTLMTXMODE>0 then
- setmathparameters=function(tfmdata,characters,mathparameters,dx,dy,squeeze,multiplier)
-  if delta~=0 then
-   for i=1,#rules do
-    local name=rules[i]
-    local value=mathparameters[name]
-    if value then
-       mathparameters[name]=(squeeze or 1)*(value+dy)
-    end
+local function setmathparameters(tfmdata,characters,mathparameters,dx,dy,squeeze,multiplier)
+ if dy~=0 then
+  for i=1,#rules do
+   local name=rules[i]
+   local value=mathparameters[name]
+   if value then
+      mathparameters[name]=(squeeze or 1)*(value+dy)
    end
   end
  end
- setmathcharacters=function()
- end
-else
- setmathparameters=function(tfmdata,characters,mathparameters,dx,dy,squeeze,multiplier)
-  if delta~=0 then
-   for i=1,#rules do
-    local name=rules[i]
-    local value=mathparameters[name]
-    if value then
-       mathparameters[name]=(squeeze or 1)*(value+dy)
-    end
-   end
+end
+local function setmathcharacters(tfmdata,characters,mathparameters,dx,dy,squeeze,wdelta,hdelta,ddelta)
+ local function wdpatch(char)
+  if wsnap~=0 then
+   char.width=char.width+wdelta/2
   end
  end
- setmathcharacters=function(tfmdata,characters,mathparameters,dx,dy,squeeze,wdelta,hdelta,ddelta)
-  local function wdpatch(char)
-   if wsnap~=0 then
-    char.width=char.width+wdelta/2
+ local function htpatch(char)
+  if hsnap~=0 then
+   local height=char.height
+   if height then
+    char.height=char.height+2*dy
    end
   end
-  local function htpatch(char)
-   if hsnap~=0 then
-    local height=char.height
-    if height then
-     char.height=char.height+2*dy
-    end
-   end
-  end
-  local character=characters[0x221A]
-  if character and character.next then
-   local char=character
-   local next=character.next
+ end
+ local character=characters[0x221A]
+ if character and character.next then
+  local char=character
+  local next=character.next
+  wdpatch(char)
+  htpatch(char)
+  while next do
+   char=characters[next]
    wdpatch(char)
    htpatch(char)
-   while next do
-    char=characters[next]
-    wdpatch(char)
-    htpatch(char)
-    next=char.next
-   end
-   if char then
-    local v=char.vert_variants
-    if v then
-     local top=v[#v]
-     if top then
-      local char=characters[top.glyph]
-      htpatch(char)
-     end
+   next=char.next
+  end
+  if char then
+   local v=char.vert_variants
+   if v then
+    local top=v[#v]
+    if top then
+     local char=characters[top.glyph]
+     htpatch(char)
     end
    end
   end
  end
 end
-local shiftmode=CONTEXTLMTXMODE and CONTEXTLMTXMODE>0
 local function manipulateeffect(tfmdata)
  local effect=tfmdata.properties.effect
  if effect then
@@ -37221,45 +37258,38 @@ local function manipulateeffect(tfmdata)
   local factor=(1+effect.factor)*factor
   local hfactor=(1+effect.hfactor)*hfactor
   local vfactor=(1+effect.vfactor)*vfactor
-  if shiftmode then
-   parameters.hshift=hshift
-   parameters.vshift=vshift
-  else
-   vshift=vshift~=0 and upcommand[vshift] or false
-   hshift=rightcommand[hshift]
-  end
+  vshift=vshift~=0 and upcommand[vshift] or false
+  hshift=rightcommand[hshift]
   for unicode,character in next,characters do
    local oldwidth=character.width
    local oldheight=character.height
    local olddepth=character.depth
    if oldwidth and oldwidth>0 then
     character.width=oldwidth+wdelta
-    if not shiftmode then
-     local commands=character.commands
-     if vshift then
-      if commands then
-       prependcommands (commands,
-        hshift,
-        vshift
-       )
-      else
-       character.commands={
-        hshift,
-        vshift,
-        charcommand[unicode]
-       }
-      end
+    local commands=character.commands
+    if vshift then
+     if commands then
+      prependcommands (commands,
+       hshift,
+       vshift
+      )
      else
-      if commands then
-        prependcommands (commands,
-         hshift
-        )
-      else
-       character.commands={
-        hshift,
-        charcommand[unicode]
-        }
-      end
+      character.commands={
+       hshift,
+       vshift,
+       charcommand[unicode]
+      }
+     end
+    else
+     if commands then
+       prependcommands (commands,
+        hshift
+       )
+     else
+      character.commands={
+       hshift,
+       charcommand[unicode]
+       }
      end
     end
    end

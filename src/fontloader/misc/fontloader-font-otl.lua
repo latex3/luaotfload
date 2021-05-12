@@ -608,6 +608,7 @@ local function read_from_otf(specification)
         -- this late ? .. needs checking
         tfmdata.properties.name = specification.name
         tfmdata.properties.sub  = specification.sub
+        tfmdata.properties.id   = specification.id
         --
         tfmdata = constructors.scale(tfmdata,specification)
         local allfeatures = tfmdata.shared.features or specification.features.normal

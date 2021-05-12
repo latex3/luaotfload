@@ -727,6 +727,7 @@ local function read_from_afm(specification)
     local tfmdata = afmtotfm(specification)
     if tfmdata then
         tfmdata.properties.name = specification.name
+        tfmdata.properties.id   = specification.id
         tfmdata = constructors.scale(tfmdata, specification)
         local allfeatures = tfmdata.shared.features or specification.features.normal
         constructors.applymanipulators("afm",tfmdata,allfeatures,trace_features,report_afm)

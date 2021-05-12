@@ -8,9 +8,7 @@ TU/texgyreheros-regular.otf(0)/m/n:
   [texgyreheros-regular.otf]:mode=node;script=latn;language=dflt;+tlig;
 TT:
 TU/texgyrecursor-regular.otf(0)/m/n:
-  "[texgyrecursor-regular.otf]:mode=node;script=latn;language=dflt;color=FF0000
-FF ;"
+  "[texgyrecursor-regular.otf]:mode=node;script=latn;language=dflt;color=FF0000FF ;"
 "CODE":
 TU/texgyrecursor-regular.otf(1)/m/n:
-  "[texgyrecursor-regular.otf]:mode=node;script=latn;language=dflt;color=0000FF
-FF ;"
+  "[texgyrecursor-regular.otf]:mode=node;script=latn;language=dflt;color=0000FFFF ;"

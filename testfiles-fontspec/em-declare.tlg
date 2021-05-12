@@ -55,8 +55,7 @@ TU/texgyrepagella(0)/b/it:
 TU/texgyrepagella(0)/b/sc:
   [texgyrepagella-bold.otf]:mode=node;script=latn;language=dflt;+tlig;+smcp;
 TU/texgyrepagella(0)/b/scit:
-  [texgyrepagella-bolditalic.otf]:mode=node;script=latn;language=dflt;+tlig;+sm
-cp;
+  [texgyrepagella-bolditalic.otf]:mode=node;script=latn;language=dflt;+tlig;+smcp;
 TU/texgyrepagella(0)/b/n:
   [texgyrepagella-bold.otf]:mode=node;script=latn;language=dflt;+tlig;
 TU/texgyrepagella(0)/b/it:
@@ -71,8 +70,7 @@ TU/texgyrepagella(0)/b/it:
 TU/texgyrepagella(0)/b/sc:
   [texgyrepagella-bold.otf]:mode=node;script=latn;language=dflt;+tlig;+smcp;
 TU/texgyrepagella(0)/b/scit:
-  [texgyrepagella-bolditalic.otf]:mode=node;script=latn;language=dflt;+tlig;+sm
-cp;
+  [texgyrepagella-bolditalic.otf]:mode=node;script=latn;language=dflt;+tlig;+smcp;
 TU/texgyrepagella(0)/b/n:
   [texgyrepagella-bold.otf]:mode=node;script=latn;language=dflt;+tlig;
 TU/texgyrepagella(0)/b/it:

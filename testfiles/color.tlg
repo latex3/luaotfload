@@ -114,7 +114,7 @@ Completed box being shipped out [1]
 ...\penalty 10000
 ...\glue(\abovedisplayshortskip) 0.0 plus 3.0
 ...\glue(\baselineskip) 5.07
-...\hbox(6.78+1.6)x39.05891, shifted 152.97055, direction TLT
+...\hbox(6.78+1.6)x39.24892, shifted 152.87555, direction TLT
 ....\pdfcolorstack 0 push {1 0 1 rg}
 ....\TU/STIXTwoMath(1)/m/n/10 1
 ....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
@@ -134,7 +134,7 @@ Completed box being shipped out [1]
 ...\penalty 0
 ...\glue(\belowdisplayshortskip) 6.0 plus 3.0 minus 3.0
 ...\glue(\baselineskip) 3.26999
-...\hbox(7.13+0.11)x345.0, glue set 267.70001fil, direction TLT
+...\hbox(7.13+0.11)x345.0, glue set 267.69998fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -150,8 +150,8 @@ Completed box being shipped out [1]
 ....\discretionary (penalty 50)
 .....< \TU/STIXTwoText(2)/m/n/10 f
 .....< \TU/STIXTwoText(2)/m/n/10 -
-.....> \TU/STIXTwoText(2)/m/n/10 f
-.....= \TU/STIXTwoText(2)/m/n/10 ﬀ (ligature ff)
+.....= \TU/STIXTwoText(2)/m/n/10 󰀈
+....\TU/STIXTwoText(2)/m/n/10 f
 ....\TU/STIXTwoText(2)/m/n/10 e
 ....\TU/STIXTwoText(2)/m/n/10 r
 ....\discretionary (penalty 50)
@@ -219,7 +219,7 @@ Completed box being shipped out [1]
 ....\penalty 10000
 ....\glue(\abovedisplayshortskip) 0.0 plus 3.0
 ....\glue(\baselineskip) 5.07
-....\hbox(6.78+1.6)x39.05891, shifted 152.97055, direction TLT
+....\hbox(6.78+1.6)x39.24892, shifted 152.87555, direction TLT
 .....\pdfcolorstack 0 push {1 0 1 rg}
 .....\TU/STIXTwoMath(1)/m/n/10 1
 .....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
@@ -239,7 +239,7 @@ Completed box being shipped out [1]
 ....\penalty 0
 ....\glue(\belowdisplayshortskip) 6.0 plus 3.0 minus 3.0
 ....\glue(\baselineskip) 3.26999
-....\hbox(7.13+0.11)x345.0, glue set 267.70001fil, direction TLT
+....\hbox(7.13+0.11)x345.0, glue set 267.69998fil, direction TLT
 .....\localpar
 ......\localinterlinepenalty=0
 ......\localbrokenpenalty=0
@@ -255,8 +255,8 @@ Completed box being shipped out [1]
 .....\discretionary (penalty 50)
 ......< \TU/STIXTwoText(2)/m/n/10 f
 ......< \TU/STIXTwoText(2)/m/n/10 -
-......> \TU/STIXTwoText(2)/m/n/10 f
-......= \TU/STIXTwoText(2)/m/n/10 ﬀ (ligature ff)
+......= \TU/STIXTwoText(2)/m/n/10 󰀈
+.....\TU/STIXTwoText(2)/m/n/10 f
 .....\TU/STIXTwoText(2)/m/n/10 e
 .....\TU/STIXTwoText(2)/m/n/10 r
 .....\discretionary (penalty 50)

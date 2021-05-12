@@ -96,6 +96,8 @@ checkruns = 3
 checksuppfiles = {"texmf.cnf"}
 typesetsuppfiles = {"texmf.cnf"}
 
+maxprintline=9999
+
 -- exclude some text temporarly or in certain systems ...
 if os.env["CONTEXTPATH"] then
   -- local system

@@ -79,7 +79,7 @@ specialformats["latex"] = specialformats["latex"] or
     luatex        = {binary="luahbtex" ,format = "lualatex"}
    } 
 
-checkengines = {"luatex","luatexdev"}
+checkengines = {"luatex"}
 
 checkconfigs = {
                 "build",

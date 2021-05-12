@@ -737,7 +737,6 @@ local function tonodes(head, node, run, glyphs)
   local dir = run.dir
   local fontid = run.font
   local fontdata = font.getfont(fontid)
-  local space = fontdata.parameters.space
   local characters = fontdata.characters
   local hbdata = fontdata.hb
   local hfactor = (fontdata.extend or 1000) / 1000
@@ -752,6 +751,7 @@ local function tonodes(head, node, run, glyphs)
   local lastprops
 
   local scale = hbdata.scale
+  local space = hbdata.space
 
   local haspng = hbshared.haspng
   local fonttype = hbshared.fonttype

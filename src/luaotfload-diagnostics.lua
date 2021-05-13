@@ -376,7 +376,7 @@ else
                 out ("Try again later at %s.", osdate ("%F %T", reset))
             else --- windows doesn’t C99
                 out ("Try again later at %s.",
-                     osdate ("%Y-%m-d %H:%M:%S", reset))
+                     osdate ("%Y-%m-%d %H:%M:%S", reset))
             end
         end
         return true

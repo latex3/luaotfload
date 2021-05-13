@@ -584,7 +584,7 @@ local function display_general (fullinfo)
                 --- the MS compiler doesn’t support C99, so
                 --- strftime is missing some functionality;
                 --- see loslib.c for details.
-                val = osdate("%Y-%m-d %H:%M:%S", fullinfo[key])
+                val = osdate("%Y-%m-%d %H:%M:%S", fullinfo[key])
             end
         end
         if not val then
@@ -834,7 +834,7 @@ local bisect_status_fmt  = [[
 local function write_bisect_status (data)
     local payload = tableserialize (data, true)
     local status  = stringformat (bisect_status_fmt,
-                                  osdate ("%Y-%m-d %H:%M:%S", os.time ()),
+                                  osdate ("%Y-%m-%d %H:%M:%S", os.time ()),
                                   payload)
     if status and iosavedata (bisect_status_file, status) then
         logreport ("info", 4, "bisect",

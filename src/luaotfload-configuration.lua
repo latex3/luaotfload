@@ -994,7 +994,7 @@ local function dump ()
   end
   if next(confdata) then
     iowrite (stringformat (conf_header,
-                           osdate ("%Y-%m-d %H:%M:%S", os.time ())))
+                           osdate ("%Y-%m-%d %H:%M:%S", os.time ())))
     iowrite (tableconcat (confdata, "\n"))
     iowrite (conf_footer)
   end

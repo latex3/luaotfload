@@ -370,13 +370,24 @@ if context then
         local xmlconvert = xml.convert
         local xmlfirst   = xml.first
 
+     -- function otfsvg.filterglyph(entry,index)
+     --     -- we only support decompression in lmtx, so one needs to wipe the
+     --     -- cache when invalid xml is reported
+     --     local svg  = xmlconvert(entry.data)
+     --     local root = svg and xmlfirst(svg,"/svg[@id='glyph"..index.."']")
+     --     local data = root and tostring(root)
+     --  -- report_svg("data for glyph %04X: %s",index,data)
+     --     return data
+     -- end
+
         function otfsvg.filterglyph(entry,index)
-            -- we only support decompression in lmtx, so one needs to wipe the
-            -- cache when invalid xml is reported
-            local svg  = xmlconvert(entry.data)
+            local d = entry.data
+            if gzip.compressed(d) then
+                d = gzip.decompress(d) or d
+            end
+            local svg  = xmlconvert(d)
             local root = svg and xmlfirst(svg,"/svg[@id='glyph"..index.."']")
             local data = root and tostring(root)
-         -- report_svg("data for glyph %04X: %s",index,data)
             return data
         end
 
@@ -412,6 +423,9 @@ end
     --
     -- Because a generic setup can be flawed we need to catch bad inkscape runs which add a bit of
     -- ugly overhead. Bah.
+    --
+    -- In the long run this method is a dead end because we cannot rely on command line arguments
+    -- etc to be upward compatible (so no real batch tool).
 
     local new = nil
 
@@ -432,7 +446,7 @@ end
             local nofshapes    = #svgshapes
             local f_svgfile    = formatters["temp-otf-svg-shape-%i.svg"]
             local f_pdffile    = formatters["temp-otf-svg-shape-%i.pdf"]
-            local f_convert    = formatters["%s --export-%s=%s\n"]
+            local f_convert    = formatters[new and "file-open:%s; export-%s:%s; export-do\n" or "%s --export-%s=%s\n"]
             local filterglyph  = otfsvg.filterglyph
             local nofdone      = 0
             local processed    = { }

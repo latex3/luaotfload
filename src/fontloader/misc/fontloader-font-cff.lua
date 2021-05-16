@@ -29,7 +29,7 @@ if not modules then modules = { } end modules ['font-cff'] = {
 
 local next, type, tonumber, rawget = next, type, tonumber, rawget
 local byte, char, gmatch, sub = string.byte, string.char, string.gmatch, string.sub
-local concat, remove, unpack = table.concat, table.remove, table.unpack
+local concat, insert, remove, unpack = table.concat, table.insert, table.remove, table.unpack
 local floor, abs, round, ceil, min, max = math.floor, math.abs, math.round, math.ceil, math.min, math.max
 local P, C, R, S, C, Cs, Ct = lpeg.P, lpeg.C, lpeg.R, lpeg.S, lpeg.C, lpeg.Cs, lpeg.Ct
 local lpegmatch = lpeg.match
@@ -744,6 +744,13 @@ do
     -- and we cache the result. As we moved the boundingbox code inline we gain
     -- some back. I inlined some of then and a bit speed can be gained by more
     -- inlining but not that much.
+
+    -- Maybe have several action tables:
+    --
+    -- keep curve / checked
+    -- keep curve / not checked
+    -- checked
+    -- not checked
 
     local function xymoveto()
         if keepcurve then
@@ -1968,8 +1975,38 @@ do
                         showstate(reverse[t] or "<action>")
                     end
                     if top > 0 then
-                        for i=1,top do
-                            r = r + 1 ; result[r] = encode[stack[i]]
+                     -- if t == 8 and top > 42 then
+                        if t == 8 and top > 48 then
+                            -- let's assume this only happens for rrcurveto .. the other ones would need some more
+                            -- complex handling (cff2 stuff)
+                            local n = 0
+                            for i=1,top do
+                             -- if n == 42 then
+                                if n == 48 then
+                                    local zero = encode[0]
+                                    local res3 = result[r-3]
+                                    local res2 = result[r-2]
+                                    local res1 = result[r-1]
+                                    local res0 = result[r]
+                                    result[r-3] = zero
+                                    result[r-2] = zero
+                                    r = r + 1 ; result[r] = chars[t]
+                                    r = r + 1 ; result[r] = zero
+                                    r = r + 1 ; result[r] = zero
+                                    r = r + 1 ; result[r] = res3
+                                    r = r + 1 ; result[r] = res2
+                                    r = r + 1 ; result[r] = res1
+                                    r = r + 1 ; result[r] = res0
+                                    n = 1
+                                else
+                                    n = n + 1
+                                end
+                                r = r + 1 ; result[r] = encode[stack[i]]
+                            end
+                        else
+                            for i=1,top do
+                                r = r + 1 ; result[r] = encode[stack[i]]
+                            end
                         end
                         top = 0
                     end

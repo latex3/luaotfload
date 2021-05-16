@@ -1292,8 +1292,8 @@ readers.post = function(f,fontdata,specification)
                     if length > 0 then
                         glyphs[mapping].name = readstring(f,length)
                     else
-                        report("quit post name fetching at %a of %a: %s",i,maxnames,"overflow")
-                        break
+                     -- report("quit post name fetching at %a of %a: %s",i,maxnames,"overflow")
+                     -- break
                     end
                 end
             end

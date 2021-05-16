@@ -118,11 +118,11 @@ local setstate           = nuts.setstate
 
 local ischar             = nuts.ischar
 
-local insert_node_after  = nuts.insert_after
+local insertnodeafter   = nuts.insertafter
 local copy_node          = nuts.copy
 local remove_node        = nuts.remove
-local flush_list         = nuts.flush_list
-local flush_node         = nuts.flush_node
+local flushlist          = nuts.flushlist
+local flushnode          = nuts.flushnode
 
 local copyinjection      = nodes.injections.copy -- KE: is this necessary? HH: probably not as positioning comes later and we rawget/set
 
@@ -826,7 +826,7 @@ local function inject_syntax_error(head,current,char)
     else
         setchar(current,dotted_circle)
     end
-    return insert_node_after(head,current,signal)
+    return insertnodeafter(head,current,signal)
 end
 
 -- hm, this is applied to one character:
@@ -968,7 +968,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
         if current == stop then
             stop = getprev(stop)
             head = remove_node(head,current)
-            flush_node(current)
+            flushnode(current)
             return head, stop, nbspaces
         else
             nbspaces  = nbspaces + 1
@@ -998,7 +998,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                         tempcurrent = processcharacters(tempcurrent,font)
                         setstate(tempcurrent,unsetvalue)
                         if getchar(next) == getchar(tempcurrent) then
-                            flush_list(tempcurrent)
+                            flushlist(tempcurrent)
                             if show_syntax_errors then
                                 head, current = inject_syntax_error(head,current,char)
                             end
@@ -1006,8 +1006,8 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                             setchar(current,getchar(tempcurrent)) -- we assumes that the result of blwf consists of one node
                             local freenode = getnext(current)
                             setlink(current,tmp)
-                            flush_node(freenode)
-                            flush_list(tempcurrent)
+                            flushnode(freenode)
+                            flushlist(tempcurrent)
                             if changestop then
                                 stop = current
                             end
@@ -1154,7 +1154,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                     ch = tpm[1]
                     setchar(n,ch)
                     setchar(extra,tpm[2])
-                    head = insert_node_after(head,current,extra)
+                    head = insertnodeafter(head,current,extra)
                     tpm = twopart_mark[ch]
                 end
                 while c ~= stop and dependent_vowel[ch] do
@@ -1335,7 +1335,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
         	stop = getprev(stop)
         end
         head = remove_node(head,base)
-        flush_node(base)
+        flushnode(base)
     end
 
     return head, stop, nbspaces
@@ -1712,7 +1712,7 @@ function handlers.devanagari_remove_joiners(head,start,kind,lookupname,replaceme
     if head == start then
         head = stop
     end
-    flush_list(start)
+    flushlist(start)
     return head, stop, true
 end
 
@@ -1876,7 +1876,7 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         if current == stop then
             stop = getprev(stop)
             head = remove_node(head,current)
-            flush_node(current)
+            flushnode(current)
             return head, stop, nbspaces
         else
             nbspaces = nbspaces + 1
@@ -1979,7 +1979,7 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
             char = tpm[1]
             setchar(current,char)
             setchar(extra,tpm[2])
-            head = insert_node_after(head,current,extra)
+            head = insertnodeafter(head,current,extra)
             tpm = twopart_mark[char]
         end
         --
@@ -2154,7 +2154,7 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         end
         nbspaces = nbspaces - 1
         head = remove_node(head, base)
-        flush_node(base)
+        flushnode(base)
     end
 
     return head, stop, nbspaces

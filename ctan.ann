@@ -1,3 +1,5 @@
-2021-01-08 luaotfload v3.17
-    *  The fontloader has been synced with the context code from 2021-01-07.
-       This improves support for advanced CFF based OpenType variable fonts.
+2021-05-?? luaotfload v3.18
+
+    *  Allow using variable fonts without explicitly specifying any axis values
+    *  The fontloader has been synced with the context code from 2021-05-12
+    *  Multiple small fixes, mostly concerning discretionaries in harf mode.

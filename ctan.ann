@@ -1,5 +1,5 @@
-2021-05-?? luaotfload v3.18
+2021-05-21 luaotfload v3.18
 
     *  Allow using variable fonts without explicitly specifying any axis values
-    *  The fontloader has been synced with the context code from 2021-05-12
+    *  The fontloader has been synced with the context code from 2021-05-20
     *  Multiple small fixes, mostly concerning discretionaries in harf mode.

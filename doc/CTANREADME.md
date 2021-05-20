@@ -1,8 +1,8 @@
 # The Luaotfload Package
 
-VERSION: 3.18-dev
+VERSION: 3.18
 
-DATE: 2021-01-08
+DATE: 2021-05-21
 
 
 ## Description

@@ -281,6 +281,10 @@ miscellaneous
                         output can be saved to a file and used for
                         bootstrapping a custom configuration files.
 
+--aliases               Dump the font name database as a kpathsea
+                        aliases file. This option is experimental and
+                        might go away.
+
 FILES
 =======================================================================
 

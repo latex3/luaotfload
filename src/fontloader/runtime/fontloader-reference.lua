@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2021-05-15 22:41
+-- merge date  : 2021-05-19 18:18
 
 do -- begin closure to overcome local limits and interference
 
@@ -20858,7 +20858,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.114 
+otf.version=3.115 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -25733,6 +25733,28 @@ local function checkkerns(lookup)
  end
  return kerned
 end
+local strip_pairs=true
+local compact_pairs=true
+local compact_singles=true
+local merge_pairs=true
+local merge_singles=true
+local merge_substitutions=true
+local merge_alternates=true
+local merge_multiples=true
+local merge_ligatures=true
+local merge_cursives=true
+local merge_marks=true
+directives.register("otf.strip.pairs",function(v) strip_pairs=v end)
+directives.register("otf.compact.pairs",function(v) compact_pairs=v end)
+directives.register("otf.compact.singles",function(v) compact_singles=v end)
+directives.register("otf.merge.pairs",function(v) merge_pairs=v end)
+directives.register("otf.merge.singles",function(v) merge_singles=v end)
+directives.register("otf.merge.substitutions",function(v) merge_substitutions=v end)
+directives.register("otf.merge.alternates",function(v) merge_alternates=v end)
+directives.register("otf.merge.multiples",function(v) merge_multiples=v end)
+directives.register("otf.merge.ligatures",function(v) merge_ligatures=v end)
+directives.register("otf.merge.cursives",function(v) merge_cursives=v end)
+directives.register("otf.merge.marks",function(v) merge_marks=v end)
 local function checkpairs(lookup)
  local steps=lookup.steps
  local nofsteps=lookup.nofsteps
@@ -25746,7 +25768,7 @@ local function checkpairs(lookup)
     else
      local v=d2[1]
      if v==true then
-     elseif v and (v[1]~=0 or v[2]~=0 or v[4]~=0) then
+     elseif v and (v[1]~=0 or v[2]~=0 or v[3]~=0 or v[4]~=0) then 
       return false
      end
     end
@@ -25780,26 +25802,27 @@ local function checkpairs(lookup)
  end
  return kerned
 end
-local compact_pairs=true
-local compact_singles=true
-local merge_pairs=true
-local merge_singles=true
-local merge_substitutions=true
-local merge_alternates=true
-local merge_multiples=true
-local merge_ligatures=true
-local merge_cursives=true
-local merge_marks=true
-directives.register("otf.compact.pairs",function(v) compact_pairs=v end)
-directives.register("otf.compact.singles",function(v) compact_singles=v end)
-directives.register("otf.merge.pairs",function(v) merge_pairs=v end)
-directives.register("otf.merge.singles",function(v) merge_singles=v end)
-directives.register("otf.merge.substitutions",function(v) merge_substitutions=v end)
-directives.register("otf.merge.alternates",function(v) merge_alternates=v end)
-directives.register("otf.merge.multiples",function(v) merge_multiples=v end)
-directives.register("otf.merge.ligatures",function(v) merge_ligatures=v end)
-directives.register("otf.merge.cursives",function(v) merge_cursives=v end)
-directives.register("otf.merge.marks",function(v) merge_marks=v end)
+local function strippairs(lookup)
+ local steps=lookup.steps
+ local nofsteps=lookup.nofsteps
+ local stripped=0
+ for i=1,nofsteps do
+  local step=steps[i]
+  if step.format=="pair" then
+   local coverage=step.coverage
+   for g1,d1 in next,coverage do
+    for g2,d2 in next,d1 do
+     if d2[2] then
+     elseif d2[1]==true then
+      d1[g2]=nil
+      stripped=stripped+1
+     end
+    end
+   end
+  end
+ end
+ return stripped
+end
 function readers.compact(data)
  if not data or data.compacted then
   return
@@ -25807,6 +25830,7 @@ function readers.compact(data)
   data.compacted=true
  end
  local resources=data.resources
+ local stripped=0
  local merged=0
  local kerned=0
  local allsteps=0
@@ -25844,6 +25868,9 @@ function readers.compact(data)
        kerned=kerned+checkkerns(lookup)
       end
      elseif kind=="gpos_pair" then
+      if strip_pairs then
+       stripped=stripped+strippairs(lookup) 
+      end
       if merge_pairs then
        merged=merged+mergesteps_2(lookup)
       end
@@ -25884,6 +25911,9 @@ function readers.compact(data)
  compact("sequences")
  compact("sublookups")
  if trace_optimizations then
+  if stripped>0 then
+   report_optimizations("%i zero positions stripped before merging",stripped)
+  end
   if merged>0 then
    report_optimizations("%i steps of %i removed due to merging",merged,allsteps)
   end
@@ -33728,6 +33758,7 @@ end
   if inkscape then
    local descriptions=tfmdata.descriptions
    local nofshapes=#svgshapes
+   local s_format=inkscapeformat("pdf") 
    local f_svgfile=formatters["temp-otf-svg-shape-%i.svg"]
    local f_pdffile=formatters["temp-otf-svg-shape-%i.pdf"]
    local f_convert=formatters[new and "file-open:%s; export-%s:%s; export-do\n" or "%s --export-%s=%s\n"]
@@ -33744,7 +33775,7 @@ end
       local svgfile=f_svgfile(index)
       local pdffile=f_pdffile(index)
       savedata(svgfile,data)
-      inkscape:write(f_convert(svgfile,inkscapeformat("pdf"),pdffile))
+      inkscape:write(f_convert(svgfile,s_format,pdffile))
       processed[index]=true
       nofdone=nofdone+1
       if nofdone%25==0 then
@@ -36132,7 +36163,7 @@ local afm=fonts.handlers.afm
 local pfb=fonts.handlers.pfb
 local hashes=fonts.hashes
 local identifiers=hashes.identifiers
-local version=0.009
+local version=0.010
 local shapescache=containers.define("fonts","shapes",version,true)
 local streamscache=containers.define("fonts","streams",version,true)
 local compact_streams=false

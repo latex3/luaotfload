@@ -2564,6 +2564,34 @@ end
 -- Because we pack we cannot mix tables and numbers so we can only turn a whole set in
 -- format kern instead of pair.
 
+local strip_pairs         = true
+
+local compact_pairs       = true
+local compact_singles     = true
+
+local merge_pairs         = true
+local merge_singles       = true
+local merge_substitutions = true
+local merge_alternates    = true
+local merge_multiples     = true
+local merge_ligatures     = true
+local merge_cursives      = true
+local merge_marks         = true
+
+directives.register("otf.strip.pairs",         function(v) strip_pairs     = v end)
+
+directives.register("otf.compact.pairs",       function(v) compact_pairs   = v end)
+directives.register("otf.compact.singles",     function(v) compact_singles = v end)
+
+directives.register("otf.merge.pairs",         function(v) merge_pairs         = v end)
+directives.register("otf.merge.singles",       function(v) merge_singles       = v end)
+directives.register("otf.merge.substitutions", function(v) merge_substitutions = v end)
+directives.register("otf.merge.alternates",    function(v) merge_alternates    = v end)
+directives.register("otf.merge.multiples",     function(v) merge_multiples     = v end)
+directives.register("otf.merge.ligatures",     function(v) merge_ligatures     = v end)
+directives.register("otf.merge.cursives",      function(v) merge_cursives      = v end)
+directives.register("otf.merge.marks",         function(v) merge_marks         = v end)
+
 local function checkpairs(lookup)
     local steps    = lookup.steps
     local nofsteps = lookup.nofsteps
@@ -2580,7 +2608,8 @@ local function checkpairs(lookup)
                     local v = d2[1]
                     if v == true then
                         -- all zero
-                    elseif v and (v[1] ~= 0 or v[2] ~= 0 or v[4] ~= 0) then
+                 -- elseif v and (v[1] ~= 0 or v[2] ~= 0 or v[4] ~= 0) then
+                    elseif v and (v[1] ~= 0 or v[2] ~= 0 or v[3] ~= 0 or v[4] ~= 0) then -- vkrn has v[3] ~= 0
                         return false
                     end
                 end
@@ -2617,29 +2646,39 @@ local function checkpairs(lookup)
     return kerned
 end
 
-local compact_pairs       = true
-local compact_singles     = true
+local function strippairs(lookup)
+    local steps    = lookup.steps
+    local nofsteps = lookup.nofsteps
+    local stripped = 0
 
-local merge_pairs         = true
-local merge_singles       = true
-local merge_substitutions = true
-local merge_alternates    = true
-local merge_multiples     = true
-local merge_ligatures     = true
-local merge_cursives      = true
-local merge_marks         = true
-
-directives.register("otf.compact.pairs",       function(v) compact_pairs   = v end)
-directives.register("otf.compact.singles",     function(v) compact_singles = v end)
-
-directives.register("otf.merge.pairs",         function(v) merge_pairs         = v end)
-directives.register("otf.merge.singles",       function(v) merge_singles       = v end)
-directives.register("otf.merge.substitutions", function(v) merge_substitutions = v end)
-directives.register("otf.merge.alternates",    function(v) merge_alternates    = v end)
-directives.register("otf.merge.multiples",     function(v) merge_multiples     = v end)
-directives.register("otf.merge.ligatures",     function(v) merge_ligatures     = v end)
-directives.register("otf.merge.cursives",      function(v) merge_cursives      = v end)
-directives.register("otf.merge.marks",         function(v) merge_marks         = v end)
+    for i=1,nofsteps do
+        local step = steps[i]
+        if step.format == "pair" then
+            local coverage = step.coverage
+            for g1, d1 in next, coverage do
+                for g2, d2 in next, d1 do
+                    if d2[2] then
+                        --- true or { a, b, c, d }
+                 -- else
+                 --     local v = d2[1]
+                 --     if v == true then
+                 --         d1[g2] = nil
+                 --         stripped = stripped + 1
+                 --     elseif v and (v[1] == 0 and v[2] == 0 and v[4] == 0) then -- vkrn can have v[3] ~= 0
+                 --         d1[g2] = nil
+                 --         stripped = stripped + 1
+                 --     end
+                 -- end
+                    elseif d2[1] == true then
+                        d1[g2] = nil
+                        stripped = stripped + 1
+                    end
+                end
+            end
+        end
+    end
+    return stripped
+end
 
 function readers.compact(data)
     if not data or data.compacted then
@@ -2648,6 +2687,7 @@ function readers.compact(data)
         data.compacted = true
     end
     local resources = data.resources
+    local stripped  = 0
     local merged    = 0
     local kerned    = 0
     local allsteps  = 0
@@ -2678,6 +2718,7 @@ function readers.compact(data)
                             merged = merged + mergesteps_4(lookup)
                         end
                     elseif kind == "gpos_single" then
+                        -- maybe also strip zeros here
                         if merge_singles then
                             merged = merged + mergesteps_1(lookup,true)
                         end
@@ -2685,6 +2726,9 @@ function readers.compact(data)
                             kerned = kerned + checkkerns(lookup)
                         end
                     elseif kind == "gpos_pair" then
+                        if strip_pairs then
+                            stripped = stripped + strippairs(lookup) -- noto cjk from 24M -> 8 M
+                        end
                         if merge_pairs then
                             merged = merged + mergesteps_2(lookup)
                         end
@@ -2726,6 +2770,9 @@ function readers.compact(data)
     compact("sequences")
     compact("sublookups")
     if trace_optimizations then
+        if stripped > 0 then
+            report_optimizations("%i zero positions stripped before merging",stripped)
+        end
         if merged > 0 then
             report_optimizations("%i steps of %i removed due to merging",merged,allsteps)
         end

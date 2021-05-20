@@ -444,6 +444,7 @@ end
          -- local indices      = fonts.getindices(tfmdata)
             local descriptions = tfmdata.descriptions
             local nofshapes    = #svgshapes
+            local s_format     = inkscapeformat("pdf") -- hack, this will go away when is >= 0 is everywhere
             local f_svgfile    = formatters["temp-otf-svg-shape-%i.svg"]
             local f_pdffile    = formatters["temp-otf-svg-shape-%i.pdf"]
             local f_convert    = formatters[new and "file-open:%s; export-%s:%s; export-do\n" or "%s --export-%s=%s\n"]
@@ -460,7 +461,7 @@ end
                         local svgfile = f_svgfile(index)
                         local pdffile = f_pdffile(index)
                         savedata(svgfile,data)
-                        inkscape:write(f_convert(svgfile,inkscapeformat("pdf"),pdffile))
+                        inkscape:write(f_convert(svgfile,s_format,pdffile))
                         processed[index] = true
                         nofdone = nofdone + 1
                         if nofdone % 25 == 0 then

@@ -507,7 +507,7 @@ end
 
 -- todo: cache when string
 
-function lpeg.replacer(one,two,makefunction,isutf) -- in principle we should sort the keys
+function lpeg.replacer(one,two,makefunction,isutf) -- in principle we should sort the keys but we have a better one anyway
     local pattern
     local u = isutf and utf8char or 1
     if type(one) == "table" then

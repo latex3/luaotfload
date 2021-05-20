@@ -1,6 +1,6 @@
 -- merged file : lualibs-basic-merged.lua
 -- parent file : lualibs-basic.lua
--- merge date  : Wed Dec 30 17:55:54 2020
+-- merge date  : 2021-05-20 23:14
 
 do -- begin closure to overcome local limits and interference
 
@@ -133,7 +133,7 @@ if not modules then modules={} end modules ['l-package']={
  copyright="PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
-local type=type
+local type,unpack=type,unpack
 local gsub,format,find=string.gsub,string.format,string.find
 local insert,remove=table.insert,table.remove
 local P,S,Cs,lpegmatch=lpeg.P,lpeg.S,lpeg.Cs,lpeg.match
@@ -163,6 +163,7 @@ local helpers=package.helpers or {
  },
  methods={},
  sequence={
+  "reset loaded",
   "already loaded",
   "preload table",
   "qualified path",
@@ -179,6 +180,7 @@ local methods=helpers.methods
 local builtin=helpers.builtin
 local extraluapaths={}
 local extralibpaths={}
+local checkedfiles={}
 local luapaths=nil 
 local libpaths=nil 
 local oldluapath=nil
@@ -312,10 +314,16 @@ end
 local function loadedaslib(resolved,rawname) 
  local base=gsub(rawname,"%.","_")
  local init="luaopen_"..gsub(base,"%.","_")
+ local data={ resolved,init,"" }
+ checkedfiles[#checkedfiles+1]=data
  if helpers.trace then
   helpers.report("calling loadlib with '%s' with init '%s'",resolved,init)
  end
- return package.loadlib(resolved,init)
+ local a,b,c=package.loadlib(resolved,init)
+ if not a and type(b)=="string" then
+  data[3]=string.fullstrip(b or "unknown error")
+ end
+ return a,b,c 
 end
 helpers.loadedaslib=loadedaslib
 local function loadedbypath(name,rawname,paths,islib,what)
@@ -354,6 +362,10 @@ local function loadedbyname(name,rawname)
  end
 end
 helpers.loadedbyname=loadedbyname
+methods["reset loaded"]=function(name)
+ checkedfiles={}
+ return false
+end
 methods["already loaded"]=function(name)
  return package.loaded[name]
 end
@@ -395,6 +407,9 @@ end
 methods["not loaded"]=function(name)
  if helpers.trace then
   helpers.report("unable to locate '%s'",name or "?")
+  for i=1,#checkedfiles do
+   helpers.report("checked file '%s', initializer '%s', message '%s'",unpack(checkedfiles[i]))
+  end
  end
  return nil
 end
@@ -2591,13 +2606,13 @@ do -- begin closure to overcome local limits and interference
 
 if not modules then modules={} end modules ['l-number']={
  version=1.001,
- comment="companion to luat-lib.mkiv",
+ comment="companion to luat-lib.mkxl",
  author="Hans Hagen, PRAGMA-ADE, Hasselt NL",
  copyright="PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
 local tostring,tonumber=tostring,tonumber
-local format,floor,match,rep=string.format,math.floor,string.match,string.rep
+local format,match,rep=string.format,string.match,string.rep
 local concat,insert=table.concat,table.insert
 local lpegmatch=lpeg.match
 local floor=math.floor
@@ -3371,7 +3386,7 @@ elseif name=="macosx" then
   elseif find(architecture,"x86_64",1,true) then
    platform="osx-64"
   elseif find(architecture,"arm64",1,true) then
-   platform="osx-64"
+   platform="osx-arm"
   else
    platform="osx-ppc"
   end
@@ -4698,7 +4713,6 @@ if not modules then modules={} end modules ['l-unicode']={
  license="see context related readme files"
 }
 utf=utf or {}
--- unicode=nil
 if not string.utfcharacters then
  local gmatch=string.gmatch
  function string.characters(str)

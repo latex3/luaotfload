@@ -129,10 +129,8 @@ local function stoptiming(instance)
             timer.loadtime  = timer.loadtime + loadtime
             timer.timing    = 0
             timer.starttime = 0
-            return loadtime
         end
     end
-    return 0
 end
 
 local function benchmarktimer(instance)

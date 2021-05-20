@@ -70,27 +70,63 @@ local function points(n)
     n = n * ptf
     if n % 1 == 0 then
         return format("%ipt",n)
+    else
+        return lpegmatch(stripzeros,format("%.5fpt",n)) -- plural as we need to keep the pt
     end
-    return lpegmatch(stripzeros,format("%.5fpt",n)) -- plural as we need to keep the pt
+end
+
+local function nupoints(n)
+    if n == 0 then
+        return "0"
+    end
+    n = tonumber(n)
+    if not n or n == 0 then
+        return "0"
+    end
+    n = n * ptf
+    if n % 1 == 0 then
+        return format("%i",n)
+    else
+        return format("%.5f",n) -- no strip
+    end
 end
 
 local function basepoints(n)
     if n == 0 then
-        return "0pt"
+        return "0bp"
     end
     n = tonumber(n)
     if not n or n == 0 then
-        return "0pt"
+        return "0bp"
     end
     n = n * bpf
     if n % 1 == 0 then
         return format("%ibp",n)
+    else
+        return lpegmatch(stripzeros,format("%.5fbp",n)) -- plural as we need to keep the pt
     end
-    return lpegmatch(stripzeros,format("%.5fbp",n)) -- plural as we need to keep the pt
 end
 
-number.points     = points
-number.basepoints = basepoints
+local function nubasepoints(n)
+    if n == 0 then
+        return "0"
+    end
+    n = tonumber(n)
+    if not n or n == 0 then
+        return "0"
+    end
+    n = n * bpf
+    if n % 1 == 0 then
+        return format("%i",n)
+    else
+        return format("%.5f",n) -- no strip
+    end
+end
+
+number.points       = points
+number.nupoints     = nupoints
+number.basepoints   = basepoints
+number.nubasepoints = nubasepoints
 
 -- str = " \n \ntest  \n test\ntest "
 -- print("["..string.gsub(string.collapsecrlf(str),"\n","+").."]")
@@ -357,7 +393,9 @@ end
 -- U+hexadecimal      %...u   character number
 -- U+HEXADECIMAL      %...U   character number
 -- points             %p      number (scaled points)
+-- nupoints           %P      number (scaled points) / without unit / always 5 decimals
 -- basepoints         %b      number (scaled points)
+-- nubasepoints       %B      number (scaled points) / without unit / always 5 decimals
 -- table concat       %...t   table
 -- table concat       %{.}t   table
 -- serialize          %...T   sequenced (no nested tables)
@@ -616,7 +654,9 @@ local environment = {
     concat          = table.concat,
     signed          = number.signed,
     points          = number.points,
+    nupoints        = number.nupoints,
     basepoints      = number.basepoints,
+    nubasepoints    = number.nubasepoints,
     utfchar         = utf.char,
     utfbyte         = utf.byte,
     lpegmatch       = lpeg.match,
@@ -879,9 +919,19 @@ local format_p = function()
     return format("points(a%s)",n)
 end
 
+local format_P = function()
+    n = n + 1
+    return format("nupoints(a%s)",n)
+end
+
 local format_b = function()
     n = n + 1
     return format("basepoints(a%s)",n)
+end
+
+local format_B = function()
+    n = n + 1
+    return format("nubasepoints(a%s)",n)
 end
 
 local format_t = function(f)
@@ -1125,7 +1175,7 @@ local builder = Cs { "start",
               --
               + V("r")
               + V("h") + V("H") + V("u") + V("U")
-              + V("p") + V("b")
+              + V("p") + V("P") + V("b") + V("B")
               + V("t") + V("T")
               + V("l") + V("L")
               + V("I")
@@ -1174,8 +1224,10 @@ local builder = Cs { "start",
     ["H"] = (prefix_any * P("H")) / format_H, -- %H => 0x0A1B2 (when - no 0x) was V
     ["u"] = (prefix_any * P("u")) / format_u, -- %u => u+0a1b2 (when - no u+)
     ["U"] = (prefix_any * P("U")) / format_U, -- %U => U+0A1B2 (when - no U+)
-    ["p"] = (prefix_any * P("p")) / format_p, -- %p => 12.345pt / maybe: P (and more units)
-    ["b"] = (prefix_any * P("b")) / format_b, -- %b => 12.342bp / maybe: B (and more units)
+    ["p"] = (prefix_any * P("p")) / format_p, -- %p => 12.345pt
+    ["P"] = (prefix_any * P("P")) / format_P, -- %p => 12.345
+    ["b"] = (prefix_any * P("b")) / format_b, -- %b => 12.342bp
+    ["B"] = (prefix_any * P("B")) / format_B, -- %b => 12.342
     ["t"] = (prefix_tab * P("t")) / format_t, -- %t => concat
     ["T"] = (prefix_tab * P("T")) / format_T, -- %t => sequenced
     ["l"] = (prefix_any * P("l")) / format_l, -- %l => boolean

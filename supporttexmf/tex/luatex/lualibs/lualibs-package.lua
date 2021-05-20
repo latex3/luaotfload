@@ -16,7 +16,7 @@ if not modules then modules = { } end modules ['l-package'] = {
 -- -- local mylib = require("libtest")
 -- -- local mysql = require("luasql.mysql")
 
-local type = type
+local type, unpack = type, unpack
 local gsub, format, find = string.gsub, string.format, string.find
 local insert, remove = table.insert, table.remove
 
@@ -70,6 +70,7 @@ local helpers = package.helpers or {
     methods    = {
     },
     sequence   = {
+        "reset loaded",
         "already loaded",
         "preload table",
         "qualified path", -- beware, lua itself doesn't handle qualified paths (prepends ./)
@@ -91,6 +92,7 @@ local builtin = helpers.builtin
 
 local extraluapaths = { }
 local extralibpaths = { }
+local checkedfiles  = { }
 local luapaths      = nil -- delayed
 local libpaths      = nil -- delayed
 local oldluapath    = nil
@@ -245,10 +247,17 @@ local function loadedaslib(resolved,rawname) -- todo: strip all before first -
  -- so, we can do a require("foo/bar") and initialize bar
  -- local base = gsub(file.basename(rawname),"%.","_")
     local init = "luaopen_" .. gsub(base,"%.","_")
+    local data = { resolved, init, "" }
+    checkedfiles[#checkedfiles+1] = data
     if helpers.trace then
         helpers.report("calling loadlib with '%s' with init '%s'",resolved,init)
     end
-    return package.loadlib(resolved,init)
+    local a, b, c = package.loadlib(resolved,init)
+    if not a and type(b) == "string" then
+--         data[3] = gsub(b or "unknown error","[\n\r]","")
+        data[3] = string.fullstrip(b or "unknown error")
+    end
+    return a, b, c -- c can be 'init'
 end
 
 helpers.loadedaslib = loadedaslib
@@ -294,6 +303,12 @@ local function loadedbyname(name,rawname)
 end
 
 helpers.loadedbyname = loadedbyname
+
+methods["reset loaded"] = function(name)
+    checkedfiles = { }
+    return false
+end
+
 
 methods["already loaded"] = function(name)
     return package.loaded[name]
@@ -344,6 +359,9 @@ end
 methods["not loaded"] = function(name)
     if helpers.trace then
         helpers.report("unable to locate '%s'",name or "?")
+        for i=1,#checkedfiles do
+            helpers.report("checked file '%s', initializer '%s', message '%s'",unpack(checkedfiles[i]))
+        end
     end
     return nil
 end

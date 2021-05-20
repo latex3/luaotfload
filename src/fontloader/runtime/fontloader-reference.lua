@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2021-05-19 18:18
+-- merge date  : 2021-05-20 15:57
 
 do -- begin closure to overcome local limits and interference
 
@@ -20858,7 +20858,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.115 
+otf.version=3.116 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -22049,6 +22049,8 @@ local getoffsets=nuts.getoffsets
 local getboth=nuts.getboth
 local getdisc=nuts.getdisc
 local setdisc=nuts.setdisc
+local getreplace=nuts.getreplace
+local setreplace=nuts.setreplace
 local setoffsets=nuts.setoffsets
 local ischar=nuts.ischar
 local getkern=nuts.getkern
@@ -22714,17 +22716,15 @@ local function inject_positions_only(head,where)
        insertnodeafter(head,current,fontkern(rightkern))
       end
      end
-    else
+    elseif next then
      local i=p.emptyinjections
      if i then
       local rightkern=i.rightkern
-      if rightkern and rightkern~=0 then
-       if next and getid(next)==disc_code then
-        if replace then
-        else
-         replace=fontkern(rightkern) 
-         done=true	
-        end
+      if rightkern and rightkern~=0 and getid(next)==disc_code then
+       local replace=getreplace(next)
+       if replace then
+       else
+        setreplace(next,fontkern(rightkern))
        end
       end
      end
@@ -23082,17 +23082,15 @@ local function inject_everything(head,where)
        end
       end
      end
-    else
+    elseif next then
      local i=p.emptyinjections
      if i then
       local rightkern=i.rightkern
-      if rightkern and rightkern~=0 then
-       if next and getid(next)==disc_code then
-        if replace then
-        else
-         replace=fontkern(rightkern)
-         done=true
-        end
+      if rightkern and rightkern~=0 and getid(next)==disc_code then
+       local replace=getreplace(next)
+       if replace then
+       else
+        setreplace(next,fontkern(rightkern))
        end
       end
      end
@@ -25768,7 +25766,7 @@ local function checkpairs(lookup)
     else
      local v=d2[1]
      if v==true then
-     elseif v and (v[1]~=0 or v[2]~=0 or v[3]~=0 or v[4]~=0) then 
+     elseif v and (v[1]~=0 or v[2]~=0 or v[4]~=0) then
       return false
      end
     end

@@ -1,6 +1,6 @@
 --[[info-----------------------------------------------------------------------
   Luaotfload fontloader package
-  build 2021-05-20 11:42:54
+  build 2021-05-20 19:43:52
 -------------------------------------------------------------------------------
 
   © 2021 PRAGMA ADE / ConTeXt Development Team
@@ -16048,7 +16048,7 @@ end
 end --- [luaotfload, fontloader-2021-05-20.lua scope for “font-dsp”] ---
 
 
-do  --- [luaotfload, fontloader-2021-05-20.lua scope for “font-oup” 59894b3fc1629c7ca71d2ab94c8befef] ---
+do  --- [luaotfload, fontloader-2021-05-20.lua scope for “font-oup” 4eb2f26e51835239e26a8df2ecf04366] ---
 
 if not modules then modules={} end modules ['font-oup']={
  version=1.001,
@@ -18327,7 +18327,7 @@ local function checkpairs(lookup)
     else
      local v=d2[1]
      if v==true then
-     elseif v and (v[1]~=0 or v[2]~=0 or v[3]~=0 or v[4]~=0) then 
+     elseif v and (v[1]~=0 or v[2]~=0 or v[4]~=0) then
       return false
      end
     end
@@ -18722,7 +18722,7 @@ end
 end --- [luaotfload, fontloader-2021-05-20.lua scope for “font-oup”] ---
 
 
-do  --- [luaotfload, fontloader-2021-05-20.lua scope for “font-otl” a7580a47d0c1655255d5ddbf531ffd38] ---
+do  --- [luaotfload, fontloader-2021-05-20.lua scope for “font-otl” 6f701653de713e8aa80d82c7cdf32d75] ---
 
 if not modules then modules={} end modules ['font-otl']={
  version=1.001,
@@ -18750,7 +18750,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.115 
+otf.version=3.116 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -19893,7 +19893,7 @@ otf.basemodeinitializer=featuresinitializer
 end --- [luaotfload, fontloader-2021-05-20.lua scope for “font-oto”] ---
 
 
-do  --- [luaotfload, fontloader-2021-05-20.lua scope for “font-otj” e77357c4ad5f7fab278be57db0b51012] ---
+do  --- [luaotfload, fontloader-2021-05-20.lua scope for “font-otj” b2c165bd6771a57633f992d07384b739] ---
 
 if not modules then modules={} end modules ['font-otj']={
  version=1.001,
@@ -19943,6 +19943,8 @@ local getoffsets=nuts.getoffsets
 local getboth=nuts.getboth
 local getdisc=nuts.getdisc
 local setdisc=nuts.setdisc
+local getreplace=nuts.getreplace
+local setreplace=nuts.setreplace
 local setoffsets=nuts.setoffsets
 local ischar=nuts.ischar
 local getkern=nuts.getkern
@@ -20608,17 +20610,15 @@ local function inject_positions_only(head,where)
        insertnodeafter(head,current,fontkern(rightkern))
       end
      end
-    else
+    elseif next then
      local i=p.emptyinjections
      if i then
       local rightkern=i.rightkern
-      if rightkern and rightkern~=0 then
-       if next and getid(next)==disc_code then
-        if replace then
-        else
-         replace=fontkern(rightkern) 
-         done=true	
-        end
+      if rightkern and rightkern~=0 and getid(next)==disc_code then
+       local replace=getreplace(next)
+       if replace then
+       else
+        setreplace(next,fontkern(rightkern))
        end
       end
      end
@@ -20976,17 +20976,15 @@ local function inject_everything(head,where)
        end
       end
      end
-    else
+    elseif next then
      local i=p.emptyinjections
      if i then
       local rightkern=i.rightkern
-      if rightkern and rightkern~=0 then
-       if next and getid(next)==disc_code then
-        if replace then
-        else
-         replace=fontkern(rightkern)
-         done=true
-        end
+      if rightkern and rightkern~=0 and getid(next)==disc_code then
+       local replace=getreplace(next)
+       if replace then
+       else
+        setreplace(next,fontkern(rightkern))
        end
       end
      end

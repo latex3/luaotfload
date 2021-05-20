@@ -90,6 +90,8 @@ local getoffsets         = nuts.getoffsets
 local getboth            = nuts.getboth
 local getdisc            = nuts.getdisc
 local setdisc            = nuts.setdisc
+local getreplace         = nuts.getreplace
+local setreplace         = nuts.setreplace
 local setoffsets         = nuts.setoffsets
 local ischar             = nuts.ischar
 local getkern            = nuts.getkern
@@ -847,20 +849,17 @@ local function inject_positions_only(head,where)
                             insertnodeafter(head,current,fontkern(rightkern))
                         end
                     end
-                else
+                elseif next then
                     local i = p.emptyinjections
                     if i then
                         -- glyph|disc|glyph (special case)
                         local rightkern = i.rightkern
-                        if rightkern and rightkern ~= 0 then
-                            if next and getid(next) == disc_code then
-                                if replace then
-                                    -- error, we expect an empty one
-                                else
-                              -- KE setfield(next,"replace",fontkern(rightkern)) -- maybe also leftkern
-                                    replace = fontkern(rightkern) -- maybe also leftkern
-                                    done = true	--KE
-                                end
+                        if rightkern and rightkern ~= 0 and getid(next) == disc_code then
+                            local replace = getreplace(next)
+                            if replace then
+                                -- can't happen
+                            else
+                                setreplace(next,fontkern(rightkern))
                             end
                         end
                     end
@@ -1313,19 +1312,17 @@ local function inject_everything(head,where)
                             end
                         end
                     end
-                else
+                elseif next then
                     local i = p.emptyinjections
                     if i then
                         -- glyph|disc|glyph (special case)
                         local rightkern = i.rightkern
-                        if rightkern and rightkern ~= 0 then
-                            if next and getid(next) == disc_code then
-                                if replace then
-                                    -- error, we expect an empty one
-                                else
-                                    replace = fontkern(rightkern)
-                                    done    = true
-                                end
+                        if rightkern and rightkern ~= 0 and getid(next) == disc_code then
+                            local replace = getreplace(next)
+                            if replace then
+                                -- can't happen
+                            else
+                                setreplace(next,fontkern(rightkern))
                             end
                         end
                     end

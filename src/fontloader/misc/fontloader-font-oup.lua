@@ -2608,8 +2608,8 @@ local function checkpairs(lookup)
                     local v = d2[1]
                     if v == true then
                         -- all zero
-                 -- elseif v and (v[1] ~= 0 or v[2] ~= 0 or v[4] ~= 0) then
-                    elseif v and (v[1] ~= 0 or v[2] ~= 0 or v[3] ~= 0 or v[4] ~= 0) then -- vkrn has v[3] ~= 0
+                    elseif v and (v[1] ~= 0 or v[2] ~= 0 or v[4] ~= 0) then
+                        -- complex kerns
                         return false
                     end
                 end

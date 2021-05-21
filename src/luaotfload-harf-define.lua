@@ -39,6 +39,7 @@ local gpostag = hb.Tag.new("GPOS")
 local invalid_l         = hb.Language.new()
 local invalid_s         = hb.Script.new()
 
+local tointeger = math.tointeger
 local floor = math.floor
 local function round(x)
   return floor(x + 0.5)
@@ -71,7 +72,7 @@ local get_designsize do
 end
 
 local containers = luaotfload.fontloader.containers
-local hbcacheversion = 1.2
+local hbcacheversion = 1.3
 local facecache = containers.define("fonts", "hb", hbcacheversion, true)
 
 local function loadfont(spec)
@@ -174,7 +175,7 @@ local function loadfont(spec)
       local glyph = hbfont:get_nominal_glyph(uni)
       if glyph then
         characters[uni] = glyph
-        nominals[glyph] = uni
+        nominals[glyph] = tointeger(uni)
       end
     end
 

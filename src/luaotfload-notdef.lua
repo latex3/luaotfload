@@ -5,7 +5,7 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-notdef",
-    version       = "3.18",       --TAGVERSION
+    version       = "3.19-dev",       --TAGVERSION
     date          = "2021-05-21", --TAGDATE
     description   = "luaotfload submodule / notdef",
     license       = "GPL v2.0",

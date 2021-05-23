@@ -2368,7 +2368,7 @@ local function collect_font_filenames_texmf ()
     fontdirs = fontdirs .. path_separator .. expanded_path "type1 fonts"
     fontdirs = fontdirs .. path_separator .. expanded_path "afm"
 
-    fontdirs = filesplitpath (fontdirs) or { }
+    fontdirs = filesplitpath (fontdirs) or { }
 
     local tasks = filter_out_pwd (fontdirs)
     logreport ("both", 3, "db",

@@ -156,6 +156,6 @@ CHECK if in fontloader-basics-gen.lua line 192 is
 =======
 I would do the merge to dev last because it is the least important step and the only
 step where we it is quite likely to get merge conflicts.
-So my order would be: Do a fast-forward merge to master, then set the tag.
-After the Tag tests ran through send the code to CTAN and delete the master-xx branch.
-Finally merge master back into dev.
+So my order would be: Do a fast-forward merge to main, then set the tag.
+After the Tag tests ran through send the code to CTAN and delete the main-xx branch.
+Finally merge main back into dev.

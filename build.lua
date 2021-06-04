@@ -19,10 +19,10 @@ print(mydata.email)
 
 --------- setup things for a dev-version
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
-local master_branch do
+local maimainanch do
   local tag = os.getenv'TRAVIS_TAG'
   if tag and tag ~= "" then
-    master_branch = not string.match(tag, '-dev$')
+    main_branch = not string.match(tag, '-dev$')
   else
     local branch = os.getenv'TRAVIS_BRANCH'
     if not branch then
@@ -30,9 +30,9 @@ local master_branch do
       branch = f:read'*a':sub(1,-2)
       assert(f:close())
     end
-    master_branch = string.match(branch, '^master')
+    main_branch = string.match(branch, '^main')
   end
-  if not master_branch then
+  if not main_branch then
     tdsroot = "latex-dev"
     print("creating/installing dev-version in " .. tdsroot)
     ctanpkg = ctanpkg .. "-dev"
@@ -292,7 +292,7 @@ function update_tag (file,content,_tagname,_tagdate)
   if string.match (file, "%.sty$" ) then
     return sty_pattern:match(content)
   elseif string.match (file,"fontloader%-basic") then
-   if master_branch then
+   if main_branch then
      return string.gsub (content,
                           "caches.namespace = 'generic%-dev'",
                           "caches.namespace = 'generic'")

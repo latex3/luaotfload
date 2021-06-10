@@ -1134,6 +1134,8 @@ local function get_glyph_info(n)
   local c = getchar(n)
   if c == 0 then
     return '^^@'
+  elseif c < 0 then -- These are left and right boundaries in ligature lists
+    return ''
   elseif c < 0x110000 then
     return utfchar(c)
   else

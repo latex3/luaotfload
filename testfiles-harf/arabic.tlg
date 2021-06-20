@@ -7,6 +7,7 @@ Completed box being shipped out [1]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 302.30731fil, direction TLT
@@ -1169,10 +1170,11 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.73
-..\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/Amiri(0)/m/n/10 "1" 0031 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(6.27+0.03)x345.0, direction TLT
+...\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/Amiri(0)/m/n/10 "1" 0031 +0:+0
+....\glue 0.0 plus 1.0fil
 Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with
 (fontspec)             options
 (fontspec)             [Extension=.ttf,UprightFont=*-Regular,ItalicFont=*-Slanted,BoldFont=*-Bold,BoldItalicFont=*-BoldSlanted,Renderer=Harfbuzz,Script=Arabic,Scale=1.6].
@@ -1201,6 +1203,7 @@ Completed box being shipped out [2]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 129.91508fil, direction TLT
@@ -2261,10 +2264,11 @@ Completed box being shipped out [2]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.73
-..\hbox(6.27+0.0)x345.0, glue set 169.84fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/Amiri(0)/m/n/10 "2" 0032 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(6.27+0.0)x345.0, direction TLT
+...\hbox(6.27+0.0)x345.0, glue set 169.84fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/Amiri(0)/m/n/10 "2" 0032 +0:+0
+....\glue 0.0 plus 1.0fil
 Package fontspec Info: Font family 'ArefRuqaa-Regular.ttf(0)' created for font
 (fontspec)             'ArefRuqaa-Regular.ttf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Arabic,Scale=1.2].
@@ -2284,6 +2288,7 @@ Completed box being shipped out [3]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 248.64998fil, direction TLT
@@ -4515,10 +4520,11 @@ Completed box being shipped out [3]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.73
-..\hbox(6.27+0.05)x345.0, glue set 169.84fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/Amiri(0)/m/n/10 "3" 0033 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(6.27+0.05)x345.0, direction TLT
+...\hbox(6.27+0.05)x345.0, glue set 169.84fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/Amiri(0)/m/n/10 "3" 0033 +0:+0
+....\glue 0.0 plus 1.0fil
 Package fontspec Info: Font family 'NotoNastaliqUrdu-Regular.ttf(0)' created
 (fontspec)             for font 'NotoNastaliqUrdu-Regular.ttf' with options
 (fontspec)             [Renderer=Harfbuzz,Script=Arabic].
@@ -4536,6 +4542,7 @@ Completed box being shipped out [4]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 265.78162fil, direction TLT
@@ -7014,8 +7021,9 @@ Completed box being shipped out [4]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.71
-..\hbox(6.29+0.06)x345.0, glue set 169.84fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/Amiri(0)/m/n/10 "4" 0034 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(6.29+0.06)x345.0, direction TLT
+...\hbox(6.29+0.06)x345.0, glue set 169.84fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/Amiri(0)/m/n/10 "4" 0034 +0:+0
+....\glue 0.0 plus 1.0fil
 2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (arabic.aux)

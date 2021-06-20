@@ -9,6 +9,7 @@ Completed box being shipped out [1]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 516.7998fil, direction TLT
@@ -37,6 +38,7 @@ Completed box being shipped out [1]
 ...\penalty 10000
 ...\glue 9.913 plus 0.86198
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 1.4928
 ...\hbox(7.8+1.88)x345.0, glue set 105.0fil, direction TLT
 ....\localpar
@@ -76,9 +78,10 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.34
-..\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/FandolSong-Regular.otf(0)/m/n/10 1
-...\glue 0.0 plus 1.0fil
+..\hbox(6.66+0.0)x345.0, direction TLT
+...\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/FandolSong-Regular.otf(0)/m/n/10 1
+....\glue 0.0 plus 1.0fil
 (setxheight.aux)
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.

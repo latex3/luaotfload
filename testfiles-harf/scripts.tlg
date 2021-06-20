@@ -61,6 +61,7 @@ Completed box being shipped out [1]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 467.95001fil, direction TLT
@@ -106,6 +107,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 2.62502
 ...\hbox(7.17+3.86)x345.0, glue set 317.84fil, direction TLT
 ....\localpar
@@ -123,6 +125,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 2.3
 ...\hbox(5.84+1.15)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
@@ -145,6 +148,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 5.01001
 ...\hbox(5.84+1.13)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
@@ -167,6 +171,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.87
 ...\hbox(6.0+1.15)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
@@ -189,6 +194,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 5.01001
 ...\hbox(5.84+1.15)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
@@ -211,6 +217,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.85
 ...\hbox(6.0+1.15)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
@@ -237,10 +244,11 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.73
-..\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/amiri-regular.ttf(1)/m/n/10 "1" 0031 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(6.27+0.03)x345.0, direction TLT
+...\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/amiri-regular.ttf(1)/m/n/10 "1" 0031 +0:+0
+....\glue 0.0 plus 1.0fil
 Missing character: There is no τ (U+03C4) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
 Missing character: There is no ε (U+03B5) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
 Missing character: There is no χ (U+03C7) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
@@ -251,6 +259,7 @@ Completed box being shipped out [2]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 499.42664fil, direction TLT
@@ -291,6 +300,7 @@ Completed box being shipped out [2]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\lineskip) 1.0
 ...\hbox(8.96+0.12)x345.0, glue set 312.17001fil, direction TLT
 ....\localpar
@@ -309,6 +319,7 @@ Completed box being shipped out [2]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 2.71
 ...\hbox(9.17+0.52)x345.0, glue set 245.47992fil, direction TLT
 ....\localpar
@@ -345,6 +356,7 @@ Completed box being shipped out [2]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 0.7
 ...\hbox(10.78+5.49)x345.0, glue set 217.37996fil, direction TLT
 ....\localpar
@@ -388,9 +400,10 @@ Completed box being shipped out [2]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.73
-..\hbox(6.27+0.0)x345.0, glue set 169.84fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/amiri-regular.ttf(1)/m/n/10 "2" 0032 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(6.27+0.0)x345.0, direction TLT
+...\hbox(6.27+0.0)x345.0, glue set 169.84fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/amiri-regular.ttf(1)/m/n/10 "2" 0032 +0:+0
+....\glue 0.0 plus 1.0fil
 2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (scripts.aux)
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.

@@ -46,6 +46,7 @@ Completed box being shipped out [1]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 113.98782fil, direction TLT
@@ -133,6 +134,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 3.69
 ...\hbox(8.17+2.62)x345.0, glue set 210.32997fil, direction TLT
 ....\localpar
@@ -182,6 +184,7 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -190,6 +193,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 1.19
 ...\hbox(8.19+2.62)x345.0, glue set 205.40996fil, direction TLT
 ....\localpar
@@ -243,6 +247,7 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -251,6 +256,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 1.21
 ...\hbox(8.17+2.62)x345.0, glue set 215.38997fil, direction TLT
 ....\localpar
@@ -290,6 +296,7 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -298,6 +305,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 1.19
 ...\hbox(8.19+2.62)x345.0, glue set 210.46996fil, direction TLT
 ....\localpar
@@ -341,12 +349,14 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 1.21
 ...\hbox(8.17+0.14)x345.0, glue set 313.66998fil, direction TLT
 ....\localpar
@@ -439,6 +449,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0 plus 1.0fil
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 3.75
 ...\hbox(8.17+0.22)x345.0, glue set 158.70996fil, direction TLT
 ....\localpar
@@ -518,6 +529,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.73
 ...\hbox(7.05+1.94)x345.0, glue set 233.57999fil, direction TLT
 ....\localpar
@@ -557,6 +569,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -565,6 +578,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 3.01
 ...\hbox(7.05+1.94)x345.0, glue set 229.95999fil, direction TLT
 ....\localpar
@@ -606,6 +620,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -614,6 +629,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 3.01
 ...\hbox(7.05+1.94)x345.0, glue set 240.23999fil, direction TLT
 ....\localpar
@@ -647,6 +663,7 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -655,6 +672,7 @@ Completed box being shipped out [1]
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 3.01
 ...\hbox(7.05+1.94)x345.0, glue set 236.62fil, direction TLT
 ....\localpar
@@ -690,12 +708,14 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
+....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue 3.0 plus 1.0 minus 1.0
 ...\glue 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 3.01
 ...\hbox(7.05+0.11)x345.0, glue set 330.84fil, direction TLT
 ....\localpar
@@ -799,8 +819,9 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 22.86
-..\hbox(7.14+0.0)x345.0, glue set 169.805fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "1" 12F357 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(7.14+0.0)x345.0, direction TLT
+...\hbox(7.14+0.0)x345.0, glue set 169.805fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "1" 12F357 +0:+0
+....\glue 0.0 plus 1.0fil
 2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 49 glue_spec, 2 attribute_list (discretionaries.aux)

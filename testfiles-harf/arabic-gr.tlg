@@ -7,6 +7,7 @@ Completed box being shipped out [1]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 343.228fil, direction TLT
@@ -396,6 +397,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\lineskip) 1.0
 ...\hbox(17.17773+5.41504)x345.0, glue set 0.22688, direction TRT
 ....\localpar
@@ -1533,6 +1535,7 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue 20.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\lineskip) 1.0
 ...\hbox(20.77637+5.41504)x345.0, glue set 123.11035fil, direction TRT
 ....\localpar
@@ -1721,8 +1724,9 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.22754
-..\hbox(6.77246+0.0)x345.0, glue set 169.99512fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "1" 0031 +0:+0
-...\glue 0.0 plus 1.0fil
+..\hbox(6.77246+0.0)x345.0, direction TLT
+...\hbox(6.77246+0.0)x345.0, glue set 169.99512fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "1" 0031 +0:+0
+....\glue 0.0 plus 1.0fil
 2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (arabic-gr.aux)

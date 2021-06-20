@@ -18,6 +18,7 @@ Completed box being shipped out [1]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 407.95642fil, direction TLT
@@ -58,6 +59,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.26074
 ...\hbox(7.59766+0.1416)x345.0, glue set 218.96793fil, direction TLT
 ....\localpar
@@ -94,6 +96,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.26074
 ...\hbox(7.59766+2.08008)x345.0, glue set 0.91293, direction TLT
 ....\localpar
@@ -198,6 +201,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 1.92188
 ...\hbox(7.99805+2.08008)x345.0, glue set 7.68555fil, direction TLT
 ....\localpar
@@ -277,6 +281,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 2.32227
 ...\hbox(7.59766+2.08008)x345.0, glue set 0.0723, direction TLT
 ....\localpar
@@ -395,6 +400,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 0.78906
 ...\hbox(9.13086+0.1416)x345.0, glue set 200.68668fil, direction TLT
 ....\localpar
@@ -432,6 +438,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.43652
 ...\hbox(7.42188+0.1416)x345.0, glue set 0.11438, direction TLT
 ....\localpar
@@ -542,6 +549,7 @@ Completed box being shipped out [1]
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 3.86035
 ...\hbox(7.99805+0.1416)x345.0, glue set 0.0093, direction TLT
 ....\localpar
@@ -629,8 +637,9 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 22.70996
-..\hbox(7.29004+0.0)x345.0, glue set 169.31885fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\TU/DejaVuSans.ttf(0)/m/n/10 1
-...\glue 0.0 plus 1.0fil
+..\hbox(7.29004+0.0)x345.0, direction TLT
+...\hbox(7.29004+0.0)x345.0, glue set 169.31885fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/DejaVuSans.ttf(0)/m/n/10 1
+....\glue 0.0 plus 1.0fil
 (add-uppercase-feature.aux)

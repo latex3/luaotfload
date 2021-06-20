@@ -69,6 +69,7 @@ Completed box being shipped out [1]
 ..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
 ...\glue 0.0 plus 1.0fil
 ...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
 ..\vbox(550.0+0.0)x345.0, glue set 471.7796fil, direction TLT
@@ -286,10 +287,11 @@ Completed box being shipped out [1]
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil
 ..\glue(\baselineskip) 23.61
-..\hbox(6.39+0.0)x345.0, glue set 170.025fil, direction TLT
-...\glue 0.0 plus 1.0fil
-...\pdfcolorstack 0 push {0 1 0 rg}
-...\TU/STIXTwoText(0)/m/n/10 1
-...\glue 0.0 plus 1.0fil
-...\pdfcolorstack 0 pop
+..\hbox(6.39+0.0)x345.0, direction TLT
+...\hbox(6.39+0.0)x345.0, glue set 170.025fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\pdfcolorstack 0 push {0 1 0 rg}
+....\TU/STIXTwoText(0)/m/n/10 1
+....\glue 0.0 plus 1.0fil
+....\pdfcolorstack 0 pop
 (color.aux)

@@ -30,6 +30,8 @@ local table             = table
 local tabletohash       = table.tohash
 local tablesort         = table.sort
 
+local stringunpack      = string.unpack
+
 --- this appears to be based in part on luatex-fonts-def.lua
 
 local fonts             = fonts
@@ -773,6 +775,58 @@ do
             base = mathfontdimen,
           -- node = mathfontdimen,
           -- plug = mathfontdimen,
+        },
+    }
+end
+
+do
+    local function restore(tfmdata, value, features)
+        if not tfmdata.properties.monospaced then return end
+        if features.fixedspace then return end -- In this case, 'auto' is true
+        local parameters = tfmdata.parameters
+        local space = parameters.space
+        parameters.space_stretch, parameters.space_shrink = space/2, space/3
+    end
+    fonts.constructors.features.otf.register {
+        name = 'internal__variablespace',
+        default = true,
+        initializers = {
+            base = restore,
+            node = restore,
+        },
+    }
+    local function node_fixedspace(tfmdata, value, features)
+        if value == 'auto' then return end
+        if tfmdata.properties.monospaced then return end -- handled by internal__variablespace
+        local parameters = tfmdata.parameters
+        parameters.space_stretch, parameters.space_shrink = 0, 0
+    end
+    local hb = luaotfload.harfbuzz
+    local post_tag = hb and hb.Tag.new'post'
+    local function harf_fixedspace(tfmdata, value, features)
+        if value == 'auto' then
+            -- We have to determine if we have a monospace font.
+            -- Let's be honest, it would be boring if that were easy.
+            local post_table = tfmdata.hb.shared.face:get_table(post_tag):get_data()
+            if #post_table < 16 then
+                -- Invalid OpenType font... Let's assume that it's not
+                -- monospaced:
+                return
+            end
+            local monospaced = string.unpack('>I4', post_table, 13) ~= 0
+            if not monospaced then return end -- FIXME: How to determine?
+        end
+        local parameters = tfmdata.parameters
+        parameters.space_stretch, parameters.space_shrink = 0, 0
+    end
+    fonts.constructors.features.otf.register {
+        name = 'fixedspace',
+        description = 'Do not stretch or shrink spaces',
+        default = 'auto',
+        initializers = {
+            base = node_fixedspace,
+            node = node_fixedspace,
+            plug = harf_fixedspace,
         },
     }
 end

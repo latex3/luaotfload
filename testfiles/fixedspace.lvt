@@ -1,0 +1,26 @@
+% !Mode:: "TeX:DE:UTF-8:Main"
+\documentclass{article}
+\input{regression-test}
+
+\begin{document}
+\showoutput
+\START
+\font \lmrDefaultspace "kpse:lmroman10-regular.otf"\lmrDefaultspace
+abc def
+
+\font \lmrVarspace "kpse:lmroman10-regular.otf:-fixedspace"\lmrVarspace
+abc def
+
+\font \lmrFixedspace "kpse:lmroman10-regular.otf:+fixedspace"\lmrFixedspace
+abc def
+
+\font \lmttDefaultspace "kpse:lmmono10-regular.otf"\lmttDefaultspace
+abc def
+
+\font \lmttVarspace "kpse:lmmono10-regular.otf:-fixedspace"\lmttVarspace
+abc def
+
+\font \lmttFixedspace "kpse:lmmono10-regular.otf:+fixedspace"\lmttFixedspace
+abc def
+
+\end{document}

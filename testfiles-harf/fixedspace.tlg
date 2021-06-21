@@ -1,0 +1,146 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 479.94873fil, direction TLT
+...\write-{}
+...\glue(\topskip) 2.92355
+...\hbox(7.07645+0.11041)x345.0, glue set 298.21124fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\lmrDefaultspace a
+....\lmrDefaultspace b
+....\kern0.28105 (font)
+....\lmrDefaultspace c
+....\glue(\spaceskip) 3.34248 plus 1.67125 minus 1.11417
+....\lmrDefaultspace d
+....\lmrDefaultspace e
+....\lmrDefaultspace f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
+...\glue(\baselineskip) 4.81314
+...\hbox(7.07645+0.11041)x345.0, glue set 298.21124fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\lmrVarspace a
+....\lmrVarspace b
+....\kern0.28105 (font)
+....\lmrVarspace c
+....\glue(\spaceskip) 3.34248 plus 1.67125 minus 1.11417
+....\lmrVarspace d
+....\lmrVarspace e
+....\lmrVarspace f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
+...\glue(\baselineskip) 4.81314
+...\hbox(7.07645+0.11041)x345.0, glue set 298.21124fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\lmrFixedspace a
+....\lmrFixedspace b
+....\kern0.28105 (font)
+....\lmrFixedspace c
+....\glue(\spaceskip) 3.34248
+....\lmrFixedspace d
+....\lmrFixedspace e
+....\lmrFixedspace f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
+...\glue(\baselineskip) 5.69644
+...\hbox(6.19315+0.06023)x345.0, glue set 293.11221fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\lmttDefaultspace a
+....\lmttDefaultspace b
+....\lmttDefaultspace c
+....\glue(\spaceskip) 5.26968
+....\lmttDefaultspace d
+....\lmttDefaultspace e
+....\lmttDefaultspace f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
+...\glue(\baselineskip) 5.74663
+...\hbox(6.19315+0.06023)x345.0, glue set 293.11221fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\lmttVarspace a
+....\lmttVarspace b
+....\lmttVarspace c
+....\glue(\spaceskip) 5.26968 plus 2.63484 minus 1.75656
+....\lmttVarspace d
+....\lmttVarspace e
+....\lmttVarspace f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue(\parskip) 0.0 plus 1.0
+...\glue(\parskip) 0.0
+...\glue(\baselineskip) 5.74663
+...\hbox(6.19315+0.06023)x345.0, glue set 293.11221fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\lmttFixedspace a
+....\lmttFixedspace b
+....\lmttFixedspace c
+....\glue(\spaceskip) 5.26968
+....\lmttFixedspace d
+....\lmttFixedspace e
+....\lmttFixedspace f
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -0.06023
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.34
+..\hbox(6.66+0.0)x345.0, direction TLT
+...\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/lmr/m/n/10 1
+....\glue 0.0 plus 1.0fil
+(fixedspace.aux)

@@ -3782,10 +3782,7 @@ return function ()
     fonts.definers  = fonts.definers or { resolvers = { } }
 
     names.blacklist = blacklist
-    -- MK Changed to rebuild with case insensitive fallback.
-    --    Negative version to indicate generation by modified code.
-    names.version   = -2       --- decrease monotonically
-    -- /MK
+    names.version   = 6        --- increase monotonically
     names.data      = nil      --- contains the loaded database
     names.lookups   = nil      --- contains the lookup cache
 

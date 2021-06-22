@@ -2901,12 +2901,13 @@ end
 local style_categories   = { "r", "b", "i", "bi" }
 local bold_categories    = {      "b",      "bi" }
 
+local huge = math.huge
 local function group_modifiers (mappings, families)
     logreport ("info", 2, "db", "Analyzing shapes, weights, and styles.")
     for location, location_data in next, families do
         for format, format_data in next, location_data do
             for familyname, collected in next, format_data do
-                local best_score = 1000000000000
+                local best_score = huge
                 local best_match
                 for i=1,#collected do
                     local v = collected[i]
@@ -2944,12 +2945,12 @@ local function group_modifiers (mappings, families)
                     local score_i = italic_score(entry, regular_entry)
                     local score_b = bold_score(entry, regular_entry)
                     if score_i and score_i <= best_score_i then
-                        v.prev_i = best_score_i == score_i and best_match_i or nil
+                        v.prev = best_score_i == score_i and best_match_i or nil
                         best_score_i = score_i
                         best_match_i = v
                     end
                     if score_b and score_b <= best_score_b then
-                        v.prev_b = best_score_b == score_b and best_match_b or nil
+                        v.prev = best_score_b == score_b and best_match_b or nil
                         best_score_b = score_b
                         best_match_b = v
                     end

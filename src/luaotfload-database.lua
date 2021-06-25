@@ -638,11 +638,12 @@ local function load_lookups ( )
 end
 
 local regular_synonym = {
-    book    = true,
-    normal  = true,
-    plain   = true,
-    regular = true,
-    roman   = true,
+    book    = 0,
+    normal  = 0,
+    plain   = 0,
+    regular = 0,
+    roman   = 0,
+    medium  = 1000, -- Some font authors haven't got the memo that medium is not regular
 }
 
 local style_synonym = {
@@ -2727,13 +2728,14 @@ local function regular_score(entry)
     return 10000 * (entry.italicangle or 0)^2 -- We really don't want italic fonts here (italic font have an angle around 10)
          +   .01 * ((entry.pfmweight or 400) - 400)^2 -- weights are normally multiples of 100, so they are still quite large after .01
          +         ((entry.width or 5) - 5)^2
-         + (regular_synonym[entry.subfamily or entry.typographicsubfamily] and 0 or 1000000)
+         + (regular_synonym[entry.subfamily or entry.typographicsubfamily] or 1000000)
          + (entry.pfmweight > 500 and 1000 or 0)
 end
 local function italic_score(entry, regular_entry)
     local regularangle = regular_entry.italicangle or 0
     local angle = entry.italicangle or 0
-    if angle == 0 or angle == regularangle then
+    if (angle == 0 or angle == regularangle)
+            and (entry.subfamily == regular_entry.subfamily or style_synonym[entry.subfamily] ~= 'i') then
         return -- This font is not italic in any way
     end
     return  .1 * (angle - regularangle - 10)^2 -- Should there ever be multiple levels of italicness...
@@ -2744,7 +2746,8 @@ end
 local function bold_score(entry, regular_entry)
     local regularweight = regular_entry.pfmweight or 400
     local weight = entry.pfmweight
-    if weight < regularweight + 100 then
+    if weight < regularweight + 100
+            and (entry.subfamily == regular_entry.subfamily or style_synonym[entry.subfamily] ~= 'b') then
         return -- This font is not bold in any way
     end
     return 10000 * (entry.italicangle or 0)^2 -- We really don't want italic fonts here (italic font have an angle around 10)
@@ -2758,7 +2761,8 @@ local function bolditalic_score(entry, bold_entry, italic_entry)
     local angle = entry.italicangle or 0
     local boldweight = bold_entry.pfmweight or 400
     local weight = entry.pfmweight or 400
-    if angle == 0 or weight < boldweight then
+    if (angle == 0 or weight < boldweight)
+            and (entry.subfamily == bold_entry.subfamily or entry.subfamily == italic_entry.subfamily or style_synonym[entry.subfamily] ~= 'bi') then
         return -- This font is not italic in any way
     end
     return 100 * (angle - italicangle)^2

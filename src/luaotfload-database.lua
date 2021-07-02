@@ -142,8 +142,7 @@ do
 end
 local otfhandler               = fonts.handlers.otf or { }
 
-local gzipload                 = gzip.load
-local gzipsave                 = gzip.save
+local gzipopen                 = gzip.open
 local iolines                  = io.lines
 local ioopen                   = io.open
 local kpseexpand_path          = kpse.expand_path
@@ -159,6 +158,7 @@ local mathmin                  = math.min
 local osgetenv                 = os.getenv
 local osgettimeofday           = os.gettimeofday
 local osremove                 = os.remove
+local dump                     = string.dump
 local stringfind               = string.find
 local stringformat             = string.format
 local stringgmatch             = string.gmatch
@@ -488,26 +488,29 @@ end
 
 -- A helper to load a file which might be gziped
 local function load_maybe_gzip (path, binary)
+    local mode = binary and 'rb' or 'r'
     local gzippath = path .. '.gz'
-    local result = gzipload (gzippath)
-    if result then
-        return gzippath, result
+    local f = gzipopen (gzippath, mode)
+    if f then
+        path = gzippath
+    else
+        f, msg = ioopen (path, mode)
     end
 
-    local f, msg = ioopen (path, binary and 'rb' or 'r')
     if f then
-        result = f:read'a'
+        result = f:read'*a'
         f:close()
         return path, result
     end
 
     return nil, msg
 end
+
 --- When loading a lua file we try its binary complement first, which
 --- is assumed to be located at an identical path, carrying the suffix
 --- .luc.
 
---- string -> (string * table)
+--- string -> string -> (string * table)
 local function load_lua_file (path_lua, path_luc)
     local foundname, chunk = load_maybe_gzip (path_luc, true)
     if foundname then
@@ -3474,28 +3477,64 @@ function update_names (currentnames, force, dry_run)
     return targetnames
 end
 
+--- string -> string -> (string * table)
+local function save_lua_table (data, path_lua, path_luc, compress)
+    local open
+    if compress then
+        osremove(path_lua)
+        osremove(path_luc)
+        path_lua, path_luc = path_lua .. '.gz', path_luc .. '.gz'
+        open = gzipopen
+    else
+        osremove(path_lua .. '.gz')
+        osremove(path_luc .. '.gz')
+        open = ioopen
+    end
+    local file_lua, msg = open(path_lua, 'w')
+    if not file_lua then
+        logreport ("info", 0, "cache", "Failed to write %q: %s", path_lua, msg)
+    end
+    local file_luc file_luc, msg = open(path_luc, 'wb')
+    if not file_luc then
+        logreport ("info", 0, "cache", "Failed to write %q: %s", path_luc, msg)
+    end
+    if not (file_lua or file_luc) then
+        return
+    end
+    -- If we can only write one of the files, try to remove the other
+    -- one to avoid them beiing inconsistent. This will probably fail,
+    -- but in some situations we might be allowed to delete a file we
+    -- can't write to.
+    if not file_lua then
+        osremove(path_lua)
+    elseif not file_luc then
+        osremove(path_luc)
+    end
+    local serialized = tableserialize (data, true)
+    if file_lua then
+        file_lua:write(serialized)
+        file_lua:close()
+    end
+    if file_luc then
+        local compiled = dump(assert(load(serialized, 't')), true)
+        file_luc:write(compiled)
+        file_luc:close()
+    end
+    -- Even if we could write one file but not the other one it's still an
+    -- error since reloading is then unreliable.
+    return file_lua and path_lua or nil, file_luc and path_luc or nil
+end
+
 --- unit -> bool
 function save_lookups ( )
     local paths = config.luaotfload.paths
     local luaname, lucname = paths.lookup_path_lua, paths.lookup_path_luc
-    if fileiswritable (luaname) and fileiswritable (lucname) then
-        tabletofile (luaname, lookup_cache, true)
-        osremove (lucname)
-        caches.compile (lookup_cache, luaname, lucname)
-        --- double check ...
-        if lfsisfile (luaname) and lfsisfile (lucname) then
-            logreport ("both", 3, "cache", "Lookup cache saved.")
-            return true
-        end
-        logreport ("info", 0, "cache", "Could not compile lookup cache.")
-        return false
-    end
-    logreport ("info", 0, "cache", "Lookup cache file not writable.")
-    if not fileiswritable (luaname) then
-        logreport ("info", 0, "cache", "Failed to write %s.", luaname)
-    end
-    if not fileiswritable (lucname) then
-        logreport ("info", 0, "cache", "Failed to write %s.", lucname)
+    luaname, lucname = save_lua_table(lookup_cache, luaname, lucname)
+    if luaname and lucname then
+        logreport ("both", 3, "cache", "Lookup cache saved.")
+        return true
+    else
+        logreport ("info", 0, "cache", "Lookup cache file not writable.")
     end
     return false
 end
@@ -3513,45 +3552,15 @@ function save_names (currentnames)
     end
     local paths = config.luaotfload.paths
     local luaname, lucname = paths.index_path_lua, paths.index_path_luc
-    if fileiswritable (luaname) and fileiswritable (lucname) then
-        osremove (lucname)
-        local gzname = luaname .. ".gz"
-        if config.luaotfload.db.compress then
-            local serialized = tableserialize (currentnames, true)
-            gzipsave (gzname, serialized)
-            caches.compile (currentnames, "", lucname)
-        else
-            tabletofile (luaname, currentnames, true)
-            caches.compile (currentnames, luaname, lucname)
-        end
+    local compress = config.luaotfload.db.compress
+    luaname, lucname = save_lua_table(currentnames, luaname, lucname, compress)
+    if luaname and lucname then
         logreport ("info", 2, "db", "Font index saved at ...")
-        local success = false
-        if lfsisfile (luaname) then
-            logreport ("info", 2, "db", "Text: " .. luaname)
-            success = true
-        end
-        if lfsisfile (gzname) then
-            logreport ("info", 2, "db", "Gzip: " .. gzname)
-            success = true
-        end
-        if lfsisfile (lucname) then
-            logreport ("info", 2, "db", "Byte: " .. lucname)
-            success = true
-        end
-        if success then
-            return true
-        else
-            logreport ("info", 0, "db", "Could not compile font index.")
-            return false
-        end
+        logreport ("info", 2, "db", "Text: " .. luaname)
+        logreport ("info", 2, "db", "Byte: " .. lucname)
+        return true
     end
     logreport ("info", 0, "db", "Index file not writable")
-    if not fileiswritable (luaname) then
-        logreport ("info", 0, "db", "Failed to write %s.", luaname)
-    end
-    if not fileiswritable (lucname) then
-        logreport ("info", 0, "db", "Failed to write %s.", lucname)
-    end
     return false
 end
 

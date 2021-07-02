@@ -486,42 +486,42 @@ local function initialize_namedata (formats, created)
     }
 end
 
+-- A helper to load a file which might be gziped
+local function load_maybe_gzip (path, binary)
+    local gzippath = path .. '.gz'
+    local result = gzipload (gzippath)
+    if result then
+        return gzippath, result
+    end
+
+    local f, msg = ioopen (path, binary and 'rb' or 'r')
+    if f then
+        result = f:read'a'
+        f:close()
+        return path, result
+    end
+
+    return nil, msg
+end
 --- When loading a lua file we try its binary complement first, which
 --- is assumed to be located at an identical path, carrying the suffix
 --- .luc.
 
 --- string -> (string * table)
-local function load_lua_file (path)
-    local foundname = filereplacesuffix (path, "luc")
-    local code      = nil
-
-    local fh = ioopen (foundname, "rb") -- try bin first
-    if fh then
-        local chunk = fh:read"*all"
-        fh:close()
-        code = load (chunk, "b")
-    end
-
-    if not code then --- fall back to text file
-        foundname = filereplacesuffix (path, "lua")
-        fh = ioopen(foundname, "rb")
-        if fh then
-            local chunk = fh:read"*all"
-            fh:close()
-            code = load (chunk, "t")
+local function load_lua_file (path_lua, path_luc)
+    local foundname, chunk = load_maybe_gzip (path_luc, true)
+    if foundname then
+        chunk = assert (load (chunk, 'b'))
+    else
+        foundname, chunk = load_maybe_gzip (path_lua, false)
+        if foundname then
+            chunk = assert (load (chunk, 't'))
+        else
+            return nil
         end
     end
 
-    if not code then --- probe gzipped file
-        foundname = filereplacesuffix (path, "lua.gz")
-        local chunk = gzipload (foundname)
-        if chunk then
-            code = load (chunk, "t")
-        end
-    end
-
-    if not code then return nil, nil end
-    return foundname, code ()
+    return foundname, chunk()
 end
 
 --- define locals in scope
@@ -543,7 +543,8 @@ local fuzzy_limit = 1 --- display closest only
 --- bool? -> -> bool? -> dbobj option
 local function load_names (dry_run, no_rebuild)
     local starttime = osgettimeofday ()
-    local foundname, data = load_lua_file (config.luaotfload.paths.index_path_lua)
+    local foundname, data = load_lua_file (config.luaotfload.paths.index_path_lua,
+                                           config.luaotfload.paths.index_path_luc)
 
     if data then
         logreport ("log", 0, "db",
@@ -624,7 +625,8 @@ end
 
 --- unit -> unit
 local function load_lookups ( )
-    local foundname, data = load_lua_file(config.luaotfload.paths.lookup_path_lua)
+    local foundname, data = load_lua_file(config.luaotfload.paths.lookup_path_lua,
+                                          config.luaotfload.paths.lookup_path_luc)
     if data then
         logreport ("log", 0, "cache", "Lookup cache loaded from %s.", foundname)
         logreport ("term", 3, "cache",

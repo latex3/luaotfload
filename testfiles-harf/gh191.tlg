@@ -1,0 +1,89 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+! Extra \endgroup.
+l. ...\par\endgroup
+                \newpage
+Things are pretty mixed up, but I think the worst is over.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 539.94232fil, direction TLT
+...\write-{}
+...\glue(\topskip) 2.43164
+...\hbox(7.56836+2.4414)x345.0, glue set 206.12793fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\gentium a
+....\gentium b
+....\gentium c
+....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
+....\gentium d
+....\gentium e
+....\gentium f
+....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
+....\special{}
+....\discretionary (penalty 50)
+.....< \gentium g
+.....< \gentium h
+.....< \gentium i
+.....< \gentium -
+.....> \gentium j
+.....> \gentium k
+.....> \gentium l
+.....= \gentium g
+.....= \gentium h
+.....= \gentium i
+.....= \gentium j
+.....= \gentium k
+.....= \gentium l
+....\special{}
+....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
+....\gentium m
+....\gentium n
+....\gentium o
+....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
+....\discretionary (penalty 50)
+.....< \gentium p
+.....< \gentium q
+.....< \gentium r
+.....< \gentium -
+.....> \gentium s
+.....> \gentium t
+.....> \gentium u
+.....= \gentium p
+.....= \gentium q
+.....= \gentium r
+.....= \gentium s
+.....= \gentium t
+.....= \gentium u
+....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
+....\gentium v
+....\gentium w
+....\gentium x
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -2.4414
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 23.34
+..\hbox(6.66+0.0)x345.0, direction TLT
+...\hbox(6.66+0.0)x345.0, glue set 170.0fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/lmr/m/n/10 1
+....\glue 0.0 plus 1.0fil
+Non-PDF special ignored!
+Non-PDF special ignored!
+2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (gh191.aux)

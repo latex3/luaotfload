@@ -1,0 +1,14 @@
+\input regression-test.tex\relax
+
+\documentclass{article}
+
+\begin{document}
+\showoutput
+\START
+\font\gentium {kpse:GentiumPlus-R.ttf:mode=harf}\gentium
+abc def \special{}ghi\-jkl\special{} mno pqr\-stu vwx
+\par\endgroup\newpage
+\directlua{
+  texio.write_nl(status.node_mem_usage)
+}
+\end{document}

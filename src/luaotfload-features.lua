@@ -831,6 +831,19 @@ do
     }
 end
 
+local uni_normalize = require'lua-uni-normalize'.direct.NFC
+fonts.constructors.features.otf.register {
+    name = 'nfc',
+    default = true,
+    description = 'Normalize text to NFC before shaping',
+    processors = {
+      node = function(head, f, _, _, _)
+          return uni_normalize(head, f, font.getfont(f).characters, true)
+      end,
+    },
+}
+
+
 return function ()
     if not fonts and fonts.handlers then
         report ("log", 0, "features",

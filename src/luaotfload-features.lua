@@ -831,14 +831,43 @@ do
     }
 end
 
-local uni_normalize = require'lua-uni-normalize'.direct.NFC
+local uni_normalize = require'lua-uni-normalize'.direct
+local normalize_lookup = setmetatable({}, {__index = function(t, f)
+    local fontdir = assert(font.getfont(f))
+    local normalize_func = t[fontdir]
+    local characters = fontdir.characters
+    local function result(head)
+        return normalize_func(head, f, characters, true)
+    end
+    t[fontdir] = result
+    return result
+end})
+local normalize_funcs = {
+    nfc = uni_normalize.NFC,
+    nfd = uni_normalize.NFD,
+    nfkd = uni_normalize.NFKD,
+}
 fonts.constructors.features.otf.register {
-    name = 'nfc',
-    default = true,
+    name = 'normalize',
+    default = 'nfc',
     description = 'Normalize text to NFC before shaping',
+    manipulators = {
+        node = function(fonttable, _, value)
+            if value == true then
+                value = 'nfc'
+            end
+            local func = normalize_funcs[value]
+            if not func then
+                report ("report", 0, "features",
+                        "Unsupported normalization method replaced by NFC")
+                func = normalize_funcs.nfc
+            end
+            normalize_lookup[fonttable] = func
+        end,
+    },
     processors = {
       node = function(head, f, _, _, _)
-          return uni_normalize(head, f, font.getfont(f).characters, true)
+          return normalize_lookup[f](head)
       end,
     },
 }

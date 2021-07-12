@@ -70,7 +70,7 @@ local todirect           = nodedirect.todirect
 local tonode             = nodedirect.tonode
 
 local insert_node_before = nodedirect.insert_before
-local free_node          = nodedirect.free
+local real_free_node     = nodedirect.free
 local copy_node          = nodedirect.copy
 local new_node           = nodedirect.new
 
@@ -86,8 +86,24 @@ local chardata           = fonthashes.characters
 local otffeatures        = fonts.constructors.newfeatures "otf"
 local markdata
 
+-- For every attribute list cached in attribute_table, we have to make
+-- sure that it doesn't get deleted. Therefore attribute_cleanup maps
+-- from a node which has the attribute_list referenced in
+-- attribute_table to the key from attribute_table.
+-- Whenever a node which has an entry in attribute_cleanup is deleted,
+-- we delete the corresponding entry from attribute_table since we can
+-- no longer guarantee that it's references somewhere.
 local attribute_table    = {}
+local attribute_cleanup  = {}
 local attr = luatexbase.new_attribute("luaotfload.letterspace_done")
+
+local function free_node(n)
+  local k = attribute_cleanup[n]
+  if k then
+    attribute_cleanup[n], attribute_table[k] = nil
+  end
+  return real_free_node(n)
+end
 
 local function getprevreal(n)
   repeat
@@ -445,6 +461,7 @@ kerncharacters = function (head)
           setattributelist(start, new_attr_list)
         else
           setattribute(start, attr, 1)
+          attribute_cleanup[start] = attr_list
           attribute_table[attr_list] = getattributelist(start)
         end
       end --[[if prev]]
@@ -500,7 +517,8 @@ local function enablefontkerning ( )
                  "kerncharacters() failed to return a valid new head")
     end
 
-    for k in next, attribute_table do attribute_table[k] = nil end
+    for k, v in next, attribute_cleanup do attribute_cleanup[k], attribute_table[v] = nil end
+    assert(not next(attribute_table))
 
     return tonode (direct_hd)
   end

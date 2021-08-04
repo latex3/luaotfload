@@ -27,8 +27,6 @@ luaotfload.harf = harf_settings
 
 harf_settings.default_buf_flags = hb.Buffer.FLAGS_DEFAULT or 0
 
-local hbfonts = {}
-
 local cfftag  = hb.Tag.new("CFF ")
 local cff2tag = hb.Tag.new("CFF2")
 local os2tag  = hb.Tag.new("OS/2")
@@ -73,7 +71,8 @@ end
 
 local containers = luaotfload.fontloader.containers
 local hbcacheversion = 1.3
-local facecache = containers.define("fonts", "hb", hbcacheversion, true)
+local fontcache = containers.define("fonts", "hb", hbcacheversion, true)
+local facecache = {}
 
 local function loadfont(spec)
   local path, sub = spec.resolved, spec.sub or 1
@@ -84,10 +83,15 @@ local function loadfont(spec)
   if not attributes then return end
   local size, date = attributes.size or 0, attributes.modification or 0
 
-  local cached = containers.read(facecache, key)
+  local hbface = facecache[key]
+  if not hbface then
+    hbface = hb.Face.new(path, sub - 1)
+    facecache[key] = hbface
+  end
+
+  local cached = containers.read(fontcache, key)
   local iscached = cached and cached.date == date and cached.size == size
 
-  local hbface = iscached and cached.face or hb.Face.new(path, sub - 1)
   local tags = hbface and hbface:get_table_tags()
   -- If the face has no table tags then it isn’t a valid SFNT font that
   -- HarfBuzz can handle.
@@ -230,7 +234,7 @@ local function loadfont(spec)
       loaded = {}, -- Cached loaded glyph data.
     }
 
-    containers.write(facecache, key, cached)
+    containers.write(fontcache, key, cached)
   end
   cached.face = hbface
   cached.font = hbfont

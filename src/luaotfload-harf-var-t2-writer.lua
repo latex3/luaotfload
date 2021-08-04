@@ -53,7 +53,65 @@ local function convert_cs(cs, upem)
       end
     end
   end
-  for _, args in ipairs(cs) do if args then add(table.unpack(args)) end end
+  for _, args in ipairs(cs) do
+    if args then
+      local cmd = args[1]
+      local height = #args - 1
+      local i = 2
+      while height > 48 do
+        -- Special cases: hhcurveto, vvcurveto, rcurveline, rlinecurve
+        -- hhvurveto/vvcurveto: In odd argument case, the first argument must be
+        -- followed by a multiple of four arguments.
+        if cmd == 27 and i == 2 and height % 4 == 1 then -- hhcurveto
+          add(cmd, table.unpack(args, i, i + 44))
+          height = height - 45
+          i = i + 45
+        elseif cmd == 26 and i == 2 and height % 4 == 1 then -- vvcurveto
+          add(cmd, table.unpack(args, i, i + 44))
+          height = height - 45
+          i = i + 45
+        -- rcurveline/rlinecurve: At least 8 arguments must be preserved, all previous instances
+        -- need different commands
+        elseif cmd == 24 then -- rcurveline
+          height = height - 48
+          local count
+          if height >= 8 then
+            count = 48
+          else
+            count = 48 - 8 + height
+            height = 8
+          end
+          add(8, table.unpack(args, i, i + count - 1)) -- 8 = rrcurveto
+          i = i + count
+        elseif cmd == 25 then -- rlinecurve
+          height = height - 48
+          local count
+          if height >= 8 then
+            count = 48
+          else
+            count = 48 - 8 + height
+            height = 8
+          end
+          add(5, table.unpack(args, i, i + count - 1)) -- 5 = rlineto
+          i = i + count
+        else -- Some commands have an optional last argument which can appear after multiple of 48 arguments,
+             -- so it's safer to never leave a element alone in a line.
+          height = height - 48
+          local count
+          if height > 1 then
+            count = 48
+          else
+            -- assert(height == 1)
+            count = 24--48 - 25 + height
+            height = 25
+          end
+          add(cmd, table.unpack(args, i, i + count - 1))
+          i = i + count
+        end
+      end
+      add(cmd, table.unpack(args, i))
+    end
+  end
   return table.concat(cs_parts)
 end
 

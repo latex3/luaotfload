@@ -105,7 +105,7 @@ local function loadfont(spec)
     if hbface:get_table(cff2tag):get_length() == 0 then
       error'Only CFF2 based Variable fonts are currently supported in harf mode'
     end
-    local instance = spec.features.raw.instance
+    local instance = spec.features.raw.instance or spec.features.raw.axis
     local assignments = instance and variable_pattern:match(instance)
     if assignments then
       local axes = hbface:ot_var_get_axis_infos()

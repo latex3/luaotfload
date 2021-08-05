@@ -101,7 +101,7 @@ local function loadfont(spec)
 
   local normalized
   local varkey
-  if hbface:ot_var_has_data() then
+  if hbface.ot_var_has_data and hbface:ot_var_has_data() then
     if hbface:get_table(cff2tag):get_length() == 0 then
       error'Only CFF2 based Variable fonts are currently supported in harf mode'
     end

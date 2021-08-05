@@ -551,10 +551,16 @@ local function init_post_load_agl ()
 
 end
 
+local function init_post_apply_keepnames ()
+  local keepnames = config.luaotfload.misc.keepnames
+  luaotfload.fontloader.fonts.privateoffsets.keepnames = keepnames
+end
+
 --- (unit -> unit) list
 local init_post_actions = {
   init_post_install_callbacks,
   init_post_load_agl,
+  init_post_apply_keepnames
 }
 
 --- unit -> size_t

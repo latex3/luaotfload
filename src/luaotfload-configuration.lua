@@ -218,6 +218,7 @@ local default_config = {
     version        = luaotfload.version,
     statistics     = false,
     termwidth      = nil,
+    keepnames      = true,
   },
   paths = {
     names_dir           = "names",
@@ -611,6 +612,7 @@ local option_spec = {
         return w
       end,
     },
+    keepnames       = { in_t = boolean_t, },
   },
   paths = {
     names_dir           = { in_t = string_t, },

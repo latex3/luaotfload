@@ -1646,7 +1646,7 @@ local function split_fontname (fontname)
     end
 end
 
-local function organize_styledata (metadata, rawinfo, info)
+local function organize_styledata (metadata, rawinfo)
     local pfminfo   = metadata.pfminfo
     local names     = rawinfo.names
     return {
@@ -1690,8 +1690,7 @@ local function ot_fullinfo (filename,
                                              basename,
                                              info)
     local style         = organize_styledata (metadata,
-                                              rawinfo,
-                                              info)
+                                              rawinfo)
     local res = {
         file            = { base        = basename,
                             full        = filename,
@@ -1933,7 +1932,7 @@ local function read_font_names (fullname,
             if insert_fullinfo (fullname, basename, n_font,
                                 loader, format, location,
                                 targetmappings, targetentrystatus,
-                                info)
+                                info[n_font])
             then
                 success = true
             end

@@ -22,6 +22,7 @@ local gsub = string.gsub
 local hb = luaotfload.harfbuzz
 local scriptlang_to_harfbuzz = require'luaotfload-scripts'.to_harfbuzz
 local cff2_handler = require'luaotfload-harf-var-cff2'
+local ttf_handler = require'luaotfload-harf-var-ttf'
 
 local harf_settings = luaotfload.harf or {}
 luaotfload.harf = harf_settings
@@ -102,9 +103,6 @@ local function loadfont(spec)
   local normalized
   local varkey
   if hbface.ot_var_has_data and hbface:ot_var_has_data() then
-    if hbface:get_table(cff2tag):get_length() == 0 then
-      error'Only CFF2 based Variable fonts are currently supported in harf mode'
-    end
     local instance = spec.features.raw.instance or spec.features.raw.axis
     local assignments = instance and variable_pattern:match(instance)
     if assignments then
@@ -428,7 +426,7 @@ local function scalefont(data, spec)
     resources = {
       unicodes = data.name_to_char,
     },
-    streamprovider = data.normalized and 1 or nil,
+    streamprovider = data.normalized and (data.fonttype == 'opentype' and 1 or 2) or nil,
   }
   tfmdata.shared.processes = fonts.handlers.otf.setfeatures(tfmdata, features)
   fonts.constructors.applymanipulators("otf", tfmdata, features, false)
@@ -498,7 +496,7 @@ luatexbase.add_to_callback('glyph_stream_provider', function(fid, cid, kind)
     collectgarbage()
     local fontdir = font.getfont(fid)
     if fontdir and fontdir.hb then
-      glyph_stream_data = cff2_handler(fontdir.hb.shared.face, fontdir.hb.shared.font)
+      glyph_stream_data = (kind == 1 and cff2_handler or kind == 2 and ttf_handler)(fontdir.hb.shared.face, fontdir.hb.shared.font)
     end
   end
   if glyph_stream_data then

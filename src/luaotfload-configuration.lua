@@ -209,7 +209,7 @@ local default_config = {
     anon_sequence  = default_anon_sequence,
     resolver       = "cached",
     definer        = "patch",
-    log_level      = 0,
+    log_level      = default_log_level or 0,
     color_callback = "post_linebreak_filter",
     fontloader     = default_fontloader (),
   },

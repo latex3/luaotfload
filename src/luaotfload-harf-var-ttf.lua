@@ -118,7 +118,16 @@ local function parse_glyf(loca, glyf, gid)
   -- local ymax = sio.readinteger2(glyf, offset + 8)
   if num_contours < 0 then
     -- composite
-    local components = {}
+    local xmin = sio.readinteger2(glyf, offset + 2)
+    local ymin = sio.readinteger2(glyf, offset + 4)
+    local xmax = sio.readinteger2(glyf, offset + 6)
+    local ymax = sio.readinteger2(glyf, offset + 8)
+    local components = { -- FIXME: These are likely incorrect
+      xmin = xmin,
+      ymin = ymin,
+      xmax = xmax,
+      ymax = ymax,
+    }
     local flags
     offset = offset + 10
     repeat
@@ -159,8 +168,6 @@ local function parse_glyf(loca, glyf, gid)
       component.payload = glyf:sub(offset, offset + payload_length - 1)
       components[#components+1] = component
     until flags & 0x20 == 0
-    print(gid)
-    table.print{[gid] = components}
     return components
   else
     local end_contours = sio.readcardinaltable(glyf, offset+10, num_contours, 2)
@@ -308,10 +315,23 @@ local function serialize_glyf(points)
         flagdata[#flagdata+1] = last_flags
       end
     end
-    local header = string.pack(">I2i2i2i2i2" .. string.rep('I2', #contours), #contours, xmin, ymin, xmax, ymax, table.unpack(contours))
+    local header = string.pack(">i2i2i2i2i2" .. string.rep('I2', #contours), #contours, xmin, ymin, xmax, ymax, table.unpack(contours))
     return header .. string.pack(">s2", points.instructions) .. string.char(table.unpack(flagdata)) .. string.char(table.unpack(xdata)) .. string.char(table.unpack(ydata))
   else
-    error'Composite glyphs not yet supported'
+    local result = string.pack(">i2i2i2i2i2", -1, points.xmin, points.ymin, points.xmax, points.ymax)
+    for i = 1, #points do
+      local component = points[i]
+      local x, y = component.x, component.y
+      x = x and math.floor(x + .5)
+      y = y and math.floor(y + .5)
+      result = result
+          .. string.pack(component.flags & 0x2 == 0 and '>I2I2'
+                      or component.flags & 0x1 == 0x1 and '>I2I2i2i2'
+                      or '>I2I2i1i1',
+              component.flags, component.glyph, x, y)
+          .. component.payload
+    end
+    return result
   end
 end
 
@@ -413,86 +433,110 @@ local function interpolate_glyf(loca, gvar_index, gvar, glyf, gid, coords)
       local x_deltas, y_deltas
       x_deltas, suboffset = read_deltas(gvar, suboffset, count)
       y_deltas, suboffset = read_deltas(gvar, suboffset, count)
-      if base_points == true then
-        for i=1, #points do
-          local point = points[i]
-          point.x = point.x + factor * x_deltas[i]
-          point.y = point.y + factor * y_deltas[i]
+      local contours = points.contours
+      if contours then
+        if base_points == true then
+          for i=1, #points do
+            local point = points[i]
+            point.x = point.x + factor * x_deltas[i]
+            point.y = point.y + factor * y_deltas[i]
+          end
+        else
+          local contour = 1
+          local last, last_x, last_y, last_dx, last_dy
+          local first, first_x, first_y, first_dx, first_dy
+          local cur = 1
+          local skip = base_points[1] > contours[1] + 1
+          local n_points = #points
+          for i = 1, n_points do
+            if i == contours[contour] + 2 then
+              contour = contour + 1
+              last_x, last_y, last_dx, last_dy = nil
+              first_x, first_y, first_dx, first_dy = nil
+              skip = (base_points[cur] or n_points + 1) > contours[contour] + 1
+            end
+            if not skip then
+              local point = points[i]
+              local this_x, this_y = point.x, point.y
+              if base_points[cur] == i then
+                repeat
+                  last_x, last_y = this_x, this_y
+                  last_dx, last_dy = x_deltas[cur], y_deltas[cur]
+                  if not first_x then
+                    first_x, first_y, first_dx, first_dy = last_x, last_y, last_dx, last_dy
+                  end
+                  point.x = last_x + factor * last_dx
+                  point.y = last_y + factor * last_dy
+                  cur = cur + 1
+                until base_points[cur] ~= i
+              else
+                if not last_x then -- We started a new contour and haven't seen a real point yet. Look for the last one instead.
+                  local idx = cur
+                  while (base_points[idx + 1] or n_points + 1) <= contours[contour] + 1 do
+                    idx = idx + 1
+                  end
+                  local idx_point = points[base_points[idx]]
+                  last_x, last_y = idx_point.x, idx_point.y
+                  last_dx, last_dy = x_deltas[idx], y_deltas[idx]
+                end
+                local after_x, after_y, after_dx, after_dy
+                if (base_points[cur] or n_points + 1) <= contours[contour] + 1 then -- If the next point is part of the contour, use it. Otherwise use the first point in our contour)
+                  local next_point = points[base_points[cur]]
+                  after_x, after_y = next_point.x, next_point.y
+                  after_dx, after_dy = x_deltas[cur], y_deltas[cur]
+                else
+                  after_x, after_y = first_x, first_y
+                  after_dx, after_dy = first_dx, first_dy
+                end
+
+                -- The first case is a bit weird, but afterwards we just interpolate while clipping to the boundaries.
+                -- See the gvar spec for details.
+                if last_x == after_x then
+                  if last_dx == after_dx then
+                    point.x = this_x + factor * last_dx
+                  end
+                elseif this_x <= last_x and this_x <= after_x then
+                  point.x = this_x + factor * (last_x < after_x and last_dx or after_dx)
+                elseif this_x >= last_x and this_x >= after_x then
+                  point.x = this_x + factor * (last_x > after_x and last_dx or after_dx)
+                else -- We have to interpolate
+                  local t = (this_x - last_x) / (after_x - last_x)
+                  point.x = this_x + factor * ((1-t) * last_dx + t * after_dx)
+                end
+
+                -- And again for y
+                if last_y == after_y then
+                  if last_dy == after_dy then
+                    point.y = this_y + factor * last_dy
+                  end
+                elseif this_y <= last_y and this_y <= after_y then
+                  point.y = this_y + factor * (last_y < after_y and last_dy or after_dy)
+                elseif this_y >= last_y and this_y >= after_y then
+                  point.y = this_y + factor * (last_y > after_y and last_dy or after_dy)
+                else -- We have to interpolate
+                  local t = (this_y - last_y) / (after_y - last_y)
+                  point.y = this_y + factor * ((1-t) * last_dy + t * after_dy)
+                end
+              end
+            end
+          end
         end
       else
-        local contours = points.contours
-        local contour = 1
-        local last, last_x, last_y, last_dx, last_dy
-        local first, first_x, first_y, first_dx, first_dy
-        local cur = 1
-        local skip = base_points[1] > contours[1] + 1
-        for i = 1, #points do
-          if i == contours[contour] + 2 then
-            contour = contour + 1
-            last_x, last_y, last_dx, last_dy = nil
-            first_x, first_y, first_dx, first_dy = nil
-            skip = base_points[cur] > contours[contour] + 1
-          end
-          if not skip then
+        -- Composite glyph
+        if base_points == true then
+          for i=1, #points do
             local point = points[i]
-            local this_x, this_y = point.x, point.y
-            if base_points[cur] == i then
-              last_x, last_y = this_x, this_y
-              last_dx, last_dy = x_deltas[cur], y_deltas[cur]
-              if not first_x then
-                first_x, first_y, first_dx, first_dy = last_x, last_y, last_dx, last_dy
-              end
-              point.x = last_x + factor * last_dx
-              point.y = last_y + factor * last_dy
-              cur = cur + 1
-            else
-              if not last_x then -- We started a new contour and haven't seen a real point yet. Look for the last one instead.
-                local idx = cur
-                while base_points[idx + 1] <= contours[contour] + 1 do
-                  idx = idx + 1
-                end
-                local idx_point = points[base_points[idx]]
-                last_x, last_y = idx_point.x, idx_point.y
-                last_dx, last_dy = x_deltas[idx], y_deltas[idx]
-              end
-              local after_x, after_y, after_dx, after_dy
-              if base_points[cur] <= contours[contour] + 1 then -- If the next point is part of the contour, use it. Otherwise use the first point in our contour.
-                local next_point = points[base_points[cur]]
-                after_x, after_y = next_point.x, next_point.y
-                after_dx, after_dy = x_deltas[cur], y_deltas[cur]
-              else
-                after_x, after_y = first_x, first_y
-                after_dx, after_dy = first_dx, first_dy
-              end
-
-              -- The first case is a bit weird, but afterwards we just interpolate while clipping to the boundaries.
-              -- See the gvar spec for details.
-              if last_x == after_x then
-                if last_dx == after_dx then
-                  point.x = this_x + factor * last_dx
-                end
-              elseif this_x <= last_x and this_x <= after_x then
-                point.x = this_x + factor * (last_x < after_x and last_dx or after_dx)
-              elseif this_x >= last_x and this_x >= after_x then
-                point.x = this_x + factor * (last_x > after_x and last_dx or after_dx)
-              else -- We have to interpolate
-                local t = (this_x - last_x) / (after_x - last_x)
-                point.x = this_x + factor * ((1-t) * last_dx + t * after_dx)
-              end
-
-              -- And again for y
-              if last_y == after_y then
-                if last_dy == after_dy then
-                  point.y = this_y + factor * last_dy
-                end
-              elseif this_y <= last_y and this_y <= after_y then
-                point.y = this_y + factor * (last_y < after_y and last_dy or after_dy)
-              elseif this_y >= last_y and this_y >= after_y then
-                point.y = this_y + factor * (last_y > after_y and last_dy or after_dy)
-              else -- We have to interpolate
-                local t = (this_y - last_y) / (after_y - last_y)
-                point.y = this_y + factor * ((1-t) * last_dy + t * after_dy)
-              end
+            if point.x then
+              point.x = point.x + factor * x_deltas[i]
+              point.y = point.y + factor * y_deltas[i]
+            end
+          end
+        else
+          for i=1, #base_points do
+            local point = points[base_points[i]]
+            if point and point.x then
+              point.x = point.x + factor * x_deltas[i]
+              point.y = point.y + factor * y_deltas[i]
             end
           end
         end

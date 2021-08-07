@@ -426,7 +426,7 @@ local function scalefont(data, spec)
     resources = {
       unicodes = data.name_to_char,
     },
-    streamprovider = data.normalized and (data.fonttype == 'opentype' and 1 or 2) or nil,
+    streamprovider = data.normalized and (data.fonttype == 'opentype' and 1 or 3) or nil,
   }
   tfmdata.shared.processes = fonts.handlers.otf.setfeatures(tfmdata, features)
   fonts.constructors.applymanipulators("otf", tfmdata, features, false)
@@ -489,19 +489,34 @@ luatexbase.add_to_callback('find_truetype_file', function(name)
 end, 'luaotfload.harf.strip_prefix')
 
 local glyph_stream_data
+local glyph_stream_mapping, glyph_stream_mapping_inverse
+local extents_hbfont
 local cb = luatexbase.remove_from_callback('glyph_stream_provider', 'luaotfload.glyph_stream')
-luatexbase.add_to_callback('glyph_stream_provider', function(fid, cid, kind)
+luatexbase.add_to_callback('glyph_stream_provider', function(fid, cid, kind, ocid)
   if cid == 0 then -- Always the first call for a font
-    glyph_stream_data = nil
+    glyph_stream_data, extents_hbfont = nil
     collectgarbage()
     local fontdir = font.getfont(fid)
     if fontdir and fontdir.hb then
-      glyph_stream_data = (kind == 1 and cff2_handler or kind == 2 and ttf_handler)(fontdir.hb.shared.face, fontdir.hb.shared.font)
+      if kind == 3 then
+        glyph_stream_mapping = {[ocid] = cid}
+        glyph_stream_mapping_inverse = {[cid] = ocid}
+        extents_hbfont = fontdir.hb.shared.font
+      elseif kind == 2 then
+        glyph_stream_data = ttf_handler(fontdir.hb.shared.face, fontdir.hb.shared.font, glyph_stream_mapping, glyph_stream_mapping_inverse)
+      else
+        glyph_stream_data = cff2_handler(fontdir.hb.shared.face, fontdir.hb.shared.font)
+      end
     end
   end
   if glyph_stream_data then
     return glyph_stream_data(cid)
+  elseif extents_hbfont then
+    glyph_stream_mapping[ocid] = cid
+    glyph_stream_mapping_inverse[cid] = ocid
+    local extents = extents_hbfont:get_glyph_extents(ocid)
+    return extents.width, extents.x_bearing, extents.height, extents.y_bearing
   else
-    return cb(fid, cid, kind)
+    return cb(fid, cid, kind, ocid)
   end
 end, 'luaotfload.harf.glyphstream')

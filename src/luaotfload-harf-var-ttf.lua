@@ -243,7 +243,7 @@ local function parse_glyf(loca, glyf, gid)
   end
 end
 
-local function serialize_glyf(points)
+local function serialize_glyf(points, map)
   local contours = points.contours
   if points.contours then
     local flagdata, xdata, ydata = {}, {}, {}
@@ -328,7 +328,7 @@ local function serialize_glyf(points)
           .. string.pack(component.flags & 0x2 == 0 and '>I2I2'
                       or component.flags & 0x1 == 0x1 and '>I2I2i2i2'
                       or '>I2I2i1i1',
-              component.flags, component.glyph, x, y)
+              component.flags, map[component.glyph], x, y)
           .. component.payload
     end
     return result
@@ -386,7 +386,7 @@ local function read_deltas(gvar_data, offset, count)
   return deltas, offset
 end
 
-local function interpolate_glyf(loca, gvar_index, gvar, glyf, gid, coords)
+local function interpolate_glyf(loca, gvar_index, gvar, glyf, gid, coords, map)
   local var = gvar_index[gid+1]
   if not var then
     local start = loca[gid+1] + 1
@@ -545,16 +545,16 @@ local function interpolate_glyf(loca, gvar_index, gvar, glyf, gid, coords)
     end
     offset = offset + size
   end
-  return serialize_glyf(points)
+  return serialize_glyf(points, map)
 end
 
-return function(face, font)
+return function(face, font, map, map_inv)
   local gvar = assert(face:get_table(gvar_tag):get_data())
   local gvar_index = assert(read_gvar(gvar))
   local loca = assert(read_loca(face))
   local glyf = assert(face:get_table(glyf_tag):get_data())
   local normalized = {font:get_var_coords_normalized()}
   return function(gid)
-    return interpolate_glyf(loca, gvar_index, gvar, glyf, gid, normalized)
+    return interpolate_glyf(loca, gvar_index, gvar, glyf, map_inv[gid], normalized, map)
   end
 end

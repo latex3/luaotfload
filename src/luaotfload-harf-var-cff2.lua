@@ -14,7 +14,7 @@ do
  }
 end
 
-local hb = require'luaharfbuzz'
+local hb = assert(luaotfload.harfbuzz)
 local cff2 = hb.Tag.new'CFF2'
 local serialize = require'luaotfload-harf-var-t2-writer'
 

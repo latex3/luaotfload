@@ -14,7 +14,7 @@ do
  }
 end
 
-local hb = require'luaharfbuzz'
+local hb = assert(luaotfload.harfbuzz)
 local gvar_tag = hb.Tag.new'gvar'
 local glyf_tag = hb.Tag.new'glyf'
 local loca_tag = hb.Tag.new'loca'

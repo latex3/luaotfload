@@ -741,7 +741,7 @@ local formatters = {
     anon_sequence   = { false, format_list    },
     color_callback  = { false, format_string  },
     definer         = { false, format_string  },
-    fontloader      = { false, format_string  },
+    fontloader      = { true, format_string  },
     log_level       = { false, format_integer },
     resolver        = { false, format_string  },
   },

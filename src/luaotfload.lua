@@ -172,11 +172,6 @@ local function make_loader_name (prefix, name)
     return prefix .. "-" .. name .. ".lua"
 end
 
-local timing_info = {
-    t_load = { },
-    t_init = { },
-}
-
 local function make_loader (prefix, load_helper)
     return function (name)
         local t_0 = osgettimeofday ()
@@ -184,7 +179,6 @@ local function make_loader (prefix, load_helper)
         --- We don’t want the stack info from inside, so just pcall().
         local ok, data = pcall (load_helper or require, modname)
         local t_end = osgettimeofday ()
-        timing_info.t_load [name] = t_end - t_0
         if not ok then
             io.write "\n"
             local msg = luaotfload.log and luaotfload.log.report or print
@@ -256,7 +250,6 @@ local function context_loader (name, path)
     end
     local ret = context_isolated_load (modpath)
     local t_end = osgettimeofday ()
-    timing_info.t_load [name] = t_end - t_0
 
     if ret ~= nil then
         --- require () returns “true” upon success unless the loaded file
@@ -293,7 +286,6 @@ local function install_loaders ()
             logreport ("log", 4, "load",
                        "Module %q loaded in %g ms.",
                        name, d_t * 1000)
-            timing_info.t_init [name] = d_t
         end
     end
 
@@ -368,7 +360,6 @@ luaotfload.main = function ()
     logreport ("log", 1, "main",
                "initialization completed in %0.3f seconds\n",
                osgettimeofday() - starttime)
-----inspect (timing_info)
     luaotfload_module = nil
 end
 

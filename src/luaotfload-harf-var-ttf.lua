@@ -100,7 +100,11 @@ local function read_loca(face)
   local data = face:get_table(loca_tag):get_data()
   local count = face:get_glyph_count() + 1
   if #data == count * 2 then
-    return sio.readcardinaltable(data, 1, count, 2)
+    local result = sio.readcardinaltable(data, 1, count, 2)
+    for i=1, count do
+      result[i] = 2 * result[i]
+    end
+    return result
   elseif #data == count * 4 then
     return sio.readcardinaltable(data, 1, count, 4)
   else

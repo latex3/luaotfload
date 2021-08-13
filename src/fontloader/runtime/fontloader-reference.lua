@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2021-05-20 15:57
+-- merge date  : 2021-08-10 12:37
 
 do -- begin closure to overcome local limits and interference
 
@@ -2255,9 +2255,12 @@ function io.copydata(source,target,action)
   flush()
  end
 end
-function io.savedata(filename,data,joiner)
- local f=open(filename,"wb")
+function io.savedata(filename,data,joiner,append)
+ local f=open(filename,append and "ab" or "wb")
  if f then
+  if append and joiner and f:seek("end")>0 then
+   f:write(joiner)
+  end
   if type(data)=="table" then
    f:write(concat(data,joiner or ""))
   elseif type(data)=="function" then
@@ -3118,7 +3121,7 @@ if not modules then modules={} end modules ['util-str']={
 utilities=utilities or {}
 utilities.strings=utilities.strings or {}
 local strings=utilities.strings
-local format,gsub,rep,sub,find=string.format,string.gsub,string.rep,string.sub,string.find
+local format,gsub,rep,sub,find,char=string.format,string.gsub,string.rep,string.sub,string.find,string.char
 local load,dump=load,string.dump
 local tonumber,type,tostring,next,setmetatable=tonumber,type,tostring,next,setmetatable
 local unpack,concat=table.unpack,table.concat
@@ -3477,6 +3480,14 @@ patterns.escapedquotes=pattern
 function string.escapedquotes(s)
  return lpegmatch(pattern,s)
 end
+local pattern=(1-P("\\"))^1;pattern=Cs (
+ pattern*((P("\\")/""*(digit^-3/function(s) return char(tonumber(s)) end))+pattern )^1
+)
+patterns.unescapedquotes=pattern
+function string.unescapedquotes(s)
+ return lpegmatch(pattern,s) or s
+end
+string.texnewlines=lpeg.replacer(patterns.newline,"\r",true)
 local preamble=""
 local environment={
  global=global or _G,
@@ -4202,20 +4213,20 @@ function files.readinteger4le(f)
  end
 end
 function files.readfixed2(f)
- local a,b=byte(f:read(2),1,2)
- if a>=0x80 then
-  tonumber((a-0x100).."."..b)
- else
-  tonumber((a    ).."."..b)
+ local n1,n2=byte(f:read(2),1,2)
+ if n1>=0x80 then
+  n1=n1-0x100
  end
+ return n1+n2/0xFF
 end
 function files.readfixed4(f)
  local a,b,c,d=byte(f:read(4),1,4)
- if a>=0x80 then
-  tonumber((0x100*a+b-0x10000).."."..(0x100*c+d))
- else
-  tonumber((0x100*a+b    ).."."..(0x100*c+d))
+ local n1=0x100*a+b
+ local n2=0x100*c+d
+ if n1>=0x8000 then
+  n1=n1-0x10000
  end
+ return n1+n2/0xFFFF
 end
 if bit32 then
  local extract=bit32.extract
@@ -4996,7 +5007,7 @@ nuts.setcomponents=direct.setcomponents
 nuts.setdirection=direct.setdirection
 nuts.setdisc=direct.setdisc
 nuts.setreplace=direct.setreplace
-nuts.setfield=setfield
+nuts.setfield=direct.setfield
 nuts.setkern=direct.setkern
 nuts.setlink=direct.setlink
 nuts.setlist=direct.setlist
@@ -11762,7 +11773,7 @@ readers.post=function(f,fontdata,specification)
   local version=readulong(f)
   fontdata.postscript={
    version=version,
-   italicangle=round(1000*readfixed(f))/1000,
+   italicangle=readfixed(f),
    underlineposition=readfword(f),
    underlinethickness=readfword(f),
    monospaced=readulong(f),
@@ -13339,7 +13350,8 @@ do
   top=0
  end
  local p_dictionary=(
-  p_byte+p_positive+p_negative+p_short+p_long+p_nibbles+p_single+p_double+p_unsupported
+  p_byte+p_positive+p_negative+p_short+p_long+p_nibbles+p_single+p_double
++p_unsupported
  )^1
  parsedictionaries=function(data,dictionaries,version)
   stack={}
@@ -13411,6 +13423,7 @@ do
  local y=0
  local width=false
  local lsb=0
+local result={}
  local r=0
  local stems=0
  local globalbias=0
@@ -14365,12 +14378,12 @@ do
      stack[top]=-t*256+64148-tab[i+1]
      i=i+2
     else
-     local n=0x100*tab[i+1]+tab[i+2]
-     if n>=0x8000 then
-      stack[top]=n-0x10000+(0x100*tab[i+3]+tab[i+4])/0xFFFF
-     else
-      stack[top]=n+(0x100*tab[i+3]+tab[i+4])/0xFFFF
+     local n1=0x100*tab[i+1]+tab[i+2]
+     local n2=0x100*tab[i+3]+tab[i+4]
+     if n1>=0x8000 then
+      n1=n1-0x10000
      end
+     stack[top]=n1+n2/0xFFFF
      i=i+5
     end
    elseif t==28 then
@@ -14621,6 +14634,7 @@ do
    r=r+1
    result[r]=c_endchar
    local stream=concat(result)
+result=nil
    if glyph then
     glyph.stream=stream
    else
@@ -14642,6 +14656,7 @@ do
     width=width,
     name=charset and charset[index] or nil,
    }
+result=nil
   else
    glyphs[index]={
     boundingbox=boundingbox,
@@ -15128,7 +15143,7 @@ if not modules then modules={} end modules ['font-ttf']={
 }
 local next,type,unpack=next,type,unpack
 local band,rshift=bit32.band,bit32.rshift
-local sqrt,round=math.sqrt,math.round
+local sqrt,round,abs,min,max=math.sqrt,math.round,math.abs,math.min,math.max
 local char,rep=string.char,string.rep
 local concat=table.concat
 local idiv=number.idiv
@@ -15262,69 +15277,156 @@ local function curveto(m_x,m_y,l_x,l_y,r_x,r_y)
   r_x+2/3*(m_x-r_x),r_y+2/3*(m_y-r_y),
   r_x,r_y,"c"
 end
+local xv={} 
+local yv={} 
 local function applyaxis(glyph,shape,deltas,dowidth)
  local points=shape.points
  if points then
   local nofpoints=#points
-  local h=nofpoints+2 
-  local l=nofpoints+1
   local dw=0
   local dl=0
   for i=1,#deltas do
    local deltaset=deltas[i]
    local xvalues=deltaset.xvalues
    local yvalues=deltaset.yvalues
-   local dpoints=deltaset.points
-   local factor=deltaset.factor
-   if dpoints then
-    local nofdpoints=#dpoints
-    for i=1,nofdpoints do
-     local d=dpoints[i]
-     local p=points[d]
-     if p then
-      if xvalues then
-       local x=xvalues[i]
-       if x and x~=0 then
+   if xvalues and yvalues then
+    local dpoints=deltaset.points
+    local factor=deltaset.factor
+    if dpoints then
+     local cnt=#dpoints
+     if dowidth then
+      cnt=cnt-4
+     end
+     if cnt==1 then
+      local d=dpoints[1]
+      local x=xvalues[d]*factor
+      local y=yvalues[d]*factor
+      for i=1,nofpoints do
+       local p=points[i]
+       if x~=0 then
+        p[1]=p[1]+x
+       end
+       if y~=0 then
+        p[2]=p[2]+y
+       end
+      end
+     else
+      local function find(i)
+       local prv=cnt
+       for j=1,cnt do
+        local nxt=dpoints[j]
+        if nxt==i then
+         return false,j,false
+        elseif nxt>i then
+         return prv,false,j
+        end
+        prv=j
+       end
+       return prv,false,1
+      end
+      for i=1,nofpoints do
+       local d1,d2,d3=find(i)
+       local p2=points[i]
+       if d2 then
+        xv[i]=xvalues[d2]
+        yv[i]=yvalues[d2]
+       else
+        local n1=dpoints[d1]
+        local n3=dpoints[d3]
+        local p1=points[n1]
+        local p3=points[n3]
+        local p1x=p1[1]
+        local p2x=p2[1]
+        local p3x=p3[1]
+        local p1y=p1[2]
+        local p2y=p2[2]
+        local p3y=p3[2]
+        local x1=xvalues[d1]
+        local y1=yvalues[d1]
+        local x3=xvalues[d3]
+        local y3=yvalues[d3]
+        local fx
+        local fy
+        if p1x==p3x then
+         if x1==x3 then
+          fx=x1
+         else
+          fx=0
+         end
+        elseif p2x<=min(p1x,p3x) then
+         if p1x<p3x then
+          fx=x1
+         else
+          fx=x3
+         end
+        elseif p2x>=max(p1x,p3x) then
+         if p1x>p3x then
+          fx=x1
+         else
+          fx=x3
+         end
+        else
+         fx=(p2x-p1x)/(p3x-p1x)
+         fx=(1-fx)*x1+fx*x3
+        end
+        if p1y==p3y then
+         if y1==y3 then
+          fy=y1
+         else
+          fy=0
+         end
+        elseif p2y<=min(p1y,p3y) then
+         if p1y<p3y then
+          fy=y1
+         else
+          fy=y3
+         end
+        elseif p2y>=max(p1y,p3y) then
+         if p1y>p3y then
+          fy=y1
+         else
+          fy=y3
+         end
+        else
+         fy=(p2y-p1y)/(p3y-p1y)
+         fy=(1-fy)*y1+fy*y3
+        end
+        xv[i]=fx
+        yv[i]=fy
+       end
+      end
+      for i=1,nofpoints do
+       local pi=points[i]
+       local fx=xv[i]
+       local fy=yv[i]
+       if fx~=0 then
+        pi[1]=pi[1]+factor*fx
+       end
+       if fy~=0 then
+        pi[2]=pi[2]+factor*fy
+       end
+      end
+     end
+    else
+     for i=1,nofpoints do
+      local p=points[i]
+      local x=xvalues[i]
+      if x then
+       local y=yvalues[i]
+       if x~=0 then
         p[1]=p[1]+factor*x
        end
-      end
-      if yvalues then
-       local y=yvalues[i]
-       if y and y~=0 then
+       if y~=0 then
         p[2]=p[2]+factor*y
        end
-      end
-     elseif dowidth then
-      if d==h then
-       local x=xvalues[i]
-       if x then
-        dw=dw+factor*x
-       end
-      elseif d==l then
-       local x=xvalues[i]
-       if x then
-        dl=dl+factor*x
-       end
-      end
-     end
-    end
-   else
-    for i=1,nofpoints do
-     local p=points[i]
-     if xvalues then
-      local x=xvalues[i]
-      if x and x~=0 then
-       p[1]=p[1]+factor*x
-      end
-     end
-     if yvalues then
-      local y=yvalues[i]
-      if y and y~=0 then
-       p[2]=p[2]+factor*y
+      else
+       break
       end
      end
     end
     if dowidth then
+     local h=nofpoints+2 
+     local l=nofpoints+1
      local x=xvalues[h]
      if x then
       dw=dw+factor*x
@@ -15903,13 +16005,13 @@ local function readcomposite(f)
     yoffset=yoffset*yscale
    end
   elseif band(flags,0x0080)~=0 then 
-   xscale=read2dot14(f)
-   xrotate=read2dot14(f)
-   yrotate=read2dot14(f)
-   yscale=read2dot14(f)
+   xscale=read2dot14(f) 
+   xrotate=read2dot14(f) 
+   yrotate=read2dot14(f) 
+   yscale=read2dot14(f) 
    if f_xyarg and f_offset then
-    xoffset=xoffset*sqrt(xscale^2+xrotate^2)
-    yoffset=yoffset*sqrt(yrotate^2+yscale^2)
+    xoffset=xoffset*sqrt(xscale^2+yrotate^2) 
+    yoffset=yoffset*sqrt(xrotate^2+yscale^2) 
    end
   end
   nofcomponents=nofcomponents+1
@@ -16062,40 +16164,6 @@ local function readpoints(f)
    end
   end
   return points,p
- end
-end
-local function readdeltas(f,nofpoints)
- local deltas={}
- local p=0
- local z=0
- while nofpoints>0 do
-  local control=readbyte(f)
-if not control then
- break
-end
-  local allzero=band(control,0x80)~=0
-  local runlength=band(control,0x3F)+1
-  if allzero then
-   z=z+runlength
-  else
-   local runreader=band(control,0x40)~=0 and readshort or readinteger
-   if z>0 then
-    for i=1,z do
-     p=p+1
-     deltas[p]=0
-    end
-    z=0
-   end
-   for i=1,runlength do
-    p=p+1
-    deltas[p]=runreader(f)
-   end
-  end
-  nofpoints=nofpoints-runlength
- end
- if p>0 then
-  return deltas
- else
  end
 end
 local function readdeltas(f,nofpoints)
@@ -20842,7 +20910,7 @@ if not modules then modules={} end modules ['font-otl']={
 local lower=string.lower
 local type,next,tonumber,tostring,unpack=type,next,tonumber,tostring,unpack
 local abs=math.abs
-local derivetable=table.derive
+local derivetable,sortedhash=table.derive,table.sortedhash
 local formatters=string.formatters
 local setmetatableindex=table.setmetatableindex
 local allocate=utilities.storage.allocate
@@ -20858,7 +20926,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.116 
+otf.version=3.118 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -21063,7 +21131,7 @@ local function copytotfm(data,cache_id)
   local properties=derivetable(data.properties)
   local descriptions=derivetable(data.descriptions)
   local goodies=derivetable(data.goodies)
-  local characters={}
+  local characters={} 
   local parameters={}
   local mathparameters={}
   local resources=data.resources
@@ -21231,7 +21299,25 @@ local function copytotfm(data,cache_id)
   properties.name=filename or fullname
   properties.subfont=subfont
 if not CONTEXTLMTXMODE or CONTEXTLMTXMODE==0 then
-  properties.encodingbytes=2
+ properties.encodingbytes=2
+elseif CONTEXTLMTXMODE then
+ local duplicates=resources and resources.duplicates
+ if duplicates then
+  local maxindex=data.nofglyphs or metadata.nofglyphs
+  if maxindex then
+   for u,d in sortedhash(duplicates) do
+    local du=descriptions[u]
+    if du then
+     for uu in sortedhash(d) do
+      maxindex=maxindex+1
+      descriptions[uu].dupindex=du.index
+      descriptions[uu].index=maxindex
+     end
+    else
+    end
+   end
+  end
+ end
 end
   properties.private=properties.private or data.private or privateoffset
   return {
@@ -23522,9 +23608,9 @@ local f_index=formatters["I%05X"]
 local f_character_y=formatters["%C"]
 local f_character_n=formatters["[ %C ]"]
 local check_duplicates=true 
-local check_soft_hyphen=true 
+local check_soft_hyphen=context 
 directives.register("otf.checksofthyphen",function(v)
- check_soft_hyphen=v
+ check_soft_hyphen=v 
 end)
 local function replaced(list,index,replacement)
  if type(list)=="number" then
@@ -23913,27 +23999,30 @@ local function copyduplicates(fontdata)
   local resources=fontdata.resources
   local duplicates=resources.duplicates
   if check_soft_hyphen then
-   local ds=descriptions[0xAD]
-   if not ds or ds.width==0 then
-    if ds then
+   local dh=descriptions[0x2D]
+   if dh then
+    local ds=descriptions[0xAD]
+    if not ds or ds.width~=dh.width then
      descriptions[0xAD]=nil
-     if trace_unicodes then
-      report_unicodes("patching soft hyphen")
+     if ds then
+      if trace_unicodes then
+       report_unicodes("patching soft hyphen")
+      end
+     else
+      if trace_unicodes then
+       report_unicodes("adding soft hyphen")
+      end
      end
-    else
-     if trace_unicodes then
-      report_unicodes("adding soft hyphen")
+     if not duplicates then
+      duplicates={}
+      resources.duplicates=duplicates
      end
-    end
-    if not duplicates then
-     duplicates={}
-     resources.duplicates=duplicates
-    end
-    local dh=duplicates[0x2D]
-    if dh then
-     dh[#dh+1]={ [0xAD]=true }
-    else
-     duplicates[0x2D]={ [0xAD]=true }
+     local d=duplicates[0x2D]
+     if d then
+      d[0xAD]=true
+     else
+      duplicates[0x2D]={ [0xAD]=true }
+     end
     end
    end
   end
@@ -24199,6 +24288,7 @@ local function unifyglyphs(fontdata,usenames)
  local resources=fontdata.resources
  local zero=glyphs[0]
  local zerocode=zero.unicode
+ local nofglyphs=#glyphs
  if not zerocode then
   zerocode=private
   zero.unicode=zerocode
@@ -24213,7 +24303,7 @@ local function unifyglyphs(fontdata,usenames)
   indices[0]=zerocode
  end
  if names then
-  for index=1,#glyphs do
+  for index=1,nofglyphs do
    local glyph=glyphs[index]
    local unicode=glyph.unicode 
    if not unicode then
@@ -24246,7 +24336,7 @@ local function unifyglyphs(fontdata,usenames)
    descriptions[unicode]=glyph
   end
  elseif trace_unicodes then
-  for index=1,#glyphs do
+  for index=1,nofglyphs do
    local glyph=glyphs[index]
    local unicode=glyph.unicode 
    if not unicode then
@@ -24287,7 +24377,7 @@ local function unifyglyphs(fontdata,usenames)
    descriptions[unicode]=glyph
   end
  else
-  for index=1,#glyphs do
+  for index=1,nofglyphs do
    local glyph=glyphs[index]
    local unicode=glyph.unicode 
    if not unicode then
@@ -24313,7 +24403,7 @@ local function unifyglyphs(fontdata,usenames)
    descriptions[unicode]=glyph
   end
  end
- for index=1,#glyphs do
+ for index=1,nofglyphs do
   local math=glyphs[index].math
   if math then
    local list=math.vparts
@@ -24336,7 +24426,7 @@ local function unifyglyphs(fontdata,usenames)
  end
  local colorpalettes=resources.colorpalettes
  if colorpalettes then
-  for index=1,#glyphs do
+  for index=1,nofglyphs do
    local colors=glyphs[index].colors
    if colors then
     for i=1,#colors do
@@ -24351,6 +24441,7 @@ local function unifyglyphs(fontdata,usenames)
  fontdata.names=names
  fontdata.descriptions=descriptions
  fontdata.hashmethod=hashmethod
+ fontdata.nofglyphs=nofglyphs
  return indices,names
 end
 local p_crappyname  do
@@ -30378,6 +30469,7 @@ local function validspecification(specification,name)
  else
   dataset={ { data=specification.data } }
   specification.data=nil
+  specification.coverage=dataset
   specification.dataset=dataset
  end
  local first=dataset[1]
@@ -30677,7 +30769,28 @@ local function addfeature(data,feature,specifications)
   return coverage
  end
  local prepare_single=prepare_pair 
- local function prepare_chain(list,featuretype,sublookups)
+ local function hassteps(lookups)
+  if lookups then
+   for i=1,#lookups do
+    local l=lookups[i]
+    if l then
+     for j=1,#l do
+      local l=l[j]
+      if l then
+       local n=l.nofsteps
+       if not n then
+        return true
+       elseif n>0 then
+        return true
+       end
+      end
+     end
+    end
+   end
+  end
+  return false
+ end
+ local function prepare_chain(list,featuretype,sublookups,nocheck)
   local rules=list.rules
   local coverage={}
   if rules then
@@ -30713,6 +30826,7 @@ local function addfeature(data,feature,specifications)
     local lookups=rule.lookups or false
     local subtype=nil
     if lookups and sublookups then
+     local l={}
      for k,v in sortedhash(lookups) do
       local t=type(v)
       if t=="table" then
@@ -30722,55 +30836,63 @@ local function addfeature(data,feature,specifications)
          v[i]={ vi }
         end
        end
+       l[k]=v
       elseif t=="number" then
        local lookup=sublookups[v]
        if lookup then
-        lookups[k]={ lookup }
+        l[k]={ lookup }
         if not subtype then
          subtype=lookup.type
         end
        elseif v==0 then
-        lookups[k]={ { type="gsub_remove" } }
+        l[k]={ { type="gsub_remove",nosteps=true } }
        else
-        lookups[k]=false 
+        l[k]=false 
        end
       else
-       lookups[k]=false 
+       l[k]=false 
       end
      end
+     if nocheck then
+      rule.lookups=l 
+     end
+     lookups=l
     end
     if nofsequences>0 then
-     local hashed={}
-     for i=1,nofsequences do
-      local t={}
-      local s=sequence[i]
-      for i=1,#s do
-       local u=tounicode(s[i])
-       if u then
-        t[u]=true
+     if hassteps(lookups) then
+      local hashed={}
+      for i=1,nofsequences do
+       local t={}
+       local s=sequence[i]
+       for i=1,#s do
+        local u=tounicode(s[i])
+        if u then
+         t[u]=true
+        end
+       end
+       hashed[i]=t
+      end
+      sequence=hashed
+      rulesize=rulesize+1
+      rulehash[rulesize]={
+       nofrules,
+       lookuptype,
+       sequence,
+       start,
+       stop,
+       lookups,
+       replacements,
+       subtype,
+      }
+      for unic in sortedhash(sequence[start]) do
+       local cu=coverage[unic]
+       if not cu then
+        coverage[unic]=rulehash 
        end
       end
-      hashed[i]=t
+      sequence.n=nofsequences
+     else
      end
-     sequence=hashed
-     rulesize=rulesize+1
-     rulehash[rulesize]={
-      nofrules,
-      lookuptype,
-      sequence,
-      start,
-      stop,
-      lookups,
-      replacements,
-      subtype,
-     }
-     for unic in sortedhash(sequence[start]) do
-      local cu=coverage[unic]
-      if not cu then
-       coverage[unic]=rulehash 
-      end
-     end
-     sequence.n=nofsequences
     end
    end
    rulehash.n=rulesize
@@ -30857,126 +30979,148 @@ local function addfeature(data,feature,specifications)
    end
    local askedfeatures=specification.features or everywhere
    local askedsteps=specification.steps or specification.subtables or { specification.data } or {}
-   local featuretype=normalized[specification.type or "substitution"] or "substitution"
+   local featuretype=specification.type or "substitution"
+   local featureaction=false
    local featureflags=specification.flags or noflags
    local nocheck=specification.nocheck
+   local mapping=specification.mapping
    local featureorder=specification.order or { feature }
    local featurechain=(featuretype=="chainsubstitution" or featuretype=="chainposition") and 1 or 0
    local nofsteps=0
    local steps={}
    local sublookups=specification.lookups
    local category=nil
+   local steptype=nil
+   local sequence=nil
+   if fonts.handlers.otf.handlers[featuretype] then
+    featureaction=true 
+   else
+    featuretype=normalized[specification.type or "substitution"] or "substitution"
+   end
    checkflags(specification,resources)
-   if sublookups then
-    local s={}
-    for i=1,#sublookups do
-     local specification=sublookups[i]
-     local askedsteps=specification.steps or specification.subtables or { specification.data } or {}
-     local featuretype=normalized[specification.type or "substitution"] or "substitution"
-     local featureflags=specification.flags or noflags
-     local nofsteps=0
-     local steps={}
-     for i=1,#askedsteps do
-      local list=askedsteps[i]
-      local coverage=nil
-      local format=nil
-      if featuretype=="substitution" then
-       coverage=prepare_substitution(list,featuretype,nocheck)
-      elseif featuretype=="ligature" then
-       coverage=prepare_ligature(list,featuretype,nocheck)
-      elseif featuretype=="alternate" then
-       coverage=prepare_alternate(list,featuretype,nocheck)
-      elseif featuretype=="multiple" then
-       coverage=prepare_multiple(list,featuretype,nocheck)
-      elseif featuretype=="kern" or featuretype=="move" then
-       format=featuretype
-       coverage=prepare_kern(list,featuretype)
-      elseif featuretype=="pair" then
-       format="pair"
-       coverage=prepare_pair(list,featuretype)
-      elseif featuretype=="single" then
-       format="single"
-       coverage=prepare_single(list,featuretype)
-      end
-      if coverage and next(coverage) then
-       nofsteps=nofsteps+1
-       steps[nofsteps]=register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
-      end
-     end
-     checkmerge(specification)
-     checksteps(specification)
-     s[i]={
-      [stepkey]=steps,
-      nofsteps=nofsteps,
-      flags=featureflags,
-      type=types[featuretype],
-     }
-    end
-    sublookups=s
-   end
-   for i=1,#askedsteps do
-    local list=askedsteps[i]
-    local coverage=nil
-    local format=nil
-    if featuretype=="substitution" then
-     category="gsub"
-     coverage=prepare_substitution(list,featuretype,nocheck)
-    elseif featuretype=="ligature" then
-     category="gsub"
-     coverage=prepare_ligature(list,featuretype,nocheck)
-    elseif featuretype=="alternate" then
-     category="gsub"
-     coverage=prepare_alternate(list,featuretype,nocheck)
-    elseif featuretype=="multiple" then
-     category="gsub"
-     coverage=prepare_multiple(list,featuretype,nocheck)
-    elseif featuretype=="kern" or featuretype=="move" then
-     category="gpos"
-     format=featuretype
-     coverage=prepare_kern(list,featuretype)
-    elseif featuretype=="pair" then
-     category="gpos"
-     format="pair"
-     coverage=prepare_pair(list,featuretype)
-    elseif featuretype=="single" then
-     category="gpos"
-     format="single"
-     coverage=prepare_single(list,featuretype)
-    elseif featuretype=="chainsubstitution" then
-     category="gsub"
-     coverage=prepare_chain(list,featuretype,sublookups)
-    elseif featuretype=="chainposition" then
-     category="gpos"
-     coverage=prepare_chain(list,featuretype,sublookups)
-    else
-     report_otf("not registering feature %a, unknown category",feature)
-     return
-    end
-    if coverage and next(coverage) then
-     nofsteps=nofsteps+1
-     steps[nofsteps]=register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+   for k,v in next,askedfeatures do
+    if v[1] then
+     askedfeatures[k]=tohash(v)
     end
    end
-   if nofsteps>0 then
-    for k,v in next,askedfeatures do
-     if v[1] then
-      askedfeatures[k]=tohash(v)
-     end
-    end
-    if featureflags[1] then featureflags[1]="mark" end
-    if featureflags[2] then featureflags[2]="ligature" end
-    if featureflags[3] then featureflags[3]="base" end
-    local steptype=types[featuretype]
-    local sequence={
-     chain=featurechain,
+   if featureflags[1] then featureflags[1]="mark" end
+   if featureflags[2] then featureflags[2]="ligature" end
+   if featureflags[3] then featureflags[3]="base" end
+   if featureaction then
+    category="gsub"
+    sequence={
      features={ [feature]=askedfeatures },
      flags=featureflags,
      name=feature,
      order=featureorder,
-     [stepkey]=steps,
-     nofsteps=nofsteps,
-     type=steptype,
+     type=featuretype,
+     nofsteps=0,
     }
+   else
+    if sublookups then
+     local s={}
+     for i=1,#sublookups do
+      local specification=sublookups[i]
+      local askedsteps=specification.steps or specification.subtables or { specification.data } or {}
+      local featuretype=normalized[specification.type or "substitution"] or "substitution"
+      local featureflags=specification.flags or noflags
+      local nofsteps=0
+      local steps={}
+      for i=1,#askedsteps do
+       local list=askedsteps[i]
+       local coverage=nil
+       local format=nil
+       if featuretype=="substitution" then
+        coverage=prepare_substitution(list,featuretype,nocheck)
+       elseif featuretype=="ligature" then
+        coverage=prepare_ligature(list,featuretype,nocheck)
+       elseif featuretype=="alternate" then
+        coverage=prepare_alternate(list,featuretype,nocheck)
+       elseif featuretype=="multiple" then
+        coverage=prepare_multiple(list,featuretype,nocheck)
+       elseif featuretype=="kern" or featuretype=="move" then
+        format=featuretype
+        coverage=prepare_kern(list,featuretype)
+       elseif featuretype=="pair" then
+        format="pair"
+        coverage=prepare_pair(list,featuretype)
+       elseif featuretype=="single" then
+        format="single"
+        coverage=prepare_single(list,featuretype)
+       end
+       if coverage and next(coverage) then
+        nofsteps=nofsteps+1
+        steps[nofsteps]=register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+       end
+      end
+      checkmerge(specification)
+      checksteps(specification)
+      s[i]={
+       [stepkey]=steps,
+       nofsteps=nofsteps,
+       flags=featureflags,
+       type=types[featuretype],
+      }
+     end
+     sublookups=s
+    end
+    for i=1,#askedsteps do
+     local list=askedsteps[i]
+     local coverage=nil
+     local format=nil
+     if featuretype=="substitution" then
+      category="gsub"
+      coverage=(mapping and list) or prepare_substitution(list,featuretype,nocheck)
+     elseif featuretype=="ligature" then
+      category="gsub"
+      coverage=prepare_ligature(list,featuretype,nocheck)
+     elseif featuretype=="alternate" then
+      category="gsub"
+      coverage=prepare_alternate(list,featuretype,nocheck)
+     elseif featuretype=="multiple" then
+      category="gsub"
+      coverage=prepare_multiple(list,featuretype,nocheck)
+     elseif featuretype=="kern" or featuretype=="move" then
+      category="gpos"
+      format=featuretype
+      coverage=prepare_kern(list,featuretype)
+     elseif featuretype=="pair" then
+      category="gpos"
+      format="pair"
+      coverage=prepare_pair(list,featuretype)
+     elseif featuretype=="single" then
+      category="gpos"
+      format="single"
+      coverage=prepare_single(list,featuretype)
+     elseif featuretype=="chainsubstitution" then
+      category="gsub"
+      coverage=prepare_chain(list,featuretype,sublookups,nocheck)
+     elseif featuretype=="chainposition" then
+      category="gpos"
+      coverage=prepare_chain(list,featuretype,sublookups,nocheck)
+     else
+      report_otf("not registering feature %a, unknown category",feature)
+      return
+     end
+     if coverage and next(coverage) then
+      nofsteps=nofsteps+1
+      steps[nofsteps]=register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+     end
+    end
+    if nofsteps>0 then
+     sequence={
+      chain=featurechain,
+      features={ [feature]=askedfeatures },
+      flags=featureflags,
+      name=feature,
+      order=featureorder,
+      [stepkey]=steps,
+      nofsteps=nofsteps,
+      type=types[featuretype],
+     }
+    end
+   end
+   if sequence then
     checkflags(sequence,resources)
     checkmerge(sequence)
     checksteps(sequence)
@@ -31091,7 +31235,8 @@ local flushnode=nuts.flushnode
 local copyinjection=nodes.injections.copy 
 local unsetvalue=attributes.unsetvalue
 local fontdata=fonts.hashes.identifiers
-local a_syllabe=attributes.private('syllabe')
+local a_syllabe="syllable"  
+local a_reordered="reordered" 
 local dotted_circle=0x25CC
 local c_nbsp=0x00A0
 local c_zwnj=0x200C
@@ -32167,7 +32312,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
  if getchar(base)==c_nbsp then
   nbspaces=nbspaces-1
   if base==stop then
-  	stop=getprev(stop)
+   stop=getprev(stop)
   end
   head=remove_node(head,base)
   flushnode(base)
@@ -32284,7 +32429,7 @@ function handlers.devanagari_reorder_reph(head,start)
       start=startnext
       startattr=getprop(start,a_syllabe)
       break
-     elseif not c and (vowel_modifier[char] or stress_tone_mark[char] ) then
+     elseif not c and (vowel_modifier[char] or stress_tone_mark[char]) then
       c=current
      end
      current=getnext(current)
@@ -32352,9 +32497,8 @@ function handlers.devanagari_reorder_reph(head,start)
  end
  return head,start,true
 end
-local reordered_pre_base_reordering_consonants={} 
 function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
- if reordered_pre_base_reordering_consonants[start] then
+ if getprop(start,a_reordered) then
   return head,start,true
  end
  local current=start 
@@ -32376,7 +32520,7 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
     head=remove_node(head,start)
     setlink(start,next)
     setlink(current,start)
-    reordered_pre_base_reordering_consonants[start]=true
+    setprop(start,"reordered",true)
     start=startnext
     return head,start,true
    end
@@ -32399,7 +32543,7 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
     setlink(getprev(current),start)
     setlink(start,current)
    end
-   reordered_pre_base_reordering_consonants[start]=true
+   setprop(start,"reordered",true)
    start=startnext
    break
   end
@@ -32910,20 +33054,20 @@ local function analyze_next_chars_one(c,font,variant)
  local already_below_mark 
  local already_post_mark  
  while dependent_vowel[v] do
-	 local vowels=twopart_mark[v] or { v }
-	 for k,v in next,vowels do
-			if pre_mark[v] and not already_pre_mark then
-				already_pre_mark=true
-			elseif above_mark[v] and not already_above_mark then
-				already_above_mark=true
-			elseif below_mark[v] and not already_below_mark then
-				already_below_mark=true
-			elseif post_mark[v] and not already_post_mark then
-				already_post_mark=true
-			else
-				return c
-			end
-	 end
+  local vowels=twopart_mark[v] or { v }
+  for k,v in next,vowels do
+   if pre_mark[v] and not already_pre_mark then
+    already_pre_mark=true
+   elseif above_mark[v] and not already_above_mark then
+    already_above_mark=true
+   elseif below_mark[v] and not already_below_mark then
+    already_below_mark=true
+   elseif post_mark[v] and not already_post_mark then
+    already_post_mark=true
+   else
+    return c
+   end
+  end
   c=getnext(c)
   n=getnext(c)
   if not n then
@@ -33093,21 +33237,21 @@ local function analyze_next_chars_two(c,font)
   local already_above_mark 
   local already_below_mark 
   local already_post_mark  
-		while dependent_vowel[v] do
-			local vowels=twopart_mark[v] or { v }
-			for k,v in next,vowels do
-				if pre_mark[v] and not already_pre_mark then
-					already_pre_mark=true
-				elseif above_mark[v] and not already_above_mark then
-					already_above_mark=true
-				elseif below_mark[v] and not already_below_mark then
-					already_below_mark=true
-				elseif post_mark[v] and not already_post_mark then
-					already_post_mark=true
-				else
-					return c
-				end
-			end
+  while dependent_vowel[v] do
+   local vowels=twopart_mark[v] or { v }
+   for k,v in next,vowels do
+    if pre_mark[v] and not already_pre_mark then
+     already_pre_mark=true
+    elseif above_mark[v] and not already_above_mark then
+     already_above_mark=true
+    elseif below_mark[v] and not already_below_mark then
+     already_below_mark=true
+    elseif post_mark[v] and not already_post_mark then
+     already_post_mark=true
+    else
+     return c
+    end
+   end
    c=n
    n=getnext(c)
    if not n then
@@ -33363,15 +33507,15 @@ local function method_one(head,font,attr)
  while current do
   local char=ischar(current,font)
   if char then
-			if n==0 and not getstate(current) then
-				setstate(current,s_init)
-			end
-			n=n+1
-		else
-			n=0
-		end
-		current=getnext(current)
-	end
+   if n==0 and not getstate(current) then
+    setstate(current,s_init)
+   end
+   n=n+1
+  else
+   n=0
+  end
+  current=getnext(current)
+ end
  return head,done
 end
 local function method_two(head,font,attr)
@@ -33458,15 +33602,15 @@ local function method_two(head,font,attr)
  while current do
   local char=ischar(current,font)
   if char then
-			if n==0 and not getstate(current) then 
-				setstate(current,s_init)
-			end
-			n=n+1
-		else
-			n=0
-		end
-		current=getnext(current)
-	end
+   if n==0 and not getstate(current) then 
+    setstate(current,s_init)
+   end
+   n=n+1
+  else
+   n=0
+  end
+  current=getnext(current)
+ end
  return head,done
 end
 for i=1,nofscripts do
@@ -36161,7 +36305,7 @@ local afm=fonts.handlers.afm
 local pfb=fonts.handlers.pfb
 local hashes=fonts.hashes
 local identifiers=hashes.identifiers
-local version=0.010
+local version=otf.version or 0.011
 local shapescache=containers.define("fonts","shapes",version,true)
 local streamscache=containers.define("fonts","streams",version,true)
 local compact_streams=false
@@ -36469,7 +36613,7 @@ local function getstreamhash(fontid)
  local fontdata=identifiers[fontid]
  if fontdata then
   local properties=fontdata.properties
-  return makehash(properties.filename,properties.subfont,properties.instance)
+  return makehash(properties.filename,properties.subfont,properties.instance),fontdata
  end
 end
 local function loadstreamdata(fontdata)

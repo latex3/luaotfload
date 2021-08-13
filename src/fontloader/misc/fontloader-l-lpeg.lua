@@ -665,12 +665,12 @@ end
 -- lpeg.print(lpeg.P("a","b","c"))
 -- lpeg.print(lpeg.S("a","b","c"))
 
--- print(lpeg.count("äáàa",lpeg.P("á") + lpeg.P("à")))
--- print(lpeg.count("äáàa",lpeg.UP("áà")))
--- print(lpeg.count("äáàa",lpeg.US("àá")))
--- print(lpeg.count("äáàa",lpeg.UR("aá")))
--- print(lpeg.count("äáàa",lpeg.UR("àá")))
--- print(lpeg.count("äáàa",lpeg.UR(0x0000,0xFFFF)))
+-- print(lpeg.counter("äáàa",lpeg.P("á") + lpeg.P("à")))
+-- print(lpeg.counter("äáàa",lpeg.UP("áà")))
+-- print(lpeg.counter("äáàa",lpeg.US("àá")))
+-- print(lpeg.counter("äáàa",lpeg.UR("aá")))
+-- print(lpeg.counter("äáàa",lpeg.UR("àá")))
+-- print(lpeg.counter("äáàa",lpeg.UR(0x0000,0xFFFF)))
 
 function lpeg.is_lpeg(p)
     return p and lpegtype(p) == "pattern"

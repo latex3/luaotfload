@@ -26,7 +26,7 @@ if not modules then modules = { } end modules ['font-otl'] = {
 local lower = string.lower
 local type, next, tonumber, tostring, unpack = type, next, tonumber, tostring, unpack
 local abs = math.abs
-local derivetable = table.derive
+local derivetable, sortedhash = table.derive, table.sortedhash
 local formatters = string.formatters
 
 local setmetatableindex   = table.setmetatableindex
@@ -52,7 +52,7 @@ local report_otf          = logs.reporter("fonts","otf loading")
 local fonts               = fonts
 local otf                 = fonts.handlers.otf
 
-otf.version               = 3.116 -- beware: also sync font-mis.lua and in mtx-fonts
+otf.version               = 3.118 -- beware: also sync font-mis.lua and in mtx-fonts
 otf.cache                 = containers.define("fonts", "otl", otf.version, true)
 otf.svgcache              = containers.define("fonts", "svg", otf.version, true)
 otf.pngcache              = containers.define("fonts", "png", otf.version, true)
@@ -314,7 +314,7 @@ local function copytotfm(data,cache_id)
         local properties     = derivetable(data.properties)
         local descriptions   = derivetable(data.descriptions)
         local goodies        = derivetable(data.goodies)
-        local characters     = { }
+        local characters     = { } -- newtable if we knwo how many
         local parameters     = { }
         local mathparameters = { }
         --
@@ -504,7 +504,28 @@ local function copytotfm(data,cache_id)
         properties.subfont    = subfont
         --
 if not CONTEXTLMTXMODE or CONTEXTLMTXMODE == 0 then
-        properties.encodingbytes = 2
+    --
+    properties.encodingbytes = 2
+elseif CONTEXTLMTXMODE then
+    local duplicates = resources and resources.duplicates
+    if duplicates then
+        local maxindex = data.nofglyphs or metadata.nofglyphs
+        if maxindex then
+            for u, d in sortedhash(duplicates) do
+                local du = descriptions[u]
+                if du then
+                    for uu in sortedhash(d) do
+                        maxindex = maxindex + 1
+                        descriptions[uu].dupindex = du.index
+                        descriptions[uu].index    = maxindex
+                    end
+                else
+                 -- report_otf("no %U in font %a, duplicates ignored",u,filename)
+                end
+            end
+        end
+    end
+    --
 end
         --
      -- properties.name          = specification.name

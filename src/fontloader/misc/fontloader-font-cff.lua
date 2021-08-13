@@ -572,6 +572,11 @@ do
         stack[top] = -(byte(b0)-251)*256 - byte(b1) - 108
     end
 
+ -- local p_float = P("\255") * C(1) * C(1) * C(1) * C(1) / function(b0,b1,b2,b3)
+ --     top = top + 1
+ --     stack[top] = 0
+ -- end
+
     local p_short = P("\28") * C(1) * C(1) / function(b1,b2)
         -- -32768 .. +32767 : b1<<8 | b2
         top = top + 1
@@ -607,6 +612,7 @@ do
       + p_nibbles
       + p_single
       + p_double
+   -- + p_float
       + p_unsupported
     )^1
 
@@ -701,6 +707,7 @@ do
     local y            = 0
     local width        = false
     local lsb          = 0
+local result = { }
     local r            = 0
     local stems        = 0
     local globalbias   = 0
@@ -1825,13 +1832,13 @@ do
                     stack[top] = -t*256 + 64148 - tab[i+1]
                     i = i + 2
                 else
-                    -- a 16.16 float
-                    local n = 0x100 * tab[i+1] + tab[i+2]
-                    if n >= 0x8000 then
-                        stack[top] = n - 0x10000 + (0x100 * tab[i+3] + tab[i+4])/0xFFFF
-                    else
-                        stack[top] = n           + (0x100 * tab[i+3] + tab[i+4])/0xFFFF
+                    -- a 16.16 float (used for italic but pretty unreliable)
+                    local n1 = 0x100 * tab[i+1] + tab[i+2]
+                    local n2 = 0x100 * tab[i+3] + tab[i+4]
+                    if n1 >= 0x8000 then
+                        n1 = n1 - 0x10000
                     end
+                    stack[top] = n1 + n2/0xFFFF
                     i = i + 5
                 end
             elseif t == 28 then
@@ -2122,7 +2129,6 @@ do
         end
 
         process(tab)
-
         if hack then
             return x, y
         end
@@ -2145,6 +2151,7 @@ do
             r = r + 1
             result[r] = c_endchar
             local stream = concat(result)
+result = nil
          -- if trace_charstrings then
          --     report("vdata: %s",stream)
          -- end
@@ -2171,6 +2178,7 @@ do
                 name        = charset and charset[index] or nil,
              -- sidebearing = 0,
             }
+result = nil
         else
             glyphs[index] = {
                 boundingbox = boundingbox,

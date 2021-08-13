@@ -10,7 +10,7 @@ utilities         = utilities or { }
 utilities.strings = utilities.strings or { }
 local strings     = utilities.strings
 
-local format, gsub, rep, sub, find = string.format, string.gsub, string.rep, string.sub, string.find
+local format, gsub, rep, sub, find, char = string.format, string.gsub, string.rep, string.sub, string.find, string.char
 local load, dump = load, string.dump
 local tonumber, type, tostring, next, setmetatable = tonumber, type, tostring, next, setmetatable
 local unpack, concat = table.unpack, table.concat
@@ -622,7 +622,7 @@ local template = [[
 return function(%s) return %s end
 ]]
 
--- this might move
+-- We only use fast serialize in controlled cases.
 
 local pattern = Cs(Cc('"') * (
     (1-S('"\\\n\r'))^1
@@ -632,11 +632,42 @@ local pattern = Cs(Cc('"') * (
   + P('\r') / '\\r'
 )^0 * Cc('"'))
 
+-- -- I need to do more experiments with this:
+--
+-- local pattern = Cs(Cc('"') * (
+--     (1-S('"\\\n\r'))^1
+--   + P('"')  / '\\034'
+--   + P('\\') / '\\092'
+--   + P('\n') / '\\013'
+--   + P('\r') / '\\010'
+-- )^0 * Cc('"'))
+
 patterns.escapedquotes = pattern
 
 function string.escapedquotes(s)
     return lpegmatch(pattern,s)
 end
+
+local pattern = (1 - P("\\"))^1 ; pattern = Cs (
+    pattern
+ * ( (P("\\") / "" * (digit^-3 / function(s) return char(tonumber(s)) end)) + pattern )^1
+)
+
+patterns.unescapedquotes = pattern
+
+function string.unescapedquotes(s)
+    return lpegmatch(pattern,s) or s
+end
+
+-- function string.longifneeded(s)
+--     if find(s,'["\\\n\r]') then
+--         return "[===[" .. s .. "]===]"
+--     else
+--         return '"' .. s ..'"'
+--     end
+-- end
+
+string.texnewlines = lpeg.replacer(patterns.newline,"\r",true)
 
 -- print(string.escapedquotes('1\\23\n"'))
 

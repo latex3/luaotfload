@@ -102,8 +102,9 @@ local function validspecification(specification,name)
         specification = { dataset = dataset }
     else
         dataset = { { data = specification.data } }
-        specification.data    = nil
-        specification.dataset = dataset
+        specification.data     = nil
+        specification.coverage = dataset
+        specification.dataset  = dataset
     end
     local first = dataset[1]
     if first then
@@ -232,6 +233,7 @@ local function addfeature(data,feature,specifications)
             local unicode     = tounicode(code)
             local description = descriptions[unicode]
             if not nocheck and not description then
+                -- todo: trace !
                 skip = skip + 1
             else
                 if type(replacement) == "table" then
@@ -436,7 +438,30 @@ local function addfeature(data,feature,specifications)
 
     local prepare_single = prepare_pair -- we could have a better test on the spec
 
-    local function prepare_chain(list,featuretype,sublookups)
+    local function hassteps(lookups)
+        if lookups then
+            for i=1,#lookups do
+                local l = lookups[i]
+                if l then
+                    for j=1,#l do
+                        local l = l[j]
+                        if l then
+                            local n = l.nofsteps
+                            if not n then
+                                -- gsub_remove
+                                return true
+                            elseif n > 0 then
+                                return true
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        return false
+    end
+
+    local function prepare_chain(list,featuretype,sublookups,nocheck)
         -- todo: coveractions
         local rules    = list.rules
         local coverage = { }
@@ -473,6 +498,7 @@ local function addfeature(data,feature,specifications)
                 local lookups = rule.lookups or false
                 local subtype = nil
                 if lookups and sublookups then
+                    local l = { }
                     for k, v in sortedhash(lookups) do
                         local t = type(v)
                         if t == "table" then
@@ -483,58 +509,66 @@ local function addfeature(data,feature,specifications)
                                     v[i] = { vi }
                                 end
                             end
+                            l[k] = v
                         elseif t == "number" then
                             local lookup = sublookups[v]
                             if lookup then
-                                lookups[k] = { lookup }
+                                l[k] = { lookup }
                                 if not subtype then
                                     subtype = lookup.type
                                 end
                             elseif v == 0 then
-                                lookups[k] = { { type = "gsub_remove" } }
+                                l[k] = { { type = "gsub_remove", nosteps = true } }
                             else
-                                lookups[k] = false -- { false } -- new
+                                l[k] = false -- { false } -- new
                             end
                         else
-                            lookups[k] = false -- { false } -- new
+                            l[k] = false -- { false } -- new
                         end
                     end
+                    if nocheck then
+                        -- fragile
+                        rule.lookups = l --no, because checking can spoil it
+                    end
+                    lookups = l
                 end
                 if nofsequences > 0 then -- we merge coverage into one
                     -- we copy as we can have different fonts
-                    local hashed = { }
-                    for i=1,nofsequences do
-                        local t = { }
-                        local s = sequence[i]
-                        for i=1,#s do
-                            local u = tounicode(s[i])
-                            if u then
-                                t[u] = true
+                    if hassteps(lookups) then
+                        local hashed = { }
+                        for i=1,nofsequences do
+                            local t = { }
+                            local s = sequence[i]
+                            for i=1,#s do
+                                local u = tounicode(s[i])
+                                if u then
+                                    t[u] = true
+                                end
+                            end
+                            hashed[i] = t
+                        end
+                        sequence = hashed
+                        rulesize = rulesize + 1
+                        rulehash[rulesize] = {
+                            nofrules,     -- 1
+                            lookuptype,   -- 2
+                            sequence,     -- 3
+                            start,        -- 4
+                            stop,         -- 5
+                            lookups,      -- 6 (6/7 also signal of what to do)
+                            replacements, -- 7
+                            subtype,      -- 8
+                        }
+                        for unic in sortedhash(sequence[start]) do
+                            local cu = coverage[unic]
+                            if not cu then
+                                coverage[unic] = rulehash -- can now be done cleaner i think
                             end
                         end
-                        hashed[i] = t
+                        sequence.n = nofsequences
+                    else
+                     -- report_otf("no steps for %a",lookuptype) -- e.g. in primes feature
                     end
-                    sequence = hashed
-                    -- now we create the rule
-                    rulesize = rulesize + 1
-                    rulehash[rulesize] = {
-                        nofrules,     -- 1
-                        lookuptype,   -- 2
-                        sequence,     -- 3
-                        start,        -- 4
-                        stop,         -- 5
-                        lookups,      -- 6 (6/7 also signal of what to do)
-                        replacements, -- 7
-                        subtype,      -- 8
-                    }
---                     for unic in next, sequence[start] do
-                    for unic in sortedhash(sequence[start]) do
-                        local cu = coverage[unic]
-                        if not cu then
-                            coverage[unic] = rulehash -- can now be done cleaner i think
-                        end
-                    end
-                    sequence.n = nofsequences
                 end
             end
             rulehash.n = rulesize
@@ -626,133 +660,164 @@ local function addfeature(data,feature,specifications)
             end
             local askedfeatures = specification.features or everywhere
             local askedsteps    = specification.steps or specification.subtables or { specification.data } or { }
-            local featuretype   = normalized[specification.type or "substitution"] or "substitution"
+            local featuretype   = specification.type or "substitution"
+            local featureaction = false
             local featureflags  = specification.flags or noflags
             local nocheck       = specification.nocheck
+            local mapping       = specification.mapping
             local featureorder  = specification.order or { feature }
             local featurechain  = (featuretype == "chainsubstitution" or featuretype == "chainposition") and 1 or 0
             local nofsteps      = 0
             local steps         = { }
             local sublookups    = specification.lookups
             local category      = nil
+            local steptype      = nil
+            local sequence      = nil
+            --
+            if fonts.handlers.otf.handlers[featuretype] then
+                featureaction = true -- function based
+            else
+                featuretype = normalized[specification.type or "substitution"] or "substitution"
+            end
             --
             checkflags(specification,resources)
             --
-            if sublookups then
-                local s = { }
-                for i=1,#sublookups do
-                    local specification = sublookups[i]
-                    local askedsteps    = specification.steps or specification.subtables or { specification.data } or { }
-                    local featuretype   = normalized[specification.type or "substitution"] or "substitution"
-                    local featureflags  = specification.flags or noflags
-                    local nofsteps      = 0
-                    local steps         = { }
-                    for i=1,#askedsteps do
-                        local list     = askedsteps[i]
-                        local coverage = nil
-                        local format   = nil
-                        if featuretype == "substitution" then
-                            coverage = prepare_substitution(list,featuretype,nocheck)
-                        elseif featuretype == "ligature" then
-                            coverage = prepare_ligature(list,featuretype,nocheck)
-                        elseif featuretype == "alternate" then
-                            coverage = prepare_alternate(list,featuretype,nocheck)
-                        elseif featuretype == "multiple" then
-                            coverage = prepare_multiple(list,featuretype,nocheck)
-                        elseif featuretype == "kern" or featuretype == "move" then
-                            format   = featuretype
-                            coverage = prepare_kern(list,featuretype)
-                        elseif featuretype == "pair" then
-                            format   = "pair"
-                            coverage = prepare_pair(list,featuretype)
-                        elseif featuretype == "single" then
-                            format   = "single"
-                            coverage = prepare_single(list,featuretype)
-                        end
-                        if coverage and next(coverage) then
-                            nofsteps = nofsteps + 1
-                            steps[nofsteps] = register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
-                        end
-                    end
-                    --
-                    checkmerge(specification)
-                    checksteps(specification)
-                    --
-                    s[i] = {
-                        [stepkey] = steps,
-                        nofsteps  = nofsteps,
-                        flags     = featureflags,
-                        type      = types[featuretype],
-                    }
-                end
-                sublookups = s
-            end
-            for i=1,#askedsteps do
-                local list     = askedsteps[i]
-                local coverage = nil
-                local format   = nil
-                if featuretype == "substitution" then
-                    category = "gsub"
-                    coverage = prepare_substitution(list,featuretype,nocheck)
-                elseif featuretype == "ligature" then
-                    category = "gsub"
-                    coverage = prepare_ligature(list,featuretype,nocheck)
-                elseif featuretype == "alternate" then
-                    category = "gsub"
-                    coverage = prepare_alternate(list,featuretype,nocheck)
-                elseif featuretype == "multiple" then
-                    category = "gsub"
-                    coverage = prepare_multiple(list,featuretype,nocheck)
-                elseif featuretype == "kern" or featuretype == "move" then
-                    category = "gpos"
-                    format   = featuretype
-                    coverage = prepare_kern(list,featuretype)
-                elseif featuretype == "pair" then
-                    category = "gpos"
-                    format   = "pair"
-                    coverage = prepare_pair(list,featuretype)
-                elseif featuretype == "single" then
-                    category = "gpos"
-                    format   = "single"
-                    coverage = prepare_single(list,featuretype)
-                elseif featuretype == "chainsubstitution" then
-                    category = "gsub"
-                    coverage = prepare_chain(list,featuretype,sublookups)
-                elseif featuretype == "chainposition" then
-                    category = "gpos"
-                    coverage = prepare_chain(list,featuretype,sublookups)
-                else
-                    report_otf("not registering feature %a, unknown category",feature)
-                    return
-                end
-                if coverage and next(coverage) then
-                    nofsteps = nofsteps + 1
-                    steps[nofsteps] = register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+            for k, v in next, askedfeatures do
+                if v[1] then
+                    askedfeatures[k] = tohash(v)
                 end
             end
-            if nofsteps > 0 then
-                -- script = { lang1, lang2, lang3 } or script = { lang1 = true, ... }
-                for k, v in next, askedfeatures do
-                    if v[1] then
-                        askedfeatures[k] = tohash(v)
-                    end
-                end
-                --
-                if featureflags[1] then featureflags[1] = "mark" end
-                if featureflags[2] then featureflags[2] = "ligature" end
-                if featureflags[3] then featureflags[3] = "base" end
-                local steptype = types[featuretype]
-                local sequence = {
-                    chain     = featurechain,
+            --
+            if featureflags[1] then featureflags[1] = "mark" end
+            if featureflags[2] then featureflags[2] = "ligature" end
+            if featureflags[3] then featureflags[3] = "base" end
+            --
+            if featureaction then
+
+                category = "gsub"
+                sequence = {
                     features  = { [feature] = askedfeatures },
                     flags     = featureflags,
                     name      = feature, -- redundant
                     order     = featureorder,
-                    [stepkey] = steps,
-                    nofsteps  = nofsteps,
-                    type      = steptype,
+                    type      = featuretype,
+                 -- steps     = { },
+                    nofsteps  = 0, -- just in case we test for that
                 }
-                --
+
+            else
+
+                if sublookups then
+                    local s = { }
+                    for i=1,#sublookups do
+                        local specification = sublookups[i]
+                        local askedsteps    = specification.steps or specification.subtables or { specification.data } or { }
+                        local featuretype   = normalized[specification.type or "substitution"] or "substitution"
+                        local featureflags  = specification.flags or noflags
+                        local nofsteps      = 0
+                        local steps         = { }
+                        for i=1,#askedsteps do
+                            local list     = askedsteps[i]
+                            local coverage = nil
+                            local format   = nil
+                            if featuretype == "substitution" then
+                                coverage = prepare_substitution(list,featuretype,nocheck)
+                            elseif featuretype == "ligature" then
+                                coverage = prepare_ligature(list,featuretype,nocheck)
+                            elseif featuretype == "alternate" then
+                                coverage = prepare_alternate(list,featuretype,nocheck)
+                            elseif featuretype == "multiple" then
+                                coverage = prepare_multiple(list,featuretype,nocheck)
+                            elseif featuretype == "kern" or featuretype == "move" then
+                                format   = featuretype
+                                coverage = prepare_kern(list,featuretype)
+                            elseif featuretype == "pair" then
+                                format   = "pair"
+                                coverage = prepare_pair(list,featuretype)
+                            elseif featuretype == "single" then
+                                format   = "single"
+                                coverage = prepare_single(list,featuretype)
+                            end
+                            if coverage and next(coverage) then
+                                nofsteps = nofsteps + 1
+                                steps[nofsteps] = register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+                            end
+                        end
+                        --
+                        checkmerge(specification)
+                        checksteps(specification)
+                        --
+                        s[i] = {
+                            [stepkey] = steps,
+                            nofsteps  = nofsteps,
+                            flags     = featureflags,
+                            type      = types[featuretype],
+                        }
+                    end
+                    sublookups = s
+                end
+
+                for i=1,#askedsteps do
+                    local list     = askedsteps[i]
+                    local coverage = nil
+                    local format   = nil
+                    if featuretype == "substitution" then
+                        -- see font-imp-tweaks: we directly pass a mapping so no checks done
+                        category = "gsub"
+                        coverage = (mapping and list) or prepare_substitution(list,featuretype,nocheck)
+                    elseif featuretype == "ligature" then
+                        category = "gsub"
+                        coverage = prepare_ligature(list,featuretype,nocheck)
+                    elseif featuretype == "alternate" then
+                        category = "gsub"
+                        coverage = prepare_alternate(list,featuretype,nocheck)
+                    elseif featuretype == "multiple" then
+                        category = "gsub"
+                        coverage = prepare_multiple(list,featuretype,nocheck)
+                    elseif featuretype == "kern" or featuretype == "move" then
+                        category = "gpos"
+                        format   = featuretype
+                        coverage = prepare_kern(list,featuretype)
+                    elseif featuretype == "pair" then
+                        category = "gpos"
+                        format   = "pair"
+                        coverage = prepare_pair(list,featuretype)
+                    elseif featuretype == "single" then
+                        category = "gpos"
+                        format   = "single"
+                        coverage = prepare_single(list,featuretype)
+                    elseif featuretype == "chainsubstitution" then
+                        category = "gsub"
+                        coverage = prepare_chain(list,featuretype,sublookups,nocheck)
+                    elseif featuretype == "chainposition" then
+                        category = "gpos"
+                        coverage = prepare_chain(list,featuretype,sublookups,nocheck)
+                    else
+                        report_otf("not registering feature %a, unknown category",feature)
+                        return
+                    end
+                    if coverage and next(coverage) then
+                        nofsteps = nofsteps + 1
+                        steps[nofsteps] = register(coverage,featuretype,format,feature,nofsteps,descriptions,resources)
+                    end
+                end
+
+                if nofsteps > 0 then
+                    sequence = {
+                        chain     = featurechain,
+                        features  = { [feature] = askedfeatures },
+                        flags     = featureflags,
+                        name      = feature, -- redundant
+                        order     = featureorder,
+                        [stepkey] = steps,
+                        nofsteps  = nofsteps,
+                        type      = types[featuretype],
+                    }
+                end
+            end
+
+            if sequence then
+                -- script = { lang1, lang2, lang3 } or script = { lang1 = true, ... }
                 checkflags(sequence,resources)
                 checkmerge(sequence)
                 checksteps(sequence)
@@ -782,11 +847,13 @@ local function addfeature(data,feature,specifications)
                     end
                 end
             end
+
         end
     end
     if trace_loading then
         report_otf("registering feature %a, affected glyphs %a, skipped glyphs %a",feature,done,skip)
     end
+
 end
 
 otf.enhancers.addfeature = addfeature

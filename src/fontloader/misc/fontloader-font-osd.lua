@@ -118,7 +118,7 @@ local setstate           = nuts.setstate
 
 local ischar             = nuts.ischar
 
-local insertnodeafter   = nuts.insertafter
+local insertnodeafter    = nuts.insertafter
 local copy_node          = nuts.copy
 local remove_node        = nuts.remove
 local flushlist          = nuts.flushlist
@@ -130,7 +130,8 @@ local unsetvalue         = attributes.unsetvalue
 
 local fontdata           = fonts.hashes.identifiers
 
-local a_syllabe          = attributes.private('syllabe')
+local a_syllabe          = "syllable"  -- attributes.private('syllabe') -- can be just a property key
+local a_reordered        = "reordered" -- attributes.private('reordered') -- can be just a property key
 
 local dotted_circle      = 0x25CC
 local c_nbsp             = 0x00A0
@@ -1332,7 +1333,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
     if getchar(base) == c_nbsp then
         nbspaces = nbspaces - 1
         if base == stop then
-        	stop = getprev(stop)
+            stop = getprev(stop)
         end
         head = remove_node(head,base)
         flushnode(base)
@@ -1514,7 +1515,7 @@ function handlers.devanagari_reorder_reph(head,start)
                         start = startnext
                         startattr = getprop(start,a_syllabe)
                         break
-                    elseif not c and ( vowel_modifier[char] or stress_tone_mark[char] ) then
+                    elseif not c and (vowel_modifier[char] or stress_tone_mark[char]) then
                         c = current
                     end
                     current = getnext(current)
@@ -1616,10 +1617,8 @@ end
 --       return head, start, done
 --   end
 
-local reordered_pre_base_reordering_consonants = { } -- shared ? not reset ?
-
 function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
-    if reordered_pre_base_reordering_consonants[start] then
+    if getprop(start,a_reordered) then
         return head, start, true
     end
     local current = start -- we could cache attributes here
@@ -1643,7 +1642,7 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
                 setlink(start,next)
                 setlink(current,start)
              -- setlink(current,start,next) -- maybe
-                reordered_pre_base_reordering_consonants[start] = true
+                setprop(start,"reordered",true)
                 start = startnext
                 return head, start, true
          -- elseif consonant[char] and (not getstate(current) or getstate(current,s_init)) then
@@ -1679,7 +1678,7 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
                 setlink(getprev(current),start)
                 setlink(start,current)
             end
-            reordered_pre_base_reordering_consonants[start] = true
+            setprop(start,"reordered",true)
             start = startnext
             break
         end
@@ -2251,20 +2250,20 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
     local already_below_mark -- = false
     local already_post_mark  -- = false
     while dependent_vowel[v] do
-	    local vowels = twopart_mark[v] or { v }
-	    for k, v in next, vowels do
-			if pre_mark[v] and not already_pre_mark then
-				already_pre_mark = true
-			elseif above_mark[v] and not already_above_mark then
-				already_above_mark = true
-			elseif below_mark[v] and not already_below_mark then
-				already_below_mark = true
-			elseif post_mark[v] and not already_post_mark then
-				already_post_mark = true
-			else
-				return c
-			end
-	    end
+        local vowels = twopart_mark[v] or { v }
+        for k, v in next, vowels do
+            if pre_mark[v] and not already_pre_mark then
+                already_pre_mark = true
+            elseif above_mark[v] and not already_above_mark then
+                already_above_mark = true
+            elseif below_mark[v] and not already_below_mark then
+                already_below_mark = true
+            elseif post_mark[v] and not already_post_mark then
+                already_post_mark = true
+            else
+                return c
+            end
+        end
         c = getnext(c)
         n = getnext(c)
         if not n then
@@ -2440,21 +2439,21 @@ local function analyze_next_chars_two(c,font)
         local already_above_mark -- = false
         local already_below_mark -- = false
         local already_post_mark  -- = false
-		while dependent_vowel[v] do
-			local vowels = twopart_mark[v] or { v }
-			for k, v in next, vowels do
-				if pre_mark[v] and not already_pre_mark then
-					already_pre_mark = true
-				elseif above_mark[v] and not already_above_mark then
-					already_above_mark = true
-				elseif below_mark[v] and not already_below_mark then
-					already_below_mark = true
-				elseif post_mark[v] and not already_post_mark then
-					already_post_mark = true
-				else
-					return c
-				end
-			end
+        while dependent_vowel[v] do
+            local vowels = twopart_mark[v] or { v }
+            for k, v in next, vowels do
+                if pre_mark[v] and not already_pre_mark then
+                    already_pre_mark = true
+                elseif above_mark[v] and not already_above_mark then
+                    already_above_mark = true
+                elseif below_mark[v] and not already_below_mark then
+                    already_below_mark = true
+                elseif post_mark[v] and not already_post_mark then
+                    already_post_mark = true
+                else
+                    return c
+                end
+            end
             c = n
             n = getnext(c)
             if not n then
@@ -2731,15 +2730,15 @@ local function method_one(head,font,attr)
     while current do
         local char = ischar(current,font)
         if char then
-			if n == 0 and not getstate(current) then
-				setstate(current,s_init)
-			end
-			n = n + 1
-		else
-			n = 0
-		end
-		current = getnext(current)
-	end
+            if n == 0 and not getstate(current) then
+                setstate(current,s_init)
+            end
+            n = n + 1
+        else
+            n = 0
+        end
+        current = getnext(current)
+    end
 
     return head, done
 end
@@ -2841,15 +2840,15 @@ local function method_two(head,font,attr)
     while current do
         local char = ischar(current,font)
         if char then
-			if n == 0 and not getstate(current) then -- state can also be init
-				setstate(current,s_init)
-			end
-			n = n + 1
-		else
-			n = 0
-		end
-		current = getnext(current)
-	end
+            if n == 0 and not getstate(current) then -- state can also be init
+                setstate(current,s_init)
+            end
+            n = n + 1
+        else
+            n = 0
+        end
+        current = getnext(current)
+    end
 
     return head, done
 end

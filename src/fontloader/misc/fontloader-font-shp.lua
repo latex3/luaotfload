@@ -17,7 +17,7 @@ local pfb          = fonts.handlers.pfb
 local hashes       = fonts.hashes
 local identifiers  = hashes.identifiers
 
-local version      = 0.010
+local version      = otf.version or 0.011
 local shapescache  = containers.define("fonts", "shapes",  version, true)
 local streamscache = containers.define("fonts", "streams", version, true)
 
@@ -346,7 +346,7 @@ local function getstreamhash(fontid)
     local fontdata = identifiers[fontid]
     if fontdata then
         local properties = fontdata.properties
-        return makehash(properties.filename,properties.subfont,properties.instance)
+        return makehash(properties.filename,properties.subfont,properties.instance), fontdata
     end
 end
 

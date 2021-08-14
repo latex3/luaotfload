@@ -103,10 +103,30 @@ local function loadfont(spec)
   local normalized
   local varkey
   if hbface.ot_var_has_data and hbface:ot_var_has_data() then
-    local instance = spec.features.raw.instance or spec.features.raw.axis
-    local assignments = instance and variable_pattern:match(instance)
+    local design_coords
+    local instance = spec.features.raw.instance
+    local axis = spec.features.raw.axis
+    local assignments = axis and variable_pattern:match(axis)
+    if axis and not assignments and not instance then
+      instance, axis = axis, nil
+    end
+    if instance then
+      instance = instance:lower()
+      local instances = hbface:ot_var_named_instance_get_infos()
+      for i = 1, #instances do
+        local inst = instances[i]
+        if instance == hbface:get_name(inst.subfamily_name_id):lower() then
+          design_coords = {hbface:ot_var_named_instance_get_design_coords(inst.index)}
+          break
+        end
+      end
+      if not design_coords then
+        texio.write_nl'Warning (luaotfload): Unknown instance name ignored.'
+      end
+    end
     if assignments then
       local axes = hbface:ot_var_get_axis_infos()
+      design_coords = design_coords or lua.newtable(#axes, 0)
       for i = 1, #assignments do
         local found
         local name = assignments[i][1]
@@ -118,38 +138,32 @@ local function loadfont(spec)
         for j = 1, #axes do
           local axis = axes[j]
           if tag and tag == axis.tag then
-            found = tag
+            found = axis
             break
           end
           if name == hbface:get_name(axis.name_id):lower() then
-            found = axis.tag
+            found = axis
             if not tag then break end
           end
         end
         if found then
-          assignments[i] = hb.Variation.new(tostring(found) .. '=' .. assignments[i][2])
+          design_coords[found.axis_index] = assignments[i][2]
         else
           texio.write_nl'Warning (luaotfload): Unknown axis name ignored.'
-          assignments[i] = hb.Variation.new'XXXX=0'
         end
       end
-      normalized = {hbface:ot_var_normalize_variations(table.unpack(assignments))}
-    elseif instance then
-      instance = instance:lower()
-      local instances = hbface:ot_var_named_instance_get_infos()
-      for i = 1, #instances do
-        local inst = instances[i]
-        if instance == hbface:get_name(inst.subfamily_name_id):lower() then
-          normalized = {hbface:ot_var_normalize_coords(hbface:ot_var_named_instance_get_design_coords(inst.index))}
-          break
+      for i = 1, #axes do
+        local axis = axes[i]
+        local index = axis.axis_index -- == i in practise
+        if not design_coords[index] then
+          design_coords[index] = axis.default_value
         end
-      end
-      if not normalized then
-        texio.write_nl'Warning (luaotfload): Unknown instance name ignored.'
       end
     end
-    if not normalized then
-      normalized = {hbface:ot_var_normalize_variations()}
+    if design_coords then
+      normalized = {hbface:ot_var_normalize_coords(table.unpack(design_coords))}
+    else
+      normalized = {hbface:ot_var_normalize_coords()}
     end
     varkey = ':' .. table.concat(normalized, ':')
     key = key .. varkey

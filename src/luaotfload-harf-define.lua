@@ -36,6 +36,11 @@ local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
 local gpostag = hb.Tag.new("GPOS")
 
+local italtag = hb.Tag.new("ital")
+local wghttag = hb.Tag.new("wght")
+local slnttag = hb.Tag.new("slnt")
+local opsztag = hb.Tag.new("opsz")
+
 local invalid_l         = hb.Language.new()
 local invalid_s         = hb.Script.new()
 
@@ -81,7 +86,7 @@ local variable_pattern do
   local white = l.S' \t'^0
   local number = l.C(l.S'+-'^-1 * (l.R'09'^1 * ('.' * l.R'09'^0)^-1 + '.' * l.R'09'^1))
   local name_or_tag = l.C(l.R('AZ', 'az')^1)
-  local pair = l.Ct(name_or_tag * white * '=' * white * number)
+  local pair = l.Ct(name_or_tag * white * '=' * white * (number + l.Cc(nil) * 'auto'))
   variable_pattern = l.Ct(pair * (white * ',' * white * pair)^0)
 end
 
@@ -124,9 +129,9 @@ local function loadfont(spec)
         texio.write_nl'Warning (luaotfload): Unknown instance name ignored.'
       end
     end
+    local axes = hbface:ot_var_get_axis_infos()
+    design_coords = design_coords or lua.newtable(#axes, 0)
     if assignments then
-      local axes = hbface:ot_var_get_axis_infos()
-      design_coords = design_coords or lua.newtable(#axes, 0)
       for i = 1, #assignments do
         local found
         local name = assignments[i][1]
@@ -152,19 +157,26 @@ local function loadfont(spec)
           texio.write_nl'Warning (luaotfload): Unknown axis name ignored.'
         end
       end
-      for i = 1, #axes do
-        local axis = axes[i]
-        local index = axis.axis_index -- == i in practise
-        if not design_coords[index] then
+    end
+    for i = 1, #axes do
+      local axis = axes[i]
+      local index = axis.axis_index -- == i in practise
+      if not design_coords[index] then
+        local tag = axis.tag
+        if tag == italtag and spec.style then
+          design_coords[index] = spec.style == 'i' or spec.style == 'bi' and 1 or 0
+        elseif tag == slnttag and spec.style then
+          design_coords[index] = spec.style == 'i' or spec.style == 'bi' and -5 or 0
+        elseif tag == wghttag and spec.style then
+          design_coords[index] = spec.style == 'b' or spec.style == 'bi' and 600 or 400
+        elseif tag == opsztag and (spec.optsize or spec.size > 0) then
+          design_coords[index] = spec.optsize or spec.size / 65536
+        else
           design_coords[index] = axis.default_value
         end
       end
     end
-    if design_coords then
-      normalized = {hbface:ot_var_normalize_coords(table.unpack(design_coords))}
-    else
-      normalized = {hbface:ot_var_normalize_coords()}
-    end
+    normalized = {hbface:ot_var_normalize_coords(table.unpack(design_coords))}
     varkey = ':' .. table.concat(normalized, ':')
     key = key .. varkey
   else

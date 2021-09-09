@@ -630,7 +630,8 @@ local function initializedevanagi(tfmdata)
                                                             local h = coverage[k]
                                                             if h then
                                                                 for k, v in next, h do
-                                                                    found = v and v.ligature
+                                                                 -- found = v and v.ligature
+                                                                    found = v and (tonumber(v) or v.ligature)
                                                                     if found then
                                                                         pre_base_reordering_consonants[found] = true
                                                                         break
@@ -647,7 +648,8 @@ local function initializedevanagi(tfmdata)
                                         end
                                     else
                                         for k, v in next, r do
-                                            found = v and v.ligature
+                                         -- found = v and v.ligature
+                                            found = v and (tonumber(v) or v.ligature)
                                             if found then
                                                 pre_base_reordering_consonants[found] = true
                                                 break
@@ -696,7 +698,8 @@ local function initializedevanagi(tfmdata)
                                                                         for k, v in next, halant do
                                                                             local h = r[k]
                                                                             if h then
-                                                                                reph = h.ligature or false
+                                                                             -- reph = h.ligature or false
+                                                                                reph = tonumber(h) or h.ligature or false
                                                                                 break
                                                                             end
                                                                         end
@@ -713,7 +716,8 @@ local function initializedevanagi(tfmdata)
                                                 for k, v in next, halant do
                                                     local h = r[k]
                                                     if h then
-                                                        reph = h.ligature or false
+                                                     -- reph = h.ligature or false
+                                                        reph = tonumber(h) or h.ligature or false
                                                         break
                                                     end
                                                 end
@@ -757,7 +761,8 @@ local function initializedevanagi(tfmdata)
                                                                 local h = coverage[k]
                                                                 if h then
                                                                     for k, v in next, h do
-                                                                        found = v and v.ligature
+                                                                     -- found = v and v.ligature
+                                                                        found = v and (tonumber(v) or v.ligature)
                                                                         if found then
                                                                             pre_base_reordering_consonants[found] = true
                                                                             break
@@ -774,7 +779,8 @@ local function initializedevanagi(tfmdata)
                                             end
                                         else
                                             for k, v in next, h do
-                                                found = v and v.ligature
+                                             -- found = v and v.ligature
+                                                found = v and (tonumber(v) or v.ligature)
                                                 if found then
                                                     pre_base_reordering_consonants[found] = true
                                                     break

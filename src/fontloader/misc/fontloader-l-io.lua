@@ -291,7 +291,8 @@ end
 
 io.noflines = noflines
 
--- inlined is faster ... beware, better use util-fil
+-- inlined is faster ... beware, better use util-fil so these are obsolete
+-- and will go
 
 local nextchar = {
     [ 4] = function(f)

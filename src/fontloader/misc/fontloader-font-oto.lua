@@ -170,7 +170,7 @@ end
 local function makefake(tfmdata,name,present)
     local private   = getprivate(tfmdata)
     local character = { intermediate = true, ligatures = { } }
-    resources.unicodes[name] = private
+    tfmdata.resources.unicodes[name] = private
     tfmdata.characters[private] = character
     tfmdata.descriptions[private] = { name = name }
     present[name] = private
@@ -178,43 +178,55 @@ local function makefake(tfmdata,name,present)
 end
 
 local function make_1(present,tree,name)
-    for k, v in next, tree do
-        if k == "ligature" then
-            present[name] = v
+    if tonumber(tree) then
+        present[name] = v
+    else
+        for k, v in next, tree do
+            if k == "ligature" then
+                present[name] = v
+            else
+                make_1(present,v,name .. "_" .. k)
+            end
+        end
+    end
+end
+
+local function make_3(present,tfmdata,characters,tree,name,preceding,unicode,done,v)
+    local character = characters[preceding]
+    if not character then
+        if trace_baseinit then
+            report_prepare("weird ligature in lookup %a, current %C, preceding %C",sequence.name,v,preceding)
+        end
+        character = makefake(tfmdata,name,present)
+    end
+    local ligatures = character.ligatures
+    if ligatures then
+        ligatures[unicode] = { char = v }
+    else
+        character.ligatures = { [unicode] = { char = v } }
+    end
+    if done then
+        local d = done[name]
+        if not d then
+            done[name] = { "dummy", v }
         else
-            make_1(present,v,name .. "_" .. k)
+            d[#d+1] = v
         end
     end
 end
 
 local function make_2(present,tfmdata,characters,tree,name,preceding,unicode,done)
-    for k, v in next, tree do
-        if k == "ligature" then
-            local character = characters[preceding]
-            if not character then
-                if trace_baseinit then
-                    report_prepare("weird ligature in lookup %a, current %C, preceding %C",sequence.name,v,preceding)
-                end
-                character = makefake(tfmdata,name,present)
-            end
-            local ligatures = character.ligatures
-            if ligatures then
-                ligatures[unicode] = { char = v }
+    if tonumber(tree) then
+        make_3(present,tfmdata,characters,tree,name,preceding,unicode,done,tree)
+    else
+        for k, v in next, tree do
+            if k == "ligature" then
+                make_3(present,tfmdata,characters,tree,name,preceding,unicode,done,v)
             else
-                character.ligatures = { [unicode] = { char = v } }
+                local code = present[name] or unicode
+                local name = name .. "_" .. k
+                make_2(present,tfmdata,characters,v,name,code,k,done)
             end
-            if done then
-                local d = done[name]
-                if not d then
-                    done[name] = { "dummy", v }
-                else
-                    d[#d+1] = v
-                end
-            end
-        else
-            local code = present[name] or unicode
-            local name = name .. "_" .. k
-            make_2(present,tfmdata,characters,v,name,code,k,done)
         end
     end
 end

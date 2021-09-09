@@ -456,7 +456,7 @@ function file.join(one, two, three, ...)
     if not two then
         return one == "" and one or lpegmatch(reslasher,one)
     end
-    if one == "" then
+    if not one or one == "" then
         return lpegmatch(stripper,three and concat({ two, three, ... },"/") or two)
     end
     if lpegmatch(isnetwork,one) then

@@ -269,6 +269,16 @@ local function applyaxis(glyph,shape,deltas,dowidth)
                             else
                                 local n1 = dpoints[d1]
                                 local n3 = dpoints[d3]
+                                -- Some day I need to figure out these extra points but
+                                -- I'll wait till the standard is more clear and fonts
+                                -- become better (ntg-context: fraunces.ttf > abcdef).
+                                if n1 > nofpoints then
+                                    n1 = nofpoints
+                                end
+                                if n3 > nofpoints then
+                                    n3 = nofpoints
+                                end
+                                --
                                 local p1 = points[n1]
                                 local p3 = points[n3]
                                 local p1x = p1[1]

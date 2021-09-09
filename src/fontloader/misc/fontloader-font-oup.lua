@@ -44,6 +44,9 @@ directives.register("otf.checksofthyphen",function(v)
     check_soft_hyphen = v -- only for testing
 end)
 
+-- After (!) the unicodes have been resolved we compact ligature tables so before that happens
+-- we don't need to check for numbers.
+
 local function replaced(list,index,replacement)
     if type(list) == "number" then
         return replacement
@@ -1043,6 +1046,10 @@ function readers.getcomponents(fontdata) -- handy for resolving ligatures when n
                         local function traverse(p,k,v)
                             if k == "ligature" then
                                 collected[v] = { unpack(l) }
+                            elseif tonumber(v) then
+                                insert(l,k)
+                                collected[v] = { unpack(l) }
+                                remove(l)
                             else
                                 insert(l,k)
                                 for k, vv in next, v do
@@ -1230,7 +1237,6 @@ local function tabstr_flat(t)
 end
 
 local function tabstr_mixed(t) -- indexed
-    local s = { }
     local n = #t
     if n == 0 then
         return ""
@@ -1244,6 +1250,7 @@ local function tabstr_mixed(t) -- indexed
             return tostring(k) -- number or string
         end
     else
+        local s = { }
         for i=1,n do
             local k = t[i]
             if k == true then
@@ -1352,6 +1359,21 @@ function readers.pack(data)
                 return nt
             end
         end
+
+     -- local function pack_indexed(v) -- less code
+     --     local tag = concat(v," ")
+     --     local ht = h[tag]
+     --     if ht then
+     --         c[ht] = c[ht] + 1
+     --     else
+     --         ht = nt + 1
+     --         t[ht] = v
+     --         c[ht] = 1
+     --         h[tag] = ht
+     --         nt = ht
+     --     end
+     --     return ht
+     -- end
 
         local function pack_mixed(v)
             local tag = tabstr_mixed(v)
@@ -2799,6 +2821,91 @@ function readers.compact(data)
             report_optimizations("%i steps of %i steps turned from pairs into kerns",kerned,allsteps)
         end
     end
+end
+
+if CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 then
+
+    local done = 0
+
+    local function condense_1(k,v,t)
+        if type(v) == "table" then
+            local u = false
+            local l = false
+            for k, v in next, v do
+                if k == "ligature" then
+                    l = v
+                    if u then
+                        break
+                    end
+                elseif u then
+                    break
+                else
+                    u = true
+                end
+            end
+            if l and not u then
+                t[k] = l
+                done = done + 1
+            end
+            if u then
+                for k, vv in next, v do
+                    if k ~= "ligature" then
+                        condense_1(k,vv,v)
+                    end
+                end
+            end
+        end
+    end
+
+    local function condensesteps_1(lookup)
+        done = 0
+        if lookup.type == "gsub_ligature" then
+            local steps = lookup.steps
+            if steps then
+                for i=1,#steps do
+                    local step     = steps[i]
+                    local coverage = step.coverage
+                    if coverage then
+                        for k, v in next, coverage do
+                            if condense_1(k,v,coverage) then
+                                coverage[k] = v.ligature
+                                done = done + 1
+                            end
+                        end
+                    end
+                end
+            end
+        end
+        return done
+    end
+
+    function readers.condense(data)
+        if not data or data.condensed then
+            return
+        else
+            data.condensed = true
+        end
+        local resources = data.resources
+        local condensed = 0
+        local function condense(what)
+            local lookups = resources[what]
+            if lookups then
+                for i=1,#lookups do
+                    condensed = condensed + condensesteps_1(lookups[i])
+                end
+            elseif trace_optimizations then
+                report_optimizations("no lookups in %a",what)
+            end
+        end
+        condense("sequences")
+        condense("sublookups")
+        if trace_optimizations then
+            if condensed > 0 then
+                report_optimizations("%i ligatures condensed",condensed)
+            end
+        end
+    end
+
 end
 
 local function mergesteps(t,k)

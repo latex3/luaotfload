@@ -7,7 +7,7 @@
 \START
 \font\gentium {kpse:GentiumPlus-R.ttf:mode=harf}\gentium
 abc def \special{}ghi\-jkl\special{} mno pqr\-stu vwx
-\par\endgroup\newpage
+\par\newpage
 \directlua{
   texio.write_nl(status.node_mem_usage)
 }

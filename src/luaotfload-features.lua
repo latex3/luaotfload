@@ -324,6 +324,7 @@ local supported = {
     b    = "b",
     i    = "i",
     bi   = "bi",
+    r    = "r",
     aat  = false,
     icu  = false,
     gr   = false,

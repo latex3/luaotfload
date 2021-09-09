@@ -168,7 +168,7 @@ local function loadfont(spec)
         elseif tag == slnttag and spec.style then
           design_coords[index] = spec.style == 'i' or spec.style == 'bi' and -5 or 0
         elseif tag == wghttag and spec.style then
-          design_coords[index] = spec.style == 'b' or spec.style == 'bi' and 600 or 400
+          design_coords[index] = (spec.style == 'b' or spec.style == 'bi') and 600 or 400
         elseif tag == opsztag and (spec.optsize or spec.size > 0) then
           design_coords[index] = spec.optsize or spec.size / 65536
         else

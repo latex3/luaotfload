@@ -174,6 +174,7 @@ local function itemize(head, fontid, direction)
   local hbdata   = fontdata and fontdata.hb
   local spec     = fontdata and fontdata.specification
   local options  = spec and spec.features.raw
+  local obj_repl = hbdata and hbdata.obj_repl
 
   local runs, codes = {}, {}
   local dirstack = {}
@@ -187,7 +188,7 @@ local function itemize(head, fontid, direction)
   for n, id, subtype in traverse(head) do
     if in_disc == n then in_disc = nil end
     local disc
-    local code = 0xFFFC -- OBJECT REPLACEMENT CHARACTER
+    local code = obj_repl -- OBJECT REPLACEMENT CHARACTER, substitute invalid surrogate if otherwise colliding with font glyph
     local skip = lastskip
     local props = properties[n]
 
@@ -347,6 +348,7 @@ function shape(head, firstnode, run)
   local options = spec.features.raw
   local hbshared = hbdata.shared
   local hbfont = hbshared.font
+  local obj_repl = hbdata.obj_repl
 
   local lang = spec.language
   local script = spec.script
@@ -432,7 +434,7 @@ function shape(head, firstnode, run)
         -- Is this a safe breakpoint?
       if discs and ((not glyph)
             or codes[cluster] == 0x20 or codes[cluster+1] == 0x20
-            or codes[cluster] == 0xFFFC or codes[cluster+1] == 0xFFFC
+            or codes[cluster] == obj_repl or codes[cluster+1] == obj_repl
           or not unsafetobreak(glyph)) then
         -- Should we change the discretionary state?
         local anchor_cluster, after_cluster = offset + discs.anchor_cluster, offset + discs.after_cluster
@@ -480,20 +482,20 @@ function shape(head, firstnode, run)
             local precodes, postcodes, repcodes = {}, {}
             table.move(codes, disc_cluster + 1, anchor_cluster, 1, precodes)
             for n in traverse(pre) do
-              precodes[#precodes + 1] = is_char(n, fontid) or 0xFFFC
+              precodes[#precodes + 1] = is_char(n, fontid) or obj_repl
             end
             for n in traverse(post) do
-              postcodes[#postcodes + 1] = is_char(n, fontid) or 0xFFFC
+              postcodes[#postcodes + 1] = is_char(n, fontid) or obj_repl
             end
             table.move(codes, after_cluster + 1, cluster, #postcodes + 1, postcodes)
 
             if saved_after then
               repcodes = table.move(codes, disc_cluster + 1, cluster, 1, {})
               table.move(codes, cluster + 1, #codes + cluster - disc_cluster, disc_cluster + 3)
-              codes[disc_cluster + 1], codes[disc_cluster + 2] = 0xFFFC, 0xFFFC
+              codes[disc_cluster + 1], codes[disc_cluster + 2] = obj_repl, obj_repl
             else
               table.move(codes, cluster + 1, #codes + cluster - disc_cluster, disc_cluster + 2)
-              codes[disc_cluster + 1] = 0xFFFC
+              codes[disc_cluster + 1] = obj_repl
             end
 
             do
@@ -537,7 +539,7 @@ function shape(head, firstnode, run)
               post = makesub(run, postcodes, post),
               cluster = disc_cluster,
               nextcluster = disc_cluster + 1,
-              codepoint = 0xFFFC,
+              codepoint = obj_repl,
             }
             if saved_after then
               local next_disc = discs.next
@@ -552,10 +554,10 @@ function shape(head, firstnode, run)
                 local saved_anchor, saved_after = saved_anchor + saved_offset, saved_after + saved_offset
                 table.move(postcodes, 1, saved_anchor, 1, next_precodes)
                 for n in traverse(next_pre) do
-                  next_precodes[#next_precodes + 1] = is_char(n, fontid) or 0xFFFC
+                  next_precodes[#next_precodes + 1] = is_char(n, fontid) or obj_repl
                 end
                 for n in traverse(next_post) do
-                  next_postcodes[#next_postcodes + 1] = is_char(n, fontid) or 0xFFFC
+                  next_postcodes[#next_postcodes + 1] = is_char(n, fontid) or obj_repl
                 end
                 table.move(postcodes, saved_after + 1, #postcodes, #next_postcodes + 1, next_postcodes)
 
@@ -578,7 +580,7 @@ function shape(head, firstnode, run)
                 local saved_anchor = saved_anchor - disc_cluster
                 table.move(repcodes, 1, saved_anchor, 1, next_repcodes)
                 for n in traverse(next_rep) do
-                  next_repcodes[#next_repcodes + 1] = is_char(n, fontid) or 0xFFFC
+                  next_repcodes[#next_repcodes + 1] = is_char(n, fontid) or obj_repl
                 end
 
                 local rep = glyphs[disc_glyph].replace.head
@@ -601,7 +603,7 @@ function shape(head, firstnode, run)
                 post = makesub(run, next_postcodes, next_post),
                 cluster = disc_cluster,
                 nextcluster = disc_cluster + 1,
-                codepoint = 0xFFFC,
+                codepoint = obj_repl,
               }
             end
             i = disc_glyph + 1

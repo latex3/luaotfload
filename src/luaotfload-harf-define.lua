@@ -341,6 +341,7 @@ local function scalefont(data, spec)
       hscale = upem,
       vscale = upem,
       buf_flags = harf_settings.default_buf_flags,
+      obj_repl = characters[0xFFFC] and 0xD800 or 0xFFFC,
     },
     specification = spec,
     shared = {

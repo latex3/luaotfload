@@ -158,7 +158,7 @@ Completed box being shipped out [1]
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 1.89453 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +118720:+86720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +119040:+86720
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EC +0:-31680
 ....\pdfliteral page <lua data reference ...>
 ....\pdfliteral page <lua data reference ...>
@@ -206,7 +206,7 @@ Completed box being shipped out [1]
 ....\kern-0.00488 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 12021C +0:+185280
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 -5120:+722240
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 -4800:+722240
 ....\kern0.09766 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201EC +0:+186880
 ....\pdfliteral page <lua data reference ...>
@@ -1537,7 +1537,7 @@ Completed box being shipped out [1]
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\lineskip) 1.0
-...\hbox(20.77637+5.41504)x345.0, glue set 123.11035fil, direction TRT
+...\hbox(20.77637+5.41504)x345.0, glue set 123.10059fil, direction TRT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -1561,7 +1561,7 @@ Completed box being shipped out [1]
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120320 +0:+454400
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +27200:+319680
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +26880:+319680
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201BF +0:+130880
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120415 +0:-134080
@@ -1598,7 +1598,6 @@ Completed box being shipped out [1]
 ....\glue 10.0
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 1203F5 +0:+0
-....\kern-0.00488 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12038F +0:+201280
 ....\pdfliteral page <lua data reference ...>
 ....\pdfliteral page <lua data reference ...>
@@ -1657,7 +1656,6 @@ Completed box being shipped out [1]
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024E +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\glue 10.0
-....\kern-0.00488 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 12040E +0:+38080
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
 ....\kern-0.56152 (font)

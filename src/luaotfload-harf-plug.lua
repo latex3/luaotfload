@@ -774,9 +774,15 @@ local function tonodes(head, node, run, glyphs)
       nodeindex = glyph.cluster + 1
     elseif nextcluster + 1 == nodeindex then -- Oops, we went too far
       nodeindex = nodeindex - 1
-      local new = inherit(glyph_t, getprev(node), lastprops)
-      setfont(new, fontid)
-      head, node = insertbefore(head, node, new)
+      if node then
+        local new = inherit(glyph_t, getprev(node), lastprops)
+        head, node = insertbefore(head, node, new)
+      else
+        node = tail(head)
+        local new = inherit(glyph_t, node, lastprops)
+        head, node = insertafter(head, node, new)
+      end
+      setfont(node, fontid)
     end
     local gid = glyph.codepoint
     local char = nominals[gid] or gid_offset + gid

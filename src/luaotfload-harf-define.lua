@@ -393,7 +393,7 @@ fonts.readers.harf = function(spec)
         val = (val and '+' or '-')..key
         hb_features[#hb_features + 1] = hb.Feature.new(val)
       elseif tonumber(val) then
-        val = '+'..key..'='..tonumber(val) - 1
+        val = '+'..key..'='..tonumber(val)
         hb_features[#hb_features + 1] = hb.Feature.new(val)
       end
     end

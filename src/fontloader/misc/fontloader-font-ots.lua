@@ -163,6 +163,8 @@ local trace_testruns       = false  registertracker("otf.testruns",     function
 local forcediscretionaries = false
 local forcepairadvance     = false -- for testing
 
+local repeatablemultiples  = context or false
+
 directives.register("otf.forcediscretionaries",function(v)
     forcediscretionaries = v
 end)
@@ -648,16 +650,52 @@ local function multiple_glyphs(head,start,multiple,skiphash,what,stop) -- what t
                 insertnodeafter(head,start,n)
                 start = n
             end
-            if what == true then
-                -- we're ok
-            elseif what > 1 then
-                local m = multiple[nofmultiples]
-                for i=2,what do
-                    local n = copy_node(start) -- ignore components
-                    resetinjection(n)
-                    setchar(n,m)
-                    insertnodeafter(head,start,n)
-                    start = n
+            if what ~= true and repeatablemultiples then
+                -- This is just some experimental code; we might introduce gsub_extensible
+                -- some day instead. Beware: when we have a feature that mixes alternates and
+                -- multiples we need to make sure we don't handle the alternate string values
+                -- here. This might eventually become an lmtx only feature.
+                local kind = type(what)
+                local m, f, l
+                if kind == "string" then
+                    local what, n = string.match(what,"^repeat(.-)[:=](%d+)$")
+                    if what == "middle" then
+                        m = tonumber(n)
+                    elseif what == "first" then
+                        f = tonumber(n)
+                    elseif what == "last" then
+                        l = tonumber(n)
+                    end
+                elseif kind == "table" then
+                    -- won't happen because currently we don't split these values
+                   m = what.middle
+                   f = what.first
+                   l = what.last
+                end
+                if f or m or l then
+                    if m and m > 1 and nofmultiples == 3 then
+                        local middle = getnext(first)
+                        for i=2,m do
+                            local n = copynode(middle) -- ignore components
+                            resetinjection(n)
+                            insertnodeafter(head,first,n)
+                        end
+                    end
+                    if f and f > 1 then
+                        for i=2,f do
+                            local n = copynode(first) -- ignore components
+                            resetinjection(n)
+                            insertnodeafter(head,first,n)
+                        end
+                    end
+                    if l and l > 1 then
+                        for i=2,l do
+                            local n = copynode(start) -- ignore components
+                            resetinjection(n)
+                            insertnodeafter(head,start,n)
+                            start = n
+                        end
+                    end
                 end
             end
         end
@@ -1052,7 +1090,7 @@ function handlers.gpos_mark2base(head,start,dataset,sequence,markanchors,rlmode,
                     end
                     return head, start, true
                 elseif trace_bugs then
-                 -- onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
+                 -- onetimemessage(currentfont,basechar,"no base anchors")
                     logwarning("%s: mark %s is not anchored to %s",pref(dataset,sequence),gref(markchar),gref(basechar))
                 end
             elseif trace_bugs then
@@ -1118,7 +1156,7 @@ function handlers.gpos_mark2ligature(head,start,dataset,sequence,markanchors,rlm
                     end
                 elseif trace_bugs then
                 --  logwarning("%s: char %s is missing in font",pref(dataset,sequence),gref(basechar))
-                    onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
+                    onetimemessage(currentfont,basechar,"no base anchors")
                 end
             elseif trace_bugs then
                 logwarning("%s: prev node is no char, case %i",pref(dataset,sequence),1)
@@ -1858,7 +1896,7 @@ function chainprocs.gpos_cursive(head,start,stop,dataset,sequence,currentlookup,
                                 end
                             end
                         elseif trace_bugs then
-                            onetimemessage(currentfont,startchar,"no entry anchors",report_fonts)
+                            onetimemessage(currentfont,startchar,"no entry anchors")
                         end
                         break
                     end

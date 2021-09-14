@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2021-09-06 11:44
+-- merge date  : 2021-09-13 09:37
 
 do -- begin closure to overcome local limits and interference
 
@@ -26899,6 +26899,7 @@ local trace_compruns=false  registertracker("otf.compruns",function(v) trace_com
 local trace_testruns=false  registertracker("otf.testruns",function(v) trace_testruns=v end)
 local forcediscretionaries=false
 local forcepairadvance=false 
+local repeatablemultiples=context or false
 directives.register("otf.forcediscretionaries",function(v)
  forcediscretionaries=v
 end)
@@ -27277,15 +27278,47 @@ local function multiple_glyphs(head,start,multiple,skiphash,what,stop)
     insertnodeafter(head,start,n)
     start=n
    end
-   if what==true then
-   elseif what>1 then
-    local m=multiple[nofmultiples]
-    for i=2,what do
-     local n=copy_node(start) 
-     resetinjection(n)
-     setchar(n,m)
-     insertnodeafter(head,start,n)
-     start=n
+   if what~=true and repeatablemultiples then
+    local kind=type(what)
+    local m,f,l
+    if kind=="string" then
+     local what,n=string.match(what,"^repeat(.-)[:=](%d+)$")
+     if what=="middle" then
+      m=tonumber(n)
+     elseif what=="first" then
+      f=tonumber(n)
+     elseif what=="last" then
+      l=tonumber(n)
+     end
+    elseif kind=="table" then
+       m=what.middle
+       f=what.first
+       l=what.last
+    end
+    if f or m or l then
+     if m and m>1 and nofmultiples==3 then
+      local middle=getnext(first)
+      for i=2,m do
+       local n=copynode(middle) 
+       resetinjection(n)
+       insertnodeafter(head,first,n)
+      end
+     end
+     if f and f>1 then
+      for i=2,f do
+       local n=copynode(first) 
+       resetinjection(n)
+       insertnodeafter(head,first,n)
+      end
+     end
+     if l and l>1 then
+      for i=2,l do
+       local n=copynode(start) 
+       resetinjection(n)
+       insertnodeafter(head,start,n)
+       start=n
+      end
+     end
     end
    end
   end
@@ -27699,7 +27732,7 @@ function handlers.gpos_mark2ligature(head,start,dataset,sequence,markanchors,rlm
       end
      end
     elseif trace_bugs then
-     onetimemessage(currentfont,basechar,"no base anchors",report_fonts)
+     onetimemessage(currentfont,basechar,"no base anchors")
     end
    elseif trace_bugs then
     logwarning("%s: prev node is no char, case %i",pref(dataset,sequence),1)
@@ -28339,7 +28372,7 @@ function chainprocs.gpos_cursive(head,start,stop,dataset,sequence,currentlookup,
         end
        end
       elseif trace_bugs then
-       onetimemessage(currentfont,startchar,"no entry anchors",report_fonts)
+       onetimemessage(currentfont,startchar,"no entry anchors")
       end
       break
      end

@@ -1,6 +1,6 @@
 return {
  ["hashes"]={
-  { "fontloader-2021-09-09.lua", "1fd9d0975950c31e5aeab31f0c602f98" },
+  { "fontloader-2021-09-14.lua", "3c04b16455b2f83c62f92e4928185b1e" },
   { "fontloader-util-fil.lua", "d0accf4180201efd567816a25ad5e037" },
   { "fontloader-util-str.lua", "4c212d82d24a81dd7eb00604df9f7db9" },
   { "fontloader-l-unicode.lua", "f368874f11f3c525de5864fd413e4b24" },
@@ -92,8 +92,8 @@ return {
  ["notes"]={
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",
   ["description"]="v3.19-dev/2021-05-21",
-  ["loader"]="fontloader-2021-09-09.lua",
-  ["revision"]="7acf6519981c59152a55043181fc078baafcc070",
-  ["timestamp"]="2021-09-09 17:06:16 +0200",
+  ["loader"]="fontloader-2021-09-14.lua",
+  ["revision"]="89883887746084c6932ce097ad12cb33350ba6b5",
+  ["timestamp"]="2021-09-09 17:19:14 +0200",
  },
 }

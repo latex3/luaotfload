@@ -1,6 +1,6 @@
 return {
  ["hashes"]={
-  { "fontloader-2021-09-14.lua", "3c04b16455b2f83c62f92e4928185b1e" },
+  { "fontloader-2021-09-14.lua", "62a53bfaf68edc82ccc0466c6170d6ea" },
   { "fontloader-util-fil.lua", "d0accf4180201efd567816a25ad5e037" },
   { "fontloader-util-str.lua", "4c212d82d24a81dd7eb00604df9f7db9" },
   { "fontloader-l-unicode.lua", "f368874f11f3c525de5864fd413e4b24" },
@@ -35,7 +35,7 @@ return {
   { "fontloader-font-ocl.lua", "2a377351ae23c339764ec8ce2e8e9164" },
   { "fontloader-font-osd.lua", "51e2301f68e139303ecb53a4a3fecedb" },
   { "fontloader-font-otc.lua", "582295d3d1e44cd4a31e8bbc1156f7c1" },
-  { "fontloader-font-ots.lua", "bdfa7a9fb4a22116341b57d55b3f7c52" },
+  { "fontloader-font-ots.lua", "55316a605d11a1d07d38795224c90a63" },
   { "fontloader-font-ota.lua", "2bb12d708e35bc05443eba791e2554e7" },
   { "fontloader-font-oup.lua", "711eae407ca09ed0bc33a4a1ef9218ed" },
   { "fontloader-font-otj.lua", "b2c165bd6771a57633f992d07384b739" },
@@ -53,7 +53,7 @@ return {
   { "fontloader-font-con.lua", "724e5dd14aec2d4d189f8619898004cf" },
   { "fontloader-font-ini.lua", "5343de60613adb24cdd7a8d2ee1d153c" },
   { "fontloader-data-con.lua", "23a0f5386d46a1c157ae82a373e35fa0" },
-  { "fontloader-reference.lua", "21465eb18f461d6f6320d276a15586e7" },
+  { "fontloader-reference.lua", "c17794297799db29ff1eefe1fa4f534a" },
   { "fontloader-basics-gen.lua", "e470c13b1ed41e38932e93518219ad74" },
   { "mktests", "918cb50be9ee8bd645ac1a27dc501e8c" },
   { "mkstatus", "cae94ec204fe12ed50b3bda6d0523039" },
@@ -93,7 +93,7 @@ return {
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",
   ["description"]="v3.19-dev/2021-05-21",
   ["loader"]="fontloader-2021-09-14.lua",
-  ["revision"]="89883887746084c6932ce097ad12cb33350ba6b5",
-  ["timestamp"]="2021-09-09 17:19:14 +0200",
+  ["revision"]="52c331cd95b50841ec0de42282bb96454f87936e",
+  ["timestamp"]="2021-09-14 17:14:02 +0200",
  },
 }

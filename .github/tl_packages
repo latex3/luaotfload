@@ -8,7 +8,7 @@ cm etex knuth-lib tex tex-ini-files unicode-data
 # various tools / dependencies of other packages
 ctablestack filehook ifoddpage iftex luatexbase trimspaces oberdiek
 etoolbox xkeyval ucharcat xstring everyhook svn-prov setspace
-csquotes everysel
+csquotes everysel lua-uni-algos
 #
 # slices from oberdiek
 atbegshi atveryend bigintcalc bitset bookmark epstopdf-pkg etexcmds

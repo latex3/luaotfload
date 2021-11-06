@@ -488,19 +488,21 @@ end
 
 -- A helper to load a file which might be gziped
 local function load_maybe_gzip (path, binary)
-    local mode = binary and 'rb' or 'r'
     local gzippath = path .. '.gz'
-    local f = gzipopen (gzippath, mode)
+    local f = ioopen (gzippath, 'rb')
     if f then
         path = gzippath
-    else
-        f, msg = ioopen (path, mode)
-    end
-
-    if f then
-        result = f:read'*a'
+        local result = f:read'*a'
+        result = gzip.decompress(result, 31)
         f:close()
         return path, result
+    else
+        f, msg = ioopen (path, binary and 'rb' or 'r')
+        if f then
+            local result = f:read'*a'
+            f:close()
+            return path, result
+        end
     end
 
     return nil, msg
@@ -3476,24 +3478,22 @@ function update_names (currentnames, force, dry_run)
     return targetnames
 end
 
+local function compress_dummy(data) return data end
 --- string -> string -> (string * table)
 local function save_lua_table (data, path_lua, path_luc, compress)
-    local open
     if compress then
         osremove(path_lua)
         osremove(path_luc)
         path_lua, path_luc = path_lua .. '.gz', path_luc .. '.gz'
-        open = gzipopen
     else
         osremove(path_lua .. '.gz')
         osremove(path_luc .. '.gz')
-        open = ioopen
     end
-    local file_lua, msg = open(path_lua, 'w')
+    local file_lua, msg = ioopen(path_lua, compress and 'wb' or 'w')
     if not file_lua then
         logreport ("info", 0, "cache", "Failed to write %q: %s", path_lua, msg)
     end
-    local file_luc file_luc, msg = open(path_luc, 'wb')
+    local file_luc file_luc, msg = ioopen(path_luc, 'wb')
     if not file_luc then
         logreport ("info", 0, "cache", "Failed to write %q: %s", path_luc, msg)
     end
@@ -3511,12 +3511,12 @@ local function save_lua_table (data, path_lua, path_luc, compress)
     end
     local serialized = tableserialize (data, true)
     if file_lua then
-        file_lua:write(serialized)
+        file_lua:write(compress and gzip.compress(serialized, 31) or serialized)
         file_lua:close()
     end
     if file_luc then
         local compiled = dump(assert(load(serialized, 't')), true)
-        file_luc:write(compiled)
+        file_luc:write(compress and gzip.compress(compiled, 31) or compiled)
         file_luc:close()
     end
     -- Even if we could write one file but not the other one it's still an

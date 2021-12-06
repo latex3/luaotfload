@@ -81,13 +81,13 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\FONT28 "à" 00E0 +0:+0
-....\FONT28 "́" 0301 +0:+0
-....\FONT28 "̂" 0302 +0:+166819
-....\FONT28 "̃" 0303 +0:+333638
+....\FONT20 "à" 00E0 +0:+0
+....\FONT20 "́" 0301 +0:+0
+....\FONT20 "̂" 0302 +0:+166819
+....\FONT20 "̃" 0303 +0:+333638
 ....\pdfliteral page <lua data reference ...>
-....\FONT29 "कि" F311 +0:+0
-....\FONT29 "" 0915 +0:+0
+....\FONT21 "कि" F311 +0:+0
+....\FONT21 "" 0915 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil

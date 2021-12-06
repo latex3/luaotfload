@@ -250,7 +250,6 @@ Overfull \hbox (93.95pt too wide) in paragraph at lines 24--25
 ..\TU/lmr/m/n/10 N
 ..\TU/lmr/m/n/10 O
 ..\TU/lmr/m/n/10 K
-.\kern0.0
 .\penalty 10000
 .\glue(\parfillskip) 0.0 plus 1.0fil
 .\glue(\rightskip) 0.0
@@ -500,7 +499,6 @@ Overfull \hbox (64.78pt too wide) in paragraph at lines 48--49
 ..\TU/lmr/m/n/10 a
 ..\TU/lmr/m/n/10 s
 ..\TU/lmr/m/n/10 h
-.\kern0.0
 .\penalty 10000
 .\glue(\parfillskip) 0.0 plus 1.0fil
 .\glue(\rightskip) 0.0
@@ -976,7 +974,6 @@ Completed box being shipped out [1]
 .....\TU/lmr/m/n/10 N
 .....\TU/lmr/m/n/10 O
 .....\TU/lmr/m/n/10 K
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -1238,7 +1235,6 @@ Completed box being shipped out [1]
 .....\TU/lmr/m/n/10 a
 .....\TU/lmr/m/n/10 s
 .....\TU/lmr/m/n/10 h
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

@@ -184,7 +184,6 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -247,7 +246,6 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -296,7 +294,6 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -349,7 +346,6 @@ Completed box being shipped out [1]
 ....\TU/NotoSerifCJK-Regular.ttc(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 2.58 plus 1.29 minus 0.86
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -569,7 +565,6 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -620,7 +615,6 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -663,7 +657,6 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "”" 201D +0:+0 (ligature "'" 0027 +0:+0"'" 0027 +0:+0)
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -708,7 +701,6 @@ Completed box being shipped out [1]
 ....\TU/lmroman10-regular.otf(1)/m/n/10 "'" 0027 +0:+0
 ....\glue(\spaceskip) 3.33 plus 1.665 minus 1.11
 ....\penalty 10000
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

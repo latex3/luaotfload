@@ -35,7 +35,6 @@ Completed box being shipped out [1]
 ....\mathon
 ....\TU/LatinModernMath(1)/m/n/10 𝑥
 ....\mathoff
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -70,7 +69,6 @@ Completed box being shipped out [1]
 ....\kern0.24 (italic)
 ....\TU/LatinModernMath(1)/m/n/10 𝑥
 ....\mathoff
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -105,7 +103,6 @@ Completed box being shipped out [1]
 ....\kern0.24 (italic)
 ....\TU/LatinModernMath(5)/m/n/10 𝑥
 ....\mathoff
-....\kern0.0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

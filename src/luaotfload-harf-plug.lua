@@ -110,6 +110,11 @@ local endactual_p       = "luaotfload_endactualtext"
 
 local empty_table       = {}
 
+local function is_empty_disc(n)
+  local pre, post, rep = getdisc(n)
+  return not pre and not post and not rep
+end
+
 -- "Copy" properties as done by LuaTeX: Make old properties metatable 
 local function copytable(old)
   local new = {}
@@ -206,7 +211,7 @@ local function itemize(head, fontid, direction)
     elseif id == glue_t and subtype == spaceskip_t then
       code = 0x0020 -- SPACE
     elseif id == disc_t then
-      if uses_font(n, fontid) then
+      if uses_font(n, fontid) or not lastskip and is_empty_disc(n) then
         local _, _, rep, _, _, rep_tail = getdisc(n, true)
         setfield(n, 'replace', nil)
         local prev, next = getboth(n)

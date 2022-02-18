@@ -231,6 +231,7 @@ local function node_colorize (head, toplevel, current_color, current_transparent
     return head, current_color, current_transparent
 end
 
+local addpageres = pdf.add_page_resource -- OpTeX, minim
 local getpageres = pdf.getpageresources or function() return pdf.pageresources end
 local setpageres = pdf.setpageresources or function(s) pdf.pageresources = s end
 local catat11    = luatexbase.registernumber("catcodetable@atletter")
@@ -244,7 +245,12 @@ local function color_handler (head)
     head = tonode(head)
 
     -- now append our page resources
-    if res and tonumber(transparent_stack) then
+    if res and addpageres then
+        for k in pairs(res) do
+            addpageres("ExtGState", stringformat("TransGs%.3g", k), stringformat("<</ca %.3g>>", k))
+        end
+        res = nil -- reset res
+    elseif res and tonumber(transparent_stack) then
         if scantoks and nil == pgf.loaded then
             pgf.loaded = token.create(pgf.bye).cmdname == "assign_toks"
         end

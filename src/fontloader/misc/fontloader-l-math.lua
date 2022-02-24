@@ -141,7 +141,7 @@ if not math.ult then
 
     local floor = math.floor
 
-    function math.tointeger(m,n)
+    function math.ult(m,n)
         -- not ok but i'm not motivated to look into it now
         return floor(m) < floor(n) -- unsigned comparison needed
     end

@@ -1962,9 +1962,10 @@ local function getinfo(maindata,sub,platformnames,rawfamilynames,metricstoo,inst
             weight         = weight and lower(weight),
             width          = width and lower(width),
             pfmweight      = metrics.weightclass or 400, -- will become weightclass
-            pfmwidth       = metrics.widthclass or 5,    -- will become widthclass
+            pfmwidth       = metrics.widthclass or 5, -- will become widthclass
             panosewidth    = metrics.panosewidth,
             panoseweight   = metrics.panoseweight,
+            fstype         = metrics.fstype or 0, -- embedding, subsetting and editing
             italicangle    = postscript.italicangle or 0,
             units          = fontheader.units or 0,
             designsize     = fontdata.designsize,

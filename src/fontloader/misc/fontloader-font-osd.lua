@@ -6,7 +6,6 @@ if not modules then modules = { } end modules ['font-osd'] = { -- script devanag
     license   = "see context related readme files"
 }
 
-
 -- we need to check nbsphash (context only)
 
 -- A few remarks:
@@ -56,6 +55,11 @@ if not modules then modules = { } end modules ['font-osd'] = { -- script devanag
 -- By now we have yet another incremental improved version. In the end I might
 -- rewrite the code.
 --
+-- At the start of 2022 Kauśika spent a lot of time testing combinations of fonts
+-- and scripts and in the process some more tracing was added as well as a mixed
+-- conjuncts options that can deal with fuzzy fonts. The machinery does what it has
+-- to do but some fonts expect more magic to be applied.
+--
 -- Hans Hagen, PRAGMA-ADE, Hasselt NL
 
 -- Todo:
@@ -81,8 +85,10 @@ if not modules then modules = { } end modules ['font-osd'] = { -- script devanag
 -- malayalam, oriya, tamil and tolugu but not all are checked. Also, some of the
 -- code below might need to be adapted to the extra scripts.
 
-local insert, imerge, copy, tohash = table.insert, table.imerge, table.copy, table.tohash
-local next, type = next, type
+local insert, remove, imerge, copy, tohash = table.insert, table.remove, table.imerge, table.copy, table.tohash
+local next, type, rawget = next, type, rawget
+local formatters = string.formatters
+local settings_to_hash = utilities.parsers.settings_to_hash
 
 local report             = logs.reporter("otf","devanagari")
 
@@ -97,6 +103,8 @@ local methods            = fonts.analyzers.methods
 
 local otffeatures        = fonts.constructors.features.otf
 local registerotffeature = otffeatures.register
+
+local trace_steps        = false
 
 local nuts               = nodes.nuts
 
@@ -130,7 +138,7 @@ local unsetvalue         = attributes.unsetvalue
 
 local fontdata           = fonts.hashes.identifiers
 
-local a_syllabe          = "syllable"  -- attributes.private('syllabe') -- can be just a property key
+local a_syllabe          = "syllable"  -- attributes.private('syllabe')   -- can be just a property key
 local a_reordered        = "reordered" -- attributes.private('reordered') -- can be just a property key
 
 local dotted_circle      = 0x25CC
@@ -157,9 +165,14 @@ replace_all_nbsp = function(head) -- delayed definition
 end
 
 local processcharacters = nil
+local logprocess        = nil
 
 if context then
-    local fontprocesses = fonts.hashes.processes
+
+    local fontprocesses   = fonts.hashes.processes
+    local tracers         = nodes.tracers
+    local registermessage = (tracers and tracers.steppers.message) or function() end
+
     function processcharacters(head,font)
         local processors = fontprocesses[font]
         for i=1,#processors do
@@ -167,7 +180,24 @@ if context then
         end
         return head
     end
+
+    -- When we'retrying to fix something it can be handy to have some more
+    -- details available.
+
+    trackers.register("otf.steps", function(v) trace_steps = v end)
+
+    logprocess = function(str)
+        if trace_steps then
+            registermessage("devanagari %s",str)
+            if trace_steps == "silent" then
+                return
+            end
+        end
+        report(str)
+    end
+
 else
+
     function processcharacters(head,font)
         local processors = fontdata[font].shared.processes
         for i=1,#processors do
@@ -175,6 +205,11 @@ else
         end
         return head
     end
+
+    logprocess = function(str)
+        -- do nothing
+    end
+
 end
 
 -- We can assume that script are not mixed in the source but if that is the case
@@ -303,7 +338,7 @@ local after_subscript   = indicgroups.after_subscript
 local before_main       = indicgroups.before_main
 local after_main        = indicgroups.after_main
 
-local mark_four = table.merged (
+local mark_pre_above_below_post = table.merged (
     pre_mark,
     above_mark,
     below_mark,
@@ -315,6 +350,14 @@ local mark_above_below_post = table.merged (
     below_mark,
     post_mark
 )
+
+-- Handy
+
+local devanagarihash = table.setmetatableindex(function(t,k)
+    local v = fontdata[k].resources.devanagari or false
+    t[k] = v
+    return v
+end)
 
 -- We use some pseudo features as we need to manipulate the nodelist based
 -- on information in the font as well as already applied features. We can
@@ -461,7 +504,7 @@ local function initializedevanagi(tfmdata)
         local devanagari = resources.devanagari
         if not devanagari then
             --
-            report("adding devanagari features to font")
+            report("adding features to font")
             --
             local gsubfeatures   = resources.features.gsub
             local sequences      = resources.sequences
@@ -492,7 +535,9 @@ local function initializedevanagi(tfmdata)
                                     for k, v in next, pre_mark do
                                         local locl = coverage[k]
                                         if locl then
-                                            if #locl > 0 then	--contextchain; KE: is this right?
+                                            -- if #locl > 0 then we have a list otherwise a hash; we actually should
+                                            -- test properly for gsub_...
+                                            if #locl > 0 then
                                                 for j=1,#locl do
                                                     local ck      = locl[j]
                                                     local f       = ck[4]
@@ -513,6 +558,8 @@ local function initializedevanagi(tfmdata)
                                                         end
                                                     end
                                                 end
+                                            else
+                                                -- useless next if, because locl is a table
                                             end
                                             if locl then
                                                 reorder_matras.steps[1].coverage[locl] = true
@@ -525,7 +572,7 @@ local function initializedevanagi(tfmdata)
                         if basic_shaping_forms[k] then
                             lastmatch = lastmatch + 1
                             if s ~= lastmatch then
-                                table.insert(sequences, lastmatch, table.remove(sequences, s))
+                                insert(sequences,lastmatch,remove(sequences,s))
                             end
                         end
                     end
@@ -546,9 +593,7 @@ local function initializedevanagi(tfmdata)
             local vatucache  = { }
             local pstfcache  = { }
             local seqsubset  = { }
-            local rephstep   = {
-                coverage = { } -- will be adapted each work
-            }
+            local rephstep   = { coverage = { } } -- will be adapted each work
             local devanagari = {
                 reph        = false,
                 vattu       = false,
@@ -578,7 +623,7 @@ local function initializedevanagi(tfmdata)
                 local has_pstf = features.pstf
                 if has_rphf and has_rphf[script] then
                     devanagari.reph = true
-                elseif (has_blwf and has_blwf[script] ) or (has_vatu and has_vatu[script] ) then
+                elseif (has_blwf and has_blwf[script]) or (has_vatu and has_vatu[script]) then
                     devanagari.vattu = true
                     for i=1,nofsteps do
                         local step     = steps[i]
@@ -586,10 +631,8 @@ local function initializedevanagi(tfmdata)
                         if coverage then
                             for k, v in next, coverage do
                                 for h, w in next, halant do
-                                    if v[h] then
-                                        if not blwfcache[k] then
-                                            blwfcache[k] = v
-                                        end
+                                    if v[h] and not blwfcache[k] then
+                                        blwfcache[k] = v
                                     end
                                     if has_vatu and has_vatu[script] and not vatucache[k] then
                                         vatucache[k] = v
@@ -611,34 +654,39 @@ local function initializedevanagi(tfmdata)
                             for k, v in next, ra do
                                 local r = coverage[k]
                                 if r then
+                                    -- if #r > 0 then we have a list otherwise a hash; we actually should
+                                    -- test properly for gsub_...
                                     local found = false
-                                    if #r > 0 then  -- contextchain; KE: is this right?
+                                    if #r > 0 then
                                         for j=1,#r do
-                                            local ck      = r[j]
-                                            local f       = ck[4]
+                                            local ck = r[j]
+                                            local f  = ck[4]
                                             local chainlookups = ck[6]
-                                            if chainlookups and chainlookups[f] then	--KE: why is check for chainlookups[f] necessacy???
+                                            if chainlookups then
                                                 local chainlookup = chainlookups[f]
-                                                for j=1,#chainlookup do
-                                                    local chainstep = chainlookup[j]
-                                                    local steps    = chainstep.steps
-                                                    local nofsteps = chainstep.nofsteps
-                                                    for i=1,nofsteps do
-                                                        local step     = steps[i]
-                                                        local coverage = step.coverage
-                                                        if coverage then
-                                                            local h = coverage[k]
-                                                            if h then
-                                                                for k, v in next, h do
-                                                                 -- found = v and v.ligature
-                                                                    found = v and (tonumber(v) or v.ligature)
+                                                if chainlookup then
+                                                    for j=1,#chainlookup do
+                                                        local chainstep = chainlookup[j]
+                                                        local steps     = chainstep.steps
+                                                        local nofsteps  = chainstep.nofsteps
+                                                        for i=1,nofsteps do
+                                                            local step     = steps[i]
+                                                            local coverage = step.coverage
+                                                            if coverage then
+                                                                local h = coverage[k]
+                                                                if h then
+                                                                    for k, v in next, h do
+                                                                        if v then
+                                                                            found = tonumber(v) or v.ligature
+                                                                            if found then
+                                                                                pre_base_reordering_consonants[found] = true
+                                                                                break
+                                                                            end
+                                                                        end
+                                                                    end
                                                                     if found then
-                                                                        pre_base_reordering_consonants[found] = true
                                                                         break
                                                                     end
-                                                                end
-                                                                if found then
-                                                                    break
                                                                 end
                                                             end
                                                         end
@@ -648,11 +696,12 @@ local function initializedevanagi(tfmdata)
                                         end
                                     else
                                         for k, v in next, r do
-                                         -- found = v and v.ligature
-                                            found = v and (tonumber(v) or v.ligature)
-                                            if found then
-                                                pre_base_reordering_consonants[found] = true
-                                                break
+                                            if v then
+                                                found = tonumber(v) or v.ligature
+                                                if found then
+                                                    pre_base_reordering_consonants[found] = true
+                                                    break
+                                                end
                                             end
                                         end
                                     end
@@ -670,18 +719,21 @@ local function initializedevanagi(tfmdata)
                             local step     = steps[i]
                             local coverage = step.coverage
                             if coverage then
-                                local reph, rephbase = false, false
+                                local reph = false
+                                local base = false
                                 if kind == "rphf" then
                                     -- rphf acts on consonant + halant
                                     for k, v in next, ra do
                                         local r = coverage[k]
                                         if r then
-                                            rephbase = k
+                                            -- if #r > 0 then we have a list otherwise a hash; we actually should
+                                            -- test properly for gsub_...
+                                            base = k
                                             local h = false
-                                            if #r > 0 then	--contextchain; KE: is this right?
+                                            if #r > 0 then
                                                 for j=1,#r do
-                                                    local ck      = r[j]
-                                                    local f       = ck[4]
+                                                    local ck = r[j]
+                                                    local f  = ck[4]
                                                     local chainlookups = ck[6]
                                                     if chainlookups then
                                                         local chainlookup = chainlookups[f]
@@ -698,7 +750,6 @@ local function initializedevanagi(tfmdata)
                                                                         for k, v in next, halant do
                                                                             local h = r[k]
                                                                             if h then
-                                                                             -- reph = h.ligature or false
                                                                                 reph = tonumber(h) or h.ligature or false
                                                                                 break
                                                                             end
@@ -716,7 +767,6 @@ local function initializedevanagi(tfmdata)
                                                 for k, v in next, halant do
                                                     local h = r[k]
                                                     if h then
-                                                     -- reph = h.ligature or false
                                                         reph = tonumber(h) or h.ligature or false
                                                         break
                                                     end
@@ -728,7 +778,9 @@ local function initializedevanagi(tfmdata)
                                         end
                                     end
                                 end
-                                seqsubset[#seqsubset+1] = { kind, coverage, reph, rephbase }
+--                                 if reph then
+                                    seqsubset[#seqsubset+1] = { kind, coverage, reph, base }
+--                                 end
                             end
                         end
                     end
@@ -742,18 +794,20 @@ local function initializedevanagi(tfmdata)
                                 for k, v in next, halant do
                                     local h = coverage[k]
                                     if h then
+                                        -- if #h > 0 then we have a list otherwise a hash; we actually should
+                                        -- test properly for gsub_...
                                         local found = false
-                                        if #h > 0 then -- contextchain; KE: is this right?
+                                        if #h > 0 then
                                             for j=1,#h do
-                                                local ck      = h[j]
-                                                local f       = ck[4]
+                                                local ck = h[j]
+                                                local f  = ck[4]
                                                 local chainlookups = ck[6]
                                                 if chainlookups then
                                                     local chainlookup = chainlookups[f]
                                                     for j=1,#chainlookup do
                                                         local chainstep = chainlookup[j]
-                                                        local steps    = chainstep.steps
-                                                        local nofsteps = chainstep.nofsteps
+                                                        local steps     = chainstep.steps
+                                                        local nofsteps  = chainstep.nofsteps
                                                         for i=1,nofsteps do
                                                             local step     = steps[i]
                                                             local coverage = step.coverage
@@ -761,11 +815,12 @@ local function initializedevanagi(tfmdata)
                                                                 local h = coverage[k]
                                                                 if h then
                                                                     for k, v in next, h do
-                                                                     -- found = v and v.ligature
-                                                                        found = v and (tonumber(v) or v.ligature)
-                                                                        if found then
-                                                                            pre_base_reordering_consonants[found] = true
-                                                                            break
+                                                                        if v then
+                                                                            found = tonumber(v) or v.ligature
+                                                                            if found then
+                                                                                pre_base_reordering_consonants[found] = true
+                                                                                break
+                                                                            end
                                                                         end
                                                                     end
                                                                     if found then
@@ -779,7 +834,6 @@ local function initializedevanagi(tfmdata)
                                             end
                                         else
                                             for k, v in next, h do
-                                             -- found = v and v.ligature
                                                 found = v and (tonumber(v) or v.ligature)
                                                 if found then
                                                     pre_base_reordering_consonants[found] = true
@@ -807,9 +861,9 @@ local function initializedevanagi(tfmdata)
                 sharedfeatures["dv03"] = true -- dv03_reorder_pre_base_reordering_consonants
                 sharedfeatures["dv04"] = true -- dv04_remove_joiners
             end
-            if script == "mlym" or script == "taml" then
-                devanagari.left_matra_before_base = true
-            end
+         -- if script == "mlym" or script == "taml" then
+         --     devanagari.movematra = "leftbeforebase"
+         -- end
         end
     end
 end
@@ -820,6 +874,49 @@ registerotffeature {
     default      = true,
     initializers = {
         node     = initializedevanagi,
+    },
+}
+
+local function initializeconjuncts(tfmdata,value)
+    if value then
+        local resources  = tfmdata.resources
+        local devanagari = resources.devanagari
+        if devanagari then
+            -- quit was the old situation
+            local conjuncts = "auto" -- mixed|continue|quit|auto
+            local movematra = "auto" -- default|leftbeforebase|auto
+            if type(value) == "string" and value ~= "auto" then
+                value     = settings_to_hash(value)
+                conjuncts = rawget(value,"conjuncts") or conjuncts
+                movematra = rawget(value,"movematra") or movematra
+            end
+            if conjuncts == "auto" then
+                conjuncts = "mixed" -- for all scripts ?
+            end
+            if movematra == "auto" and
+                  script == "mlym" or
+                  script == "taml" then
+                movematra = "leftbeforebase"
+            else
+                movematra = "default"
+            end
+            devanagari.conjuncts = conjuncts
+            devanagari.movematra = movematra
+            --
+            if trace_steps then
+                report("conjuncts %a, movematra %a",conjuncts,movematra)
+            end
+            --
+        end
+    end
+end
+
+registerotffeature {
+    name         = "indic",
+    description  = "control indic",
+    default      = "auto",
+    initializers = {
+        node     = initializeconjuncts,
     },
 }
 
@@ -881,38 +978,44 @@ local function initialize_one(font,attr) -- we need a proper hook into the datas
 
 end
 
-local function contextchain(contexts, n)
+-- HH: somehow we can get a non context here so for now we check for .n
+
+local function contextchain(contexts,n)
     local char = getchar(n)
-    for k=1,#contexts do
-        local ck  = contexts[k]
-        local seq = ck[3]
-        local f   = ck[4]
-        local l   = ck[5]
-        if (l - f) == 1 and seq[f+1][char] then
-            local ok = true
-            local c = n
-            for i=l+1,#seq do
-                c = getnext(c)
-                if not c or not seq[i][ischar(c)] then
-                    ok = false
-                    break
-                end
-            end
-            if ok then
-                c = getprev(n)
-                for i=1,f-1 do
-                    c = getprev(c)
-                    if not c or not seq[f-i][ischar(c)] then
+    if not contexts.n then
+        return contexts[char]
+    else
+        for k=1,#contexts do
+            local ck  = contexts[k]
+            local seq = ck[3]
+            local f   = ck[4]
+            local l   = ck[5]
+            if (l - f) == 1 and seq[f+1][char] then
+                local ok = true
+                local c = n
+                for i=l+1,#seq do
+                    c = getnext(c)
+                    if not c or not seq[i][ischar(c)] then
                         ok = false
+                        break
                     end
                 end
-            end
-            if ok then
-                return true
+                if ok then
+                    c = getprev(n)
+                    for i=1,f-1 do
+                        c = getprev(c)
+                        if not c or not seq[f-i][ischar(c)] then
+                            ok = false
+                        end
+                    end
+                end
+                if ok then
+                    return true
+                end
             end
         end
+        return false
     end
-    return false
 end
 
 local function order_matras(c)
@@ -944,11 +1047,13 @@ local function order_matras(c)
     end
 end
 
+local swapped = table.swapped(states)
+
 local function reorder_one(head,start,stop,font,attr,nbspaces)
 
     local reph, vattu, blwfcache, vatucache, pstfcache = initialize_one(font,attr) -- todo: a hash[font]
 
-    local devanagari = fontdata[font].resources.devanagari
+ -- local devanagari = devanagarihash[font]
     local current    = start
     local n          = getnext(start)
     local base       = nil
@@ -976,6 +1081,9 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
             stop = getprev(stop)
             head = remove_node(head,current)
             flushnode(current)
+            if trace_steps then
+                logprocess("reorder one, remove nbsp")
+            end
             return head, stop, nbspaces
         else
             nbspaces  = nbspaces + 1
@@ -1018,6 +1126,9 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                             if changestop then
                                 stop = current
                             end
+                        end
+                        if trace_steps then
+                            logprocess("reorder one, handle nbsp")
                         end
                     end
                 end
@@ -1080,6 +1191,9 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
             if lastcons == stop then
                 stop = n
             end
+            if trace_steps then
+                logprocess("reorder one, handle halant")
+            end
         end
     end
 
@@ -1108,6 +1222,9 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
         start = nn
         if matra == stop then
             stop = n
+        end
+        if trace_steps then
+            logprocess("reorder one, handle matra")
         end
     end
 
@@ -1155,14 +1272,19 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                 end
 
                 local tpm = twopart_mark[ch]
-                while tpm do
-                    local extra = copy_node(n)
-                    copyinjection(extra,n)
-                    ch = tpm[1]
-                    setchar(n,ch)
-                    setchar(extra,tpm[2])
-                    head = insertnodeafter(head,current,extra)
-                    tpm = twopart_mark[ch]
+                if tpm then
+                    while tpm do
+                        local extra = copy_node(n)
+                        copyinjection(extra,n)
+                        ch = tpm[1]
+                        setchar(n,ch)
+                        setchar(extra,tpm[2])
+                        head = insertnodeafter(head,current,extra)
+                        tpm = twopart_mark[ch]
+                    end
+                    if trace_steps then
+                        logprocess("reorder one, handle mark")
+                    end
                 end
                 while c ~= stop and dependent_vowel[ch] do
                     c  = n
@@ -1185,10 +1307,11 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
         local bp   = getprev(firstcons)
         local cn   = getnext(current)
         local last = getnext(c)
+        local done = false
         while cn ~= last do
             -- move pre-base matras...
             if pre_mark[getchar(cn)] then
-                if devanagari.left_matra_before_base then
+                if devanagarihash[font].movematra == "leftbeforebase" then
                     local prev, next = getboth(cn)
                     setlink(prev,next)
                     if cn == stop then
@@ -1226,6 +1349,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                     end
                     cn = next
                 end
+                done = true
             elseif current ~= base and dependent_vowel[getchar(cn)] then
                 local prev, next = getboth(cn)
                 if next then
@@ -1238,6 +1362,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                 setlink(b,cn,getnext(b))
                 order_matras(cn)
                 cn = next
+                done = true
             elseif current == base and dependent_vowel[getchar(cn)] then
                 local cnn = getnext(cn)
                 order_matras(cn)
@@ -1251,10 +1376,15 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
         end
         allreordered = c == stop
         current = getnext(c)
+        if done and trace_steps then
+            logprocess("reorder one, matra")
+        end
     end
 
     if reph or vattu then
-        local current, cns = start, nil
+        local current = start
+        local cns     = nil
+        local done    = false
         while current ~= stop do
             local c = current
             local n = getnext(current)
@@ -1287,6 +1417,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                         local next = getnext(b)
                         setlink(c,next)
                         setlink(b,current)
+                        done = true
                     end
                 elseif cns and getnext(cns) ~= current then -- todo: optimize next
                     -- position below-base Ra (vattu) following the consonants on which it is placed (either the base consonant or one of the pre-base consonants)
@@ -1295,6 +1426,7 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                     setlink(cp,n)
                     setlink(cns,current) -- cns ?
                     setlink(c,cnsn)
+                    done = true
                     if c == stop then
                         stop = cp
                         break
@@ -1333,6 +1465,9 @@ local function reorder_one(head,start,stop,font,attr,nbspaces)
                 end
             end
             current = getnext(current)
+        end
+        if done and trace_steps then
+            logprocess("reorder one, handle reph and vata") -- todo: boolean
         end
     end
 
@@ -1380,6 +1515,9 @@ function handlers.devanagari_reorder_matras(head,start) -- no leak
                 setlink(current,start)
              -- setlink(current,start,next) -- maybe
                 start = startnext
+                if trace_steps then
+                    logprocess("reorder matra")
+                end
                 break
          -- elseif consonant[char] and (not getstate(current) or getstate(current,s_init) then
          --     startnext = getnext(start)
@@ -1445,6 +1583,9 @@ function handlers.devanagari_reorder_reph(head,start)
             local char = ischar(current,startfont)
             if char and getprop(current,a_syllabe) == startattr then
                 if halant[char] then
+                    if trace_steps then
+                        logprocess("reorder reph, handling halant")
+                    end
                     local next = getnext(current)
                     if next then
                         local nextchar = ischar(next,startfont)
@@ -1482,6 +1623,9 @@ function handlers.devanagari_reorder_reph(head,start)
                 local char = ischar(current,startfont)
                 if char and getprop(current,a_syllabe) == startattr then
                     if consonant[char] and not getstate(current,s_pref) then
+                        if trace_steps then
+                            logprocess("reorder reph, handling consonant")
+                        end
                         startnext = getnext(start)
                         head = remove_node(head,start)
                         setlink(current,start)
@@ -1513,6 +1657,9 @@ function handlers.devanagari_reorder_reph(head,start)
                 local char = ischar(current,startfont)
                 if char and getprop(current,a_syllabe) == startattr then
                     if getstate(current,s_pstf) then -- post-base
+                        if trace_steps then
+                            logprocess("reorder reph, before postscript, post base")
+                        end
                         startnext = getnext(start)
                         head = remove_node(head,start)
                         setlink(getprev(current),start)
@@ -1527,6 +1674,9 @@ function handlers.devanagari_reorder_reph(head,start)
                     current = getnext(current)
                 else
                     if c then
+                        if trace_steps then
+                            logprocess("reorder reph, before postscript")
+                        end
                         startnext = getnext(start)
                         head = remove_node(head,start)
                         setlink(getprev(c),start)
@@ -1558,7 +1708,13 @@ function handlers.devanagari_reorder_reph(head,start)
                 local state = getstate(current)
                 if before_subscript[rephbase] and (state == s_blwf or state == s_pstf) then
                     c = current
+                    if trace_steps then
+                        logprocess("reorder reph, before subscript")
+                    end
                 elseif after_subscript[rephbase] and (state == s_pstf) then
+                    if trace_steps then
+                        logprocess("reorder reph, after subscript")
+                    end
                     c = current
                 end
                 current = getnext(current)
@@ -1596,6 +1752,9 @@ function handlers.devanagari_reorder_reph(head,start)
             end
         end
         if start ~= current then
+            if trace_steps then
+                logprocess("reorder reph, to end")
+            end
             startnext = getnext(start)
             head = remove_node(head,start)
             setlink(start,getnext(current))
@@ -1623,6 +1782,8 @@ end
 --       return head, start, done
 --   end
 
+-- todo: nodes -> table -> nodes
+
 function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
     if getprop(start,a_reordered) then
         return head, start, true
@@ -1635,6 +1796,9 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
         local next = getnext(current)
         if char and getprop(current,a_syllabe) == startattr then
             if halant[char] then -- state can also be init
+                if trace_steps then
+                    logprocess("reorder pre base consonants, handle halant")
+                end
                 if next then
                     local char = ischar(next,startfont)
                     if char and zw_char[char] and getprop(next,a_syllabe) == startattr then
@@ -1675,6 +1839,9 @@ function handlers.devanagari_reorder_pre_base_reordering_consonants(head,start)
     while current and getprop(current,a_syllabe) == startattr do
         local char = ischar(current)
         if (not dependent_vowel[char] and (not getstate(current) or getstate(current,s_init))) then
+            if trace_steps then
+                logprocess("reorder pre base consonants, handle vowel or initial")
+            end
             startnext = getnext(start)
             head = remove_node(head,start)
             if current == head then
@@ -1718,6 +1885,9 @@ function handlers.devanagari_remove_joiners(head,start,kind,lookupname,replaceme
         head = stop
     end
     flushlist(start)
+    if trace_steps then
+        logprocess("remove joiners")
+    end
     return head, stop, true
 end
 
@@ -1744,8 +1914,8 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
     local subpos   = nil
     local postpos  = nil
 
-    reorderreph.coverage = { }
-    rephbase[font]       = { }
+    reorderreph.coverage = { } -- use local
+    rephbase[font]       = { } -- use local
 
     for i=1,#seqsubset do
 
@@ -1755,8 +1925,12 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         local kind        = subset[1]
         local lookupcache = subset[2]
         if kind == "rphf" then
-            reorderreph.coverage[subset[3]] = true -- neat
-            rephbase[font][subset[3]] = subset[4]
+            --
+            local reph = subset[3]
+            local base = subset[4]
+            reorderreph.coverage[reph] = true -- neat -- use local
+            rephbase[font][reph] = base               -- use local
+            --
             local current = start
             local last = getnext(stop)
             while current ~= last do
@@ -1765,15 +1939,15 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        if found[getchar(next)] or contextchain(found, next) then    --above-base: rphf    Consonant + Halant
+                        if contextchain(found, next) then -- above-base: rphf Consonant + Halant
                             local afternext = next ~= stop and getnext(next)
                             if afternext and zw_char[getchar(afternext)] then -- ZWJ and ZWNJ prevent creation of reph
                                 current = afternext -- getnext(next)
                             elseif current == start then
                                 setstate(current,s_rphf)
-                                current = next
+                                current = next -- later again next
                             else
-                                current = next
+                                current = next -- later again next
                             end
                         end
                     end
@@ -1789,8 +1963,8 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     local found = lookupcache[c]
                     if found then -- pre-base: pref	Halant + Consonant
                         local next = getnext(current)
-                        if found[getchar(next)] or contextchain(found, next) then
-                            if (not getstate(current) and not getstate(next)) then	--KE: state can also be init...
+                        if contextchain(found, next) then
+                            if not getstate(current) and not getstate(next) then --KE: state can also be init...
                                 setstate(current,s_pref)
                                 setstate(next,s_pref)
                                 current = next
@@ -1809,10 +1983,10 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        if found[getchar(next)] or contextchain(found, next) then
+                        if contextchain(found, next) then
                             if next ~= stop and getchar(getnext(next)) == c_zwnj then    -- zwnj prevent creation of half
                                 current = next
-                            elseif (not getstate(current)) then	--KE: state can also be init...
+                            elseif not getstate(current) then --KE: state can also be init...
                                 setstate(current,s_half)
                                 if not halfpos then
                                     halfpos = current
@@ -1833,8 +2007,8 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        if found[getchar(next)] or contextchain(found, next) then
-                            if (not getstate(current) and not getstate(next)) then --KE: state can also be init...
+                        if contextchain(found, next) then
+                            if not getstate(current) and not getstate(next) then --KE: state can also be init...
                                 setstate(current,s_blwf)
                                 setstate(next,s_blwf)
                                 current = next
@@ -1854,8 +2028,8 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     local found = lookupcache[c]
                     if found then
                         local next = getnext(current)
-                        if found[getchar(next)] or contextchain(found, next) then
-                            if (not getstate(current) and not getstate(next)) then -- KE: state can also be init...
+                        if contextchain(found, next) then
+                            if not getstate(current) and not getstate(next) then -- KE: state can also be init...
                                 setstate(current,s_pstf)
                                 setstate(next,s_pstf)
                                 current = next
@@ -1882,6 +2056,9 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
             stop = getprev(stop)
             head = remove_node(head,current)
             flushnode(current)
+            if trace_steps then
+                logprocess("reorder two, remove nbsp")
+            end
             return head, stop, nbspaces
         else
             nbspaces = nbspaces + 1
@@ -1922,6 +2099,9 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     end
                 end
             end
+            if trace_steps then
+                logprocess("reorder two, handle nbsp")
+            end
         end
     else -- not Stand Alone cluster
         local last = getnext(stop)
@@ -1953,7 +2133,7 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         return head, stop, nbspaces
     else
         if getstate(base) then -- state can also be init
-            setstate(base,unsetvalue)
+            setstate(base,unsetvalue)  -- THIS RESETS THE HALF STATE
         end
         basepos = base
     end
@@ -1978,14 +2158,19 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         local cn     = getnext(current)
         -- not so efficient (needed for malayalam)
         local tpm = twopart_mark[char]
-        while tpm do
-            local extra = copy_node(current)
-            copyinjection(extra,current)
-            char = tpm[1]
-            setchar(current,char)
-            setchar(extra,tpm[2])
-            head = insertnodeafter(head,current,extra)
-            tpm = twopart_mark[char]
+        if tpm then
+            while tpm do
+                local extra = copy_node(current)
+                copyinjection(extra,current)
+                char = tpm[1]
+                setchar(current,char)
+                setchar(extra,tpm[2])
+                head = insertnodeafter(head,current,extra)
+                tpm = twopart_mark[char]
+            end
+            if tpm and trace_steps then
+                logprocess("reorder two, handle matra")
+            end
         end
         --
         if not moved[current] and dependent_vowel[char] then
@@ -2036,6 +2221,9 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                 setlink(getprev(pos),current)
                 setlink(current,pos)
              -- setlink(getprev(pos),current,pos) -- maybe
+                if trace_steps then
+                    logprocess("reorder two, handle pre mark")
+                end
             elseif above_mark[char] then
                 -- after main consonant
                 target = basepos
@@ -2079,13 +2267,16 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                     setlink(current,getnext(target))
                     setlink(target,current)
                  -- setlink(target,current,getnext(target)) -- maybe
+                    if trace_steps then
+                        logprocess("reorder two, handle mark")
+                    end
                 end
             end
         end
         current = cn
     end
 
-    -- reorder halant+Ra
+    -- reorder halant + Ra
 
     local current = getnext(start)
     local last    = getnext(stop)
@@ -2109,6 +2300,9 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                         stop = prev
                     end
                     cn = next
+                    if trace_steps then
+                        logprocess("reorder two, handle halant and ra")
+                    end
                 end
             end
             -- after_postscript
@@ -2148,6 +2342,9 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
                 setprev(nextnextnext,current)
             end
             setlink(nextnext,c)
+            if trace_steps then
+                logprocess("reorder two, handle nukta")
+            end
         end
         if stop == current then break end
         current = getnext(current)
@@ -2160,6 +2357,9 @@ local function reorder_two(head,start,stop,font,attr,nbspaces) -- maybe do a pas
         nbspaces = nbspaces - 1
         head = remove_node(head, base)
         flushnode(base)
+        if trace_steps then
+            logprocess("reorder two, handle nbsp")
+        end
     end
 
     return head, stop, nbspaces
@@ -2256,21 +2456,45 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
     local already_below_mark -- = false
     local already_post_mark  -- = false
     while dependent_vowel[v] do
-        local vowels = twopart_mark[v] or { v }
-        for k, v in next, vowels do
+        local vowels = twopart_mark[v]
+        if vowels then
+            for k=1,#vowels do
+                local v = vowels[k]
+                if pre_mark[v] and not already_pre_mark then
+                    already_pre_mark = true
+                elseif above_mark[v] and not already_above_mark then
+                    already_above_mark = true
+                elseif below_mark[v] and not already_below_mark then
+                    already_below_mark = true
+                elseif post_mark[v] and not already_post_mark then
+                    already_post_mark = true
+                elseif devanagarihash[font].conjuncts == "continue" then
+                    -- for testing
+                else
+                    return c
+                end
+            end
+        else
             if pre_mark[v] and not already_pre_mark then
                 already_pre_mark = true
-            elseif above_mark[v] and not already_above_mark then
-                already_above_mark = true
+            elseif post_mark[v] and not already_post_mark then
+                if devanagarihash[font].conjuncts == "mixed" then
+                    -- for messy fonts
+                    return c
+                else
+                    already_post_mark = true
+                end
             elseif below_mark[v] and not already_below_mark then
                 already_below_mark = true
-            elseif post_mark[v] and not already_post_mark then
-                already_post_mark = true
+            elseif above_mark[v] and not already_above_mark then
+                already_above_mark = true
+            elseif devanagarihash[font].conjuncts == "continue" then
+                -- for testing
             else
                 return c
             end
         end
-        c = getnext(c)
+        c = n
         n = getnext(c)
         if not n then
             return c
@@ -2281,7 +2505,7 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
         end
     end
     if nukta[v] then
-        c = getnext(c)
+        c = n
         n = getnext(c)
         if not n then
             return c
@@ -2292,7 +2516,7 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
         end
     end
     if halant[v] then
-        c = getnext(c)
+        c = n
         n = getnext(c)
         if not n then
             return c
@@ -2303,7 +2527,7 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
         end
     end
     if vowel_modifier[v] then
-        c = getnext(c)
+        c = n
         n = getnext(c)
         if not n then
             return c
@@ -2314,7 +2538,7 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
         end
     end
     if stress_tone_mark[v] then
-        c = getnext(c)
+        c = n
         n = getnext(c)
         if not n then
             return c
@@ -2332,11 +2556,12 @@ local function analyze_next_chars_one(c,font,variant) -- skip one dependent vowe
 end
 
 local function analyze_next_chars_two(c,font)
-    local n = getnext(c)
+    local n, v
+    n = getnext(c)
     if not n then
         return c
     end
-    local v = ischar(n,font)
+    v = ischar(n,font)
     if v and nukta[v] then
         c = n
     end
@@ -2398,11 +2623,11 @@ local function analyze_next_chars_two(c,font)
         -- This shouldn't happen I guess.
         return
     end
-    local n = getnext(c)
+    n = getnext(c)
     if not n then
         return c
     end
-    local v = ischar(n,font)
+    v = ischar(n,font)
     if not v then
         return c
     end
@@ -2445,17 +2670,42 @@ local function analyze_next_chars_two(c,font)
         local already_above_mark -- = false
         local already_below_mark -- = false
         local already_post_mark  -- = false
+        -- inefficient : too many tests but seldom more than one
         while dependent_vowel[v] do
-            local vowels = twopart_mark[v] or { v }
-            for k, v in next, vowels do
+            local vowels = twopart_mark[v]
+            if vowels then
+                for k=1,#vowels do
+                    local v = vowels[k]
+                    if pre_mark[v] and not already_pre_mark then
+                        already_pre_mark = true
+                    elseif above_mark[v] and not already_above_mark then
+                        already_above_mark = true
+                    elseif below_mark[v] and not already_below_mark then
+                        already_below_mark = true
+                    elseif post_mark[v] and not already_post_mark then
+                        already_post_mark = true
+                    elseif devanagarihash[font].conjuncts == "continue" then
+                        -- for testing
+                    else
+                        return c
+                    end
+                end
+            else
                 if pre_mark[v] and not already_pre_mark then
                     already_pre_mark = true
-                elseif above_mark[v] and not already_above_mark then
-                    already_above_mark = true
+                elseif post_mark[v] and not already_post_mark then
+                    if devanagarihash[font].conjuncts == "mixed" then
+                        -- for messy fonts
+                        return c
+                    else
+                        already_post_mark = true
+                    end
                 elseif below_mark[v] and not already_below_mark then
                     already_below_mark = true
-                elseif post_mark[v] and not already_post_mark then
-                    already_post_mark = true
+                elseif above_mark[v] and not already_above_mark then
+                    already_above_mark = true
+                elseif devanagarihash[font].conjuncts == "continue" then
+                    -- for testing
                 else
                     return c
                 end
@@ -2713,7 +2963,7 @@ local function method_one(head,font,attr)
                     end
                 else
                     if show_syntax_errors then
-                        local mark = mark_four[char]
+                        local mark = mark_pre_above_below_post[char]
                         if mark then
                             head, current = inject_syntax_error(head,current,char)
                         end
@@ -2805,7 +3055,6 @@ local function method_two(head,font,attr)
                     syllableend = current
                 elseif consonant[getchar(current)] then
                     -- WHY current INSTEAD OF c ?
-
                     -- Consonant syllable: {C+[N]+<H+[<ZWNJ|ZWJ>]|<ZWNJ|ZWJ>+H>} + C+[N]+[A] + [< H+[<ZWNJ|ZWJ>] | {M}+[N]+[H]>]+[SM]+[(VD)]
                     current = analyze_next_chars_two(current,font) -- not c !
                     syllableend = current
@@ -2827,7 +3076,7 @@ local function method_two(head,font,attr)
         if not syllableend and show_syntax_errors then
             local char = ischar(current,font)
             if char and not getstate(current) then -- state can also be init
-                local mark = mark_four[char]
+                local mark = mark_pre_above_below_post[char]
                 if mark then
                     head, current = inject_syntax_error(head,current,char)
                 end
@@ -2855,6 +3104,10 @@ local function method_two(head,font,attr)
         end
         current = getnext(current)
     end
+
+ -- if languages.indic then
+ --     head = languages.indic.handler(head)
+ -- end
 
     return head, done
 end

@@ -3027,7 +3027,7 @@ function readers.expand(data)
     -- about 15% on arabtype .. then moving the a test also saves a bit (even when
     -- often a is not set at all so that one is a bit debatable
 
-    local function expandlookups(sequences)
+    local function expandlookups(sequences,whatever)
         if sequences then
             -- we also need to do sublookups
             for i=1,#sequences do
@@ -3103,6 +3103,9 @@ function readers.expand(data)
                                         if lookups then
                                             for k, v in next, lookups do -- actually this one is indexed
                                                 local lookup = sublookups[v]
+if not lookup and whatever then
+    lookup = whatever[v]
+end
                                                 if lookup then
                                                     lookups[k] = lookup
                                                     if not subtype then
@@ -3183,5 +3186,5 @@ function readers.expand(data)
     end
 
     expandlookups(sequences)
-    expandlookups(sublookups)
+    expandlookups(sublookups,sequences)
 end

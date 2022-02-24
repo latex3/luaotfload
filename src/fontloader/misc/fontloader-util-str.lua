@@ -16,6 +16,7 @@ local tonumber, type, tostring, next, setmetatable = tonumber, type, tostring, n
 local unpack, concat = table.unpack, table.concat
 local P, V, C, S, R, Ct, Cs, Cp, Carg, Cc = lpeg.P, lpeg.V, lpeg.C, lpeg.S, lpeg.R, lpeg.Ct, lpeg.Cs, lpeg.Cp, lpeg.Carg, lpeg.Cc
 local patterns, lpegmatch = lpeg.patterns, lpeg.match
+local tsplitat = lpeg.tsplitat
 local utfchar, utfbyte, utflen = utf.char, utf.byte, utf.len
 
 ----- loadstripped = utilities.lua.loadstripped
@@ -1507,7 +1508,7 @@ end
 
 if not string.explode then
 
-    local tsplitat = lpeg.tsplitat
+ -- local tsplitat = lpeg.tsplitat
 
     local p_utf   = patterns.utf8character
     local p_check = C(p_utf) * (P("+") * Cc(true))^0
@@ -1530,3 +1531,24 @@ if not string.explode then
     end
 
 end
+
+
+do
+
+    local p_whitespace = patterns.whitespace^1
+
+    local cache = setmetatable({ }, { __index = function(t,k)
+        local p = tsplitat(p_whitespace * P(k) * p_whitespace)
+        local v = function(s)
+            return lpegmatch(p,s)
+        end
+        t[k] = v
+        return v
+    end })
+
+    function string.wordsplitter(s)
+        return cache[s]
+    end
+
+end
+

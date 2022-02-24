@@ -67,7 +67,7 @@ local function gref(descriptions,n)
 end
 
 local function cref(feature,sequence)
-    return formatters["feature %a, type %a, chain lookup %a"](feature,sequence.type,sequence.name)
+    return formatters["feature %a, type %a, (chain) lookup %a"](feature,sequence.type,sequence.name)
 end
 
 local function report_substitution(feature,sequence,descriptions,unicode,substitution)
@@ -240,12 +240,11 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
     local ligatures    = { }
     local alternate    = tonumber(value) or true and 1
     local defaultalt   = otf.defaultbasealternate
-
     local trace_singles      = trace_baseinit and trace_singles
     local trace_alternatives = trace_baseinit and trace_alternatives
     local trace_ligatures    = trace_baseinit and trace_ligatures
 
-    -- A chain of changes is handled in font-con which is clesner because
+    -- A chain of changes is handled in font-con which is cleaner because
     -- we can have shared changes and such.
 
     if not changed then

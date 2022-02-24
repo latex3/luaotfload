@@ -207,6 +207,8 @@ end
 -- We had two loops (going backward) but can do it in one loop .. but maybe we
 -- should only accept fonts with proper hvar tables.
 
+-- dowidth is kind of hack ... fonts are not always ok wrt these extra points
+
 local xv = { } -- we share this cache
 local yv = { } -- we share this cache
 
@@ -241,7 +243,7 @@ local function applyaxis(glyph,shape,deltas,dowidth)
                                 p[2] = p[2] + y
                             end
                         end
-                    else
+                    elseif cnt > 0 then
                         -- Not the most efficient solution but we seldom do this. We
                         -- actually need to avoid the extra points here but I'll deal
                         -- with that when needed.
@@ -365,6 +367,8 @@ local function applyaxis(glyph,shape,deltas,dowidth)
                                 pi[2] = pi[2] + factor * fy
                             end
                         end
+                    else
+                        report("bad deltapoint data, maybe a missing hvar table")
                     end
                 else
                     for i=1,nofpoints do

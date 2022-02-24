@@ -3806,6 +3806,7 @@ function readers.hvar(f,fontdata,specification)
     end
     local tableoffset = gotodatatable(f,fontdata,"hvar",specification.variable)
     if not tableoffset then
+        report("no hvar table, expect problems due to messy widths")
         return
     end
 
@@ -3823,7 +3824,6 @@ function readers.hvar(f,fontdata,specification)
     if variationoffset > 0 then
         regions, deltas = readvariationdata(f,variationoffset,factors)
     end
-
     if not regions then
         -- for now .. what to do ?
         return

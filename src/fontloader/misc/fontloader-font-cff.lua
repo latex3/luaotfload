@@ -1931,7 +1931,8 @@ local result = { }
                 -- cff 1: (when cff2 strip them)
                 elseif t == 1 or t == 3 or t == 18 or operation == 23 then
                     p_getstem() -- at the start
-                    if true then
+                    if version == "cff" then
+--                     if true then
                         if top > 0 then
                             for i=1,top do
                                 r = r + 1 ; result[r] = encode[stack[i]]
@@ -1946,6 +1947,7 @@ local result = { }
                 -- cff 1: (when cff2 strip them)
                 elseif t == 19 or t == 20 then
                     local s = p_getmask() or 0 -- after the stems
+--                     if version == "cff" then
                     if true then
                         if top > 0 then
                             for i=1,top do
@@ -1969,7 +1971,8 @@ local result = { }
                     i = i + 1
                 elseif t == 13 then
                     hsbw()
-                    if version == "cff" then
+--                     if version == "cff" then
+                    if true then
                         -- we do a moveto over lsb
                         r = r + 1 ; result[r] = encode[lsb]
                         r = r + 1 ; result[r] = chars[22]

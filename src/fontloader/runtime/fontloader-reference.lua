@@ -9034,7 +9034,6 @@ characters.indicgroups={
   [43249]=true,
  },
 }
-return characters.indicgroups
 
 end -- closure
 

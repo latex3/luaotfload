@@ -4290,7 +4290,6 @@ characters.indicgroups={
   [43249]=true,
  },
 }
-return characters.indicgroups
 
 end --- [luaotfload, fontloader-2022-02-24.lua scope for “basics-chr”] ---
 

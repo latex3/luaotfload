@@ -3839,5 +3839,3 @@ characters.indicgroups={
 }
 
 -- done
-
-return characters.indicgroups

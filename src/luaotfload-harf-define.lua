@@ -21,13 +21,13 @@ local gsub = string.gsub
 
 local hb = luaotfload.harfbuzz
 local scriptlang_to_harfbuzz = require'luaotfload-scripts'.to_harfbuzz
+local cff2_handler = require'luaotfload-harf-var-cff2'
+local ttf_handler = require'luaotfload-harf-var-ttf'
 
 local harf_settings = luaotfload.harf or {}
 luaotfload.harf = harf_settings
 
 harf_settings.default_buf_flags = hb.Buffer.FLAGS_DEFAULT or 0
-
-local hbfonts = {}
 
 local cfftag  = hb.Tag.new("CFF ")
 local cff2tag = hb.Tag.new("CFF2")
@@ -35,6 +35,11 @@ local os2tag  = hb.Tag.new("OS/2")
 local posttag = hb.Tag.new("post")
 local glyftag = hb.Tag.new("glyf")
 local gpostag = hb.Tag.new("GPOS")
+
+local italtag = hb.Tag.new("ital")
+local wghttag = hb.Tag.new("wght")
+local slnttag = hb.Tag.new("slnt")
+local opsztag = hb.Tag.new("opsz")
 
 local invalid_l         = hb.Language.new()
 local invalid_s         = hb.Script.new()
@@ -72,27 +77,123 @@ local get_designsize do
 end
 
 local containers = luaotfload.fontloader.containers
-local hbcacheversion = 1.3
-local facecache = containers.define("fonts", "hb", hbcacheversion, true)
+local hbcacheversion = 1.4
+local fontcache = containers.define("fonts", "hb", hbcacheversion, true)
+local facecache = {}
+
+local variable_pattern do
+  local l = lpeg or require'lpeg'
+  local white = l.S' \t'^0
+  local number = l.C(l.S'+-'^-1 * (l.R'09'^1 * ('.' * l.R'09'^0)^-1 + '.' * l.R'09'^1))
+  local name_or_tag = l.C(l.R('AZ', 'az')^1)
+  local pair = l.Ct(name_or_tag * white * '=' * white * (number + l.Cc(nil) * 'auto'))
+  variable_pattern = l.Ct(pair * (white * ',' * white * pair)^0)
+end
 
 local function loadfont(spec)
   local path, sub = spec.resolved, spec.sub or 1
 
-  local key = string.format("%s:%d", gsub(path, "[/\\]", ":"), sub)
+  local key = gsub(string.format("%s:%d:%s", path, sub, instance), "[/\\]", ":")
 
   local attributes = lfs.attributes(path)
   if not attributes then return end
   local size, date = attributes.size or 0, attributes.modification or 0
 
-  local cached = containers.read(facecache, key)
+  local hbface = facecache[key]
+  if not hbface then
+    hbface = hb.Face.new(path, sub - 1)
+    facecache[key] = hbface
+  end
+
+  local normalized
+  local varkey
+  if hbface.ot_var_has_data and hbface:ot_var_has_data() then
+    local design_coords
+    local instance = spec.features.raw.instance
+    local axis = spec.features.raw.axis
+    local assignments = axis and variable_pattern:match(axis)
+    if axis and not assignments and not instance then
+      instance, axis = axis, nil
+    end
+    if instance then
+      instance = instance:lower()
+      local instances = hbface:ot_var_named_instance_get_infos()
+      for i = 1, #instances do
+        local inst = instances[i]
+        if instance == hbface:get_name(inst.subfamily_name_id):lower() then
+          design_coords = {hbface:ot_var_named_instance_get_design_coords(inst.index)}
+          break
+        end
+      end
+      if not design_coords then
+        texio.write_nl'Warning (luaotfload): Unknown instance name ignored.'
+      end
+    end
+    local axes = hbface:ot_var_get_axis_infos()
+    design_coords = design_coords or lua.newtable(#axes, 0)
+    if assignments then
+      for i = 1, #assignments do
+        local found
+        local name = assignments[i][1]
+        local tag
+        if #name <= 4 then
+          tag = hb.Tag.new(name)
+        end
+        name = string.lower(name)
+        for j = 1, #axes do
+          local axis = axes[j]
+          if tag and tag == axis.tag then
+            found = axis
+            break
+          end
+          if name == hbface:get_name(axis.name_id):lower() then
+            found = axis
+            if not tag then break end
+          end
+        end
+        if found then
+          design_coords[found.axis_index] = assignments[i][2]
+        else
+          texio.write_nl'Warning (luaotfload): Unknown axis name ignored.'
+        end
+      end
+    end
+    for i = 1, #axes do
+      local axis = axes[i]
+      local index = axis.axis_index -- == i in practise
+      if not design_coords[index] then
+        local tag = axis.tag
+        if tag == italtag and spec.style then
+          design_coords[index] = spec.style == 'i' or spec.style == 'bi' and 1 or 0
+        elseif tag == slnttag and spec.style then
+          design_coords[index] = spec.style == 'i' or spec.style == 'bi' and -5 or 0
+        elseif tag == wghttag and spec.style then
+          design_coords[index] = (spec.style == 'b' or spec.style == 'bi') and 600 or 400
+        elseif tag == opsztag and (spec.optsize or spec.size > 0) then
+          design_coords[index] = spec.optsize or spec.size / 65536
+        else
+          design_coords[index] = axis.default_value
+        end
+      end
+    end
+    normalized = {hbface:ot_var_normalize_coords(table.unpack(design_coords))}
+    varkey = ':' .. table.concat(normalized, ':')
+    key = key .. varkey
+  else
+    varkey = ''
+  end
+
+  local cached = containers.read(fontcache, key)
   local iscached = cached and cached.date == date and cached.size == size
 
-  local hbface = iscached and cached.face or hb.Face.new(path, sub - 1)
   local tags = hbface and hbface:get_table_tags()
   -- If the face has no table tags then it isn’t a valid SFNT font that
   -- HarfBuzz can handle.
   if not tags then return end
   local hbfont = iscached and cached.font or hb.Font.new(hbface)
+  if normalized then
+    hbfont:set_var_coords_normalized(table.unpack(normalized))
+  end
 
   if not iscached then
     local upem = hbface:get_upem()
@@ -225,12 +326,13 @@ local function loadfont(spec)
       nominals = nominals,
       unicodes = characters,
       psname = hbface:get_name(hb.ot.NAME_ID_POSTSCRIPT_NAME),
-      fullname = hbface:get_name(hb.ot.NAME_ID_FULL_NAME),
+      fullname = hbface:get_name(hb.ot.NAME_ID_FULL_NAME) .. varkey,
       haspng = hbface:ot_color_has_png(),
       loaded = {}, -- Cached loaded glyph data.
+      normalized = normalized,
     }
 
-    containers.write(facecache, key, cached)
+    containers.write(fontcache, key, cached)
   end
   cached.face = hbface
   cached.font = hbfont
@@ -351,6 +453,7 @@ local function scalefont(data, spec)
     resources = {
       unicodes = data.name_to_char,
     },
+    streamprovider = data.normalized and (data.fonttype == 'opentype' and 1 or 3) or nil,
   }
   tfmdata.shared.processes = fonts.handlers.otf.setfeatures(tfmdata, features)
   fonts.constructors.applymanipulators("otf", tfmdata, features, false)
@@ -411,3 +514,36 @@ luatexbase.add_to_callback('find_truetype_file', function(name)
   return find_file(name, 'truetype fonts')
       or name:gsub('^harfloaded:', '')
 end, 'luaotfload.harf.strip_prefix')
+
+local glyph_stream_data
+local glyph_stream_mapping, glyph_stream_mapping_inverse
+local extents_hbfont
+local cb = luatexbase.remove_from_callback('glyph_stream_provider', 'luaotfload.glyph_stream')
+luatexbase.add_to_callback('glyph_stream_provider', function(fid, cid, kind, ocid)
+  if cid == 0 then -- Always the first call for a font
+    glyph_stream_data, extents_hbfont = nil
+    collectgarbage()
+    local fontdir = font.getfont(fid)
+    if fontdir and fontdir.hb then
+      if kind == 3 then
+        glyph_stream_mapping = {[ocid] = cid}
+        glyph_stream_mapping_inverse = {[cid] = ocid}
+        extents_hbfont = fontdir.hb.shared.font
+      elseif kind == 2 then
+        glyph_stream_data = ttf_handler(fontdir.hb.shared.face, fontdir.hb.shared.font, glyph_stream_mapping, glyph_stream_mapping_inverse)
+      else
+        glyph_stream_data = cff2_handler(fontdir.hb.shared.face, fontdir.hb.shared.font)
+      end
+    end
+  end
+  if glyph_stream_data then
+    return glyph_stream_data(cid)
+  elseif extents_hbfont then
+    glyph_stream_mapping[ocid] = cid
+    glyph_stream_mapping_inverse[cid] = ocid
+    local extents = extents_hbfont:get_glyph_extents(ocid)
+    return extents.width, extents.x_bearing, extents.height, extents.y_bearing
+  else
+    return cb(fid, cid, kind, ocid)
+  end
+end, 'luaotfload.harf.glyphstream')

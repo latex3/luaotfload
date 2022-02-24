@@ -528,7 +528,7 @@ local featuresep = comma + semicolon
     we only support the shorthands for italic / bold / bold italic
     shapes, as well as setting optical size, the rest is ignored.
 --doc]]--
-local style_modifier    = (S'bB' * S'iI'^-1 + S'iI' * S'bB'^-1)
+local style_modifier    = (S'bB' * S'iI'^-1 + S'iI' * S'bB'^-1 + S'rR')
                         / stringlower
 local size_modifier     = S"Ss" * P"="    --- optical size
                         * Cc"optsize" * C(decimal)

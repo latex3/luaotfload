@@ -8,8 +8,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-loaders",
-    version       = "3.19-dev",       --TAGVERSION
-    date          = "2021-05-21", --TAGDATE
+    version       = "3.19",       --TAGVERSION
+    date          = "2022-02-24", --TAGDATE
     description   = "luaotfload submodule / callback handling",
     license       = "GPL v2.0"
 }

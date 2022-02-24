@@ -19,7 +19,7 @@ print(mydata.email)
 
 --------- setup things for a dev-version
 -- See stackoverflow.com/a/12142066/212001 / build-config from latex2e
-local maimainanch do
+local main_branch do
   local tag = os.getenv'TRAVIS_TAG'
   if tag and tag ~= "" then
     main_branch = not string.match(tag, '-dev$')

@@ -35,10 +35,10 @@
 \l{Kashmiri}{۰۱۲۳۴۵۶۷۸۹}\par
 \newpage
 
-\font\burmesefont={file:NotoSerifMyanmar-Regular.ttf:mode=harf;script=mym2;}
-\font\devafont={file:NotoSansDevanagari-Regular.ttf:mode=harf;script=dev2;}
-\font\banglafont={file:NotoSansBengali-Regular.ttf:mode=harf;script=bng2;}
-\font\tibetanfont={file:NotoSerifTibetan-Regular.ttf:mode=harf;script=tibt;}
+\font\burmesefont={kpse:NotoSerifMyanmar-Regular.ttf:mode=harf;script=mym2;}
+\font\devafont={kpse:NotoSansDevanagari-Regular.ttf:mode=harf;script=dev2;}
+\font\banglafont={kpse:NotoSansBengali-Regular.ttf:mode=harf;script=bng2;}
+\font\tibetanfont={kpse:NotoSerifTibetan-Regular.ttf:mode=harf;script=tibt;}
 \burmesefont မ္မတီခေါင်းလောင်းကြီ\par
 \devafont  क्रर्कि \par
 \banglafont কণ্যা এখন কি করিবে\par

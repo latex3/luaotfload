@@ -62,6 +62,23 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.19 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+  \item When used with Lua\TeX\ 1.15.0 or newer, variable fonts are supported
+    when using the \texttt{harf} shaper too.
+  \item A new algorithm for selecting fonts based on font family names allows
+    to more reliably load fonts based on their family name.
+  \item The compiled font database gets compressed to reduce disk space and
+    improve performance on newer systems.
+  \item Broken rendering of some TrueType based variable fonts has been fixed.
+  \item Text automatically gets normalized to Unicode's NFC before shaping.
+    This improves rendering for text written in decomposed forms for many
+    fonts. This can be turned off by passing the \texttt{-normalize} font
+    feature.
+  \item A number of small bugfixes.
+ \end{itemize}
+\endsubsection
+
 \beginsubsection {New in version 3.18 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
   \item Now variable fonts can be loaded with default values without specifying

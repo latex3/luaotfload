@@ -1,5 +1,11 @@
 Change History
 --------------
+2022-02-27 luaotfload v3.20
+
+    *  A bug in luaotfload-tool has been corrected.
+    *  The directory for the font name database has been corrected and no
+       longer uses the development directory.
+
 2022-02-24 luaotfload v3.19
 
     *  When used with LuaTeX 1.15.0 or newer, variable fonts are supported

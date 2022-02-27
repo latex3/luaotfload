@@ -6,8 +6,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-dvi",
-    version       = "3.19",       --TAGVERSION
-    date          = "2022-02-24", --TAGDATE
+    version       = "3.20",       --TAGVERSION
+    date          = "2022-02-27", --TAGDATE
     description   = "luaotfload submodule / DVI",
     license       = "GPL v2.0",
     author        = "Marcel Krüger",

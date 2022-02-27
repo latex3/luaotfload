@@ -1,14 +1,2 @@
-2022-02-24 luaotfload v3.19
-
-    *  When used with LuaTeX 1.15.0 or newer, variable fonts are supported
-       when using the harf shaper too.
-    *  A new algorithm for selecting fonts based on font family names allows
-       to more reliably load fonts based on their family name.
-    *  The compiled font database gets compressed to reduce disk space and
-       improve performance on newer systems.
-    *  Text automatically gets normalized to Unicode's NFC before shaping.
-       This improves rendering for text written in decomposed forms for many
-       fonts. This can be turned off by passing the -normalize font feature.
-    *  The fontloader has been synced with the context code from 2022-02-24.
-       This fixes some broken rendering of TrueType based variable fonts.
-    *  A number of small bugfixes.
+Two critical bugs related to luaotfload-tool and the cache location have been corrected.
+Otherwise there are no functional changes.

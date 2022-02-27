@@ -5,8 +5,8 @@
 do
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-harf-var-t2-writer",
-     version       = "3.19",       --TAGVERSION
-     date          = "2022-02-24", --TAGDATE
+     version       = "3.20",       --TAGVERSION
+     date          = "2022-02-27", --TAGDATE
      description   = "luaotfload submodule / Type 2 charstring writer",
      license       = "GPL v2.0",
      author        = "Marcel Krüger",

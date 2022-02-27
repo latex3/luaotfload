@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2022-02-24 v3.19}
+  \setdocumentdate   {2022-02-27 v3.20}
   \setdocumentauthor {LaTeX3 Project\\
                       Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer · Marcel Krüger\\
                       Home: \hyperlink {https://github.com/latex3/luaotfload}}
@@ -62,6 +62,14 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.20 (by Ulrike Fischer/Marcel Krüger)}
+\begin{itemize}
+  \item A bug in luaotfload-tool has been corrected.
+  \item The directory for the font name database has been corrected and no
+    longer uses the development directory.
+\end{itemize}
+\endsubsection
+
 \beginsubsection {New in version 3.19 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
   \item When used with Lua\TeX\ 1.15.0 or newer, variable fonts are supported

@@ -5,8 +5,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-script",
-    version       = "3.19",       --TAGVERSION
-    date          = "2022-02-24", --TAGDATE
+    version       = "3.20",       --TAGVERSION
+    date          = "2022-02-27", --TAGDATE
     description   = "luaotfload submodule / Script helpers",
     license       = "CC0 1.0 Universal",
     author        = "Marcel Krüger"

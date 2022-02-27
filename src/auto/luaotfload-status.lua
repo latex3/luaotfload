@@ -93,7 +93,7 @@ return {
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",
   ["description"]="v3.20/2022-02-27",
   ["loader"]="fontloader-2022-02-24.lua",
-  ["revision"]="9c6d7c657d0325cdd51009b8d484675ff500f19d",
-  ["timestamp"]="2022-02-27 14:13:25 +0100",
+  ["revision"]="b6b01d231706a79c8456c4c890d62a65897b49e1",
+  ["timestamp"]="2022-02-27 14:15:30 +0100",
  },
 }

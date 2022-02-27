@@ -843,7 +843,10 @@ local normalize_lookup = setmetatable({}, {__index = function(t, f)
     t[fontdir] = result
     return result
 end})
-local normalize_funcs = {
+-- When this is loaded as part of luaotfload-tool, then we can't access nodes
+-- and therefore uni_normalize doesn't exists. In that case we don't need it
+-- anyway, so just skip it then.
+local normalize_funcs = uni_normalize and {
     nfc = uni_normalize.NFC,
     nfd = uni_normalize.NFD,
     nfkd = uni_normalize.NFKD,

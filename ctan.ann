@@ -1,2 +1,4 @@
-Two critical bugs related to luaotfload-tool and the cache location have been corrected.
-Otherwise there are no functional changes.
+2022-03-18 luaotfload v3.21
+
+    *  Fix performance regression introduced in version 3.19.
+    *  More reliably support TrueType based variable fonts in harf mode.

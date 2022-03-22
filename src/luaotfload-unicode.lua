@@ -5,7 +5,7 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
     name          = "luaotfload-unicode",
-    version       = "3.21",       --TAGVERSION
+    version       = "3.22-dev",       --TAGVERSION
     date          = "2022-03-18", --TAGDATE
     description   = "luaotfload submodule / Unicode helpers",
     license       = "CC0 1.0 Universal",

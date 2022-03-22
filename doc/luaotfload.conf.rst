@@ -8,7 +8,7 @@
 
 :Date:                  2022-03-18
 :Copyright:             GPL v2.0
-:Version:               3.21
+:Version:               3.22-dev
 :Manual section:        5
 :Manual group:          text processing
 

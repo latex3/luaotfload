@@ -247,115 +247,148 @@ local function applyaxis(glyph,shape,deltas,dowidth)
                         -- Not the most efficient solution but we seldom do this. We
                         -- actually need to avoid the extra points here but I'll deal
                         -- with that when needed.
-                        local function find(i)
-                            local prv = cnt
-                            for j=1,cnt do
-                                local nxt = dpoints[j]
-                                if nxt == i then
-                                    return false, j, false
-                                elseif nxt > i then
-                                    return prv, false, j
+                        local contours    = shape.contours
+                        local nofcontours = #contours
+                        local first       = 1
+                        local firstindex  = 1
+                        for contour=1,nofcontours do
+                            local last = contours[contour]
+                            if last >= first then
+                                local lastindex = cnt
+                                if firstindex < cnt then
+                                    for currentindex=firstindex,cnt do
+                                        local found = dpoints[currentindex]
+                                        if found <= first then
+                                            firstindex = currentindex
+                                        end
+                                        if found == last then
+                                            lastindex = currentindex
+                                            break;
+                                        elseif found > last then
+                                            break
+                                        end
+                                    end
                                 end
-                                prv = j
+                                -- print("unicode: ",glyph.unicode or "?")
+                                -- print("contour: ",first,contour,last)
+                                -- print("index  : ",firstindex,lastindex,cnt)
+                                -- print("points : ",dpoints[firstindex],dpoints[lastindex])
+                                local function find(i)
+                                    local prv = lastindex
+                                    for j=firstindex,lastindex do
+                                        local nxt = dpoints[j]
+                                        if nxt == i then
+                                            return false, j, false
+                                        elseif nxt > i then
+                                            return prv, false, j
+                                        end
+                                        prv = j
+                                    end
+                                    return prv, false, firstindex
+                                end
+                                -- We need the first and last points untouched so we first
+                                -- collect data.
+                                for point=first,last do
+                                    local d1, d2, d3 = find(point)
+                                    local p2 = points[point]
+                                    if d2 then
+                                        xv[point] = xvalues[d2]
+                                        yv[point] = yvalues[d2]
+                                    else
+                                        local n1 = dpoints[d1]
+                                        local n3 = dpoints[d3]
+                                        -- Some day I need to figure out these extra points but
+                                        -- I'll wait till the standard is more clear and fonts
+                                        -- become better (ntg-context: fraunces.ttf > abcdef).
+                                        if n1 > nofpoints then
+                                            n1 = nofpoints
+                                        end
+                                        if n3 > nofpoints then
+                                            n3 = nofpoints
+                                        end
+                                        --
+                                        local p1 = points[n1]
+                                        local p3 = points[n3]
+                                        local p1x = p1[1]
+                                        local p2x = p2[1]
+                                        local p3x = p3[1]
+                                        local p1y = p1[2]
+                                        local p2y = p2[2]
+                                        local p3y = p3[2]
+                                        local x1 = xvalues[d1]
+                                        local y1 = yvalues[d1]
+                                        local x3 = xvalues[d3]
+                                        local y3 = yvalues[d3]
+                                        --
+                                        local fx
+                                        local fy
+                                        --
+                                        if p1x == p3x then
+                                            if x1 == x3 then
+                                                fx = x1
+                                            else
+                                                fx = 0
+                                            end
+                                        elseif p2x <= min(p1x,p3x) then
+                                            if p1x < p3x then
+                                                fx = x1
+                                            else
+                                                fx = x3
+                                            end
+                                        elseif p2x >= max(p1x,p3x) then
+                                            if p1x > p3x then
+                                                fx = x1
+                                            else
+                                                fx = x3
+                                            end
+                                        else
+                                            fx = (p2x - p1x)/(p3x - p1x)
+                                            fx = (1 - fx) * x1 + fx * x3
+                                        end
+                                        --
+                                        if p1y == p3y then
+                                            if y1 == y3 then
+                                                fy = y1
+                                            else
+                                                fy = 0
+                                            end
+                                        elseif p2y <= min(p1y,p3y) then
+                                            if p1y < p3y then
+                                                fy = y1
+                                            else
+                                                fy = y3
+                                            end
+                                        elseif p2y >= max(p1y,p3y) then
+                                            if p1y > p3y then
+                                                fy = y1
+                                            else
+                                                fy = y3
+                                            end
+                                        else
+                                            fy = (p2y - p1y)/(p3y - p1y)
+                                            fy = (1 - fy) * y1 + fy * y3
+                                        end
+                                     -- -- maybe:
+                                     -- if p1y ~= p3y then
+                                     --     fy = (p2y - p1y)/(p3y - p1y)
+                                     --     fy = (1 - fy) * y1 + fy * y3
+                                     -- elseif abs(p1y-p2y) < abs(p3y-p2y) then
+                                     --     fy = y1
+                                     -- else
+                                     --     fy = y3
+                                     -- end
+                                        --
+                                        xv[point] = fx
+                                        yv[point] = fy
+                                    end
+                                end
+                                if lastindex < cnt then
+                                    firstindex = lastindex + 1
+                                end
                             end
-                            return prv, false, 1
+                            first = last + 1
                         end
-                        -- We need the first and last points untouched so we first
-                        -- collect data.
-                        for i=1,nofpoints do
-                            local d1, d2, d3 = find(i)
-                            local p2 = points[i]
-                            if d2 then
-                                xv[i] = xvalues[d2]
-                                yv[i] = yvalues[d2]
-                            else
-                                local n1 = dpoints[d1]
-                                local n3 = dpoints[d3]
-                                -- Some day I need to figure out these extra points but
-                                -- I'll wait till the standard is more clear and fonts
-                                -- become better (ntg-context: fraunces.ttf > abcdef).
-                                if n1 > nofpoints then
-                                    n1 = nofpoints
-                                end
-                                if n3 > nofpoints then
-                                    n3 = nofpoints
-                                end
-                                --
-                                local p1 = points[n1]
-                                local p3 = points[n3]
-                                local p1x = p1[1]
-                                local p2x = p2[1]
-                                local p3x = p3[1]
-                                local p1y = p1[2]
-                                local p2y = p2[2]
-                                local p3y = p3[2]
-                                local x1 = xvalues[d1]
-                                local y1 = yvalues[d1]
-                                local x3 = xvalues[d3]
-                                local y3 = yvalues[d3]
-                                --
-                                local fx
-                                local fy
-                                --
-                                if p1x == p3x then
-                                    if x1 == x3 then
-                                        fx = x1
-                                    else
-                                        fx = 0
-                                    end
-                                elseif p2x <= min(p1x,p3x) then
-                                    if p1x < p3x then
-                                        fx = x1
-                                    else
-                                        fx = x3
-                                    end
-                                elseif p2x >= max(p1x,p3x) then
-                                    if p1x > p3x then
-                                        fx = x1
-                                    else
-                                        fx = x3
-                                    end
-                                else
-                                    fx = (p2x - p1x)/(p3x - p1x)
-                                    fx = (1 - fx) * x1 + fx * x3
-                                end
-                                --
-                                if p1y == p3y then
-                                    if y1 == y3 then
-                                        fy = y1
-                                    else
-                                        fy = 0
-                                    end
-                                elseif p2y <= min(p1y,p3y) then
-                                    if p1y < p3y then
-                                        fy = y1
-                                    else
-                                        fy = y3
-                                    end
-                                elseif p2y >= max(p1y,p3y) then
-                                    if p1y > p3y then
-                                        fy = y1
-                                    else
-                                        fy = y3
-                                    end
-                                else
-                                    fy = (p2y - p1y)/(p3y - p1y)
-                                    fy = (1 - fy) * y1 + fy * y3
-                                end
-                             -- -- maybe:
-                             -- if p1y ~= p3y then
-                             --     fy = (p2y - p1y)/(p3y - p1y)
-                             --     fy = (1 - fy) * y1 + fy * y3
-                             -- elseif abs(p1y-p2y) < abs(p3y-p2y) then
-                             --     fy = y1
-                             -- else
-                             --     fy = y3
-                             -- end
-                                --
-                                xv[i] = fx
-                                yv[i] = fy
-                            end
-                        end
+
                         for i=1,nofpoints do
                             local pi = points[i]
                             local fx = xv[i]

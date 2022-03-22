@@ -1,6 +1,6 @@
 return {
  ["hashes"]={
-  { "fontloader-2022-02-24.lua", "4dc8ce07471f8af7aa98d835df654768" },
+  { "fontloader-2022-03-22.lua", "de922cd18768e46f2831a03133c50a89" },
   { "fontloader-util-fil.lua", "d0accf4180201efd567816a25ad5e037" },
   { "fontloader-util-str.lua", "f4a9dd15c3e40cd3915749ac13837c95" },
   { "fontloader-l-unicode.lua", "f368874f11f3c525de5864fd413e4b24" },
@@ -44,7 +44,7 @@ return {
   { "fontloader-font-ott.lua", "3f67b1b1d40bbc222681d8db4aff0f42" },
   { "fontloader-font-oti.lua", "309a75f9c14b77d87e94eba827dc4e71" },
   { "fontloader-font-dsp.lua", "7616dae672693fd8ec0f1892358019a2" },
-  { "fontloader-font-ttf.lua", "feba1fdc80160343b24f89ef978e53cb" },
+  { "fontloader-font-ttf.lua", "a3ff07150b3535fd32f68748d53fcd36" },
   { "fontloader-font-cff.lua", "e38c1a40e1d1d577cdf7920fa50d0654" },
   { "fontloader-font-otr.lua", "91f70c1216e60227e1437b6c8dcd8647" },
   { "fontloader-font-vfc.lua", "a81c29eda98cd62cbebdb6c93544b50d" },
@@ -92,8 +92,8 @@ return {
  ["notes"]={
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",
   ["description"]="v3.22-dev/2022-03-18",
-  ["loader"]="fontloader-2022-02-24.lua",
-  ["revision"]="f3b4cee7b284e3e9d780315400166c53a4579f55",
-  ["timestamp"]="2022-03-18 14:09:12 +0100",
+  ["loader"]="fontloader-2022-03-22.lua",
+  ["revision"]="5663c544650e9795fbf179f1e876cfbf1b34d8a9",
+  ["timestamp"]="2022-03-22 19:10:08 +0100",
  },
 }

@@ -328,6 +328,9 @@ local function serialize_glyf(points, map)
       local x, y = component.x, component.y
       x = x and math.floor(x + .5)
       y = y and math.floor(y + .5)
+      if component.flags & 0x3 == 0x2 and (x >= 0x100 or x < -0x100 or y >= 0x100 or y < 0x100) then
+        component.flags = component.flags | 0x1
+      end
       result = result
           .. string.pack(component.flags & 0x2 == 0 and '>I2I2'
                       or component.flags & 0x1 == 0x1 and '>I2I2i2i2'

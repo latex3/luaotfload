@@ -39,6 +39,7 @@ jobs:
       - name: Install TeX Live
         uses: zauguin/install-texlive@v1
         with:
+          repository: https://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2021/tlnet-final
           # Here we use the same list of packages as in the testing workflow.
           package_file: .github/tl_packages
       - name: Run l3build

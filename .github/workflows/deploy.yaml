@@ -32,13 +32,14 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/texlive
-          key: texlive-v0-tl2022-${{ steps.get-id.outputs.id }}
-          restore-keys: texlive-v0-
+          key: texlive-v0-tl2022my-${{ steps.get-id.outputs.id }}
+          restore-keys: texlive-v0-tl2022my-
       # We need docutils for our documentation
       - run: sudo apt-get install python3-docutils
       - name: Install TeX Live
         uses: zauguin/install-texlive@main
         with:
+          repository: https://ctan.math.hamburg/systems/texlive/tlnet
           # Here we use the same list of packages as in the testing workflow.
           package_file: .github/tl_packages
       - name: Run l3build

@@ -166,7 +166,7 @@ local function parse_glyf(loca, glyf, gid)
         payload_length = payload_length + 8
       end
       if flags & 0x120 == 0x100 then -- Only applies to the last character
-        payload_length = payload_length + 2 + sio.readcardinal2(offset + payload_length)
+        payload_length = payload_length + 2 + sio.readcardinal2(glyf, offset + payload_length)
       end
       component.flags = flags
       component.payload = glyf:sub(offset, offset + payload_length - 1)

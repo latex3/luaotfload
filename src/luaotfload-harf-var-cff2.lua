@@ -371,7 +371,7 @@ local function parse_vstore(buf, offset, variation)
   return variation_data
 end
 
-function parse_cff2(buf, i0, coords)
+local function parse_cff2(buf, i0, coords)
   local fontid = 1
   local major, minor, hdrSize, topSize = string.unpack(">BBBH", buf, i0)
   if major ~= 2 then error[[Unsupported CFF version]] end

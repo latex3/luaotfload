@@ -516,8 +516,11 @@ end
 local function load_lua_file (path_lua, path_luc)
     local foundname, chunk = load_maybe_gzip (path_luc, true)
     if foundname then
-        chunk = assert (load (chunk, 'b'))
+        chunk = load (chunk, 'b')
     else
+        chunk = nil
+    end
+    if not chunk then
         foundname, chunk = load_maybe_gzip (path_lua, false)
         if foundname then
             chunk = assert (load (chunk, 't'))

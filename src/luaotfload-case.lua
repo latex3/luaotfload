@@ -281,7 +281,7 @@ local function process(table, feature)
           local add_ypogegrammeni = has_ypogegrammeni
           local post = getnext(n)
           local last
-          local saved_tonos
+          local saved_tonos, saved_dialytika
           while post do
             local char = is_char(post, font)
             if not char then break end
@@ -306,6 +306,9 @@ local function process(table, feature)
               if char == 0x0301 and not saved_tonos then
                 -- But if we have a tonos we might want to reinsert it later
                 saved_tonos = old
+              elseif diacritic_data & HAS_DIALYTIKA ~= 0 and not saved_dialytika then
+                -- Similar for dilytika
+                saved_dialytika = old
               else
                 free(old)
               end
@@ -335,10 +338,14 @@ local function process(table, feature)
             if first_datum & HAS_DIALYTIKA ~= 0 then
               if upper == 0x0399 then -- upper == 'Ι'
                 upper = 0x03AA
-                datum = datum & ~HAS_DIALYTIKA
-              elseif upper == 0x03a5 then -- upper == 'Υ'
-                upper = 0x03ab
-                datum = datum & ~HAS_DIALYTIKA
+              elseif upper == 0x03A5 then -- upper == 'Υ'
+                upper = 0x03AB
+              else
+                assert(false) -- Should not be possible
+              end
+              if saved_dialytika then
+                free(saved_dialytika)
+                saved_dialytika = nil
               end
             end
           end
@@ -351,9 +358,9 @@ local function process(table, feature)
           end
           setchar(n, upper)
           -- Potentially reinsert accents
-          if datum & HAS_DIALYTIKA ~= 0 then
-            head, n = insert_after(head, n, copy(n))
-            setchar(n, 0x0308)
+          if saved_dialytika then
+            head, n = insert_after(head, n, saved_dialytika)
+            setchar(n, 0x0308) -- Needed since we might have a U+0344 (COMBINING GREEK DIALYTIKA TONOS)
           end
           if saved_tonos then
             head, n = insert_after(head, n, saved_tonos)

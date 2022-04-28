@@ -1,0 +1,46 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{fontspec}
+\setmainfont[Script=Greek,Language=Greek]{Noto Serif}
+\ExplSyntaxOn
+\NewDocumentCommand\showUpper{m}{
+   #1&\text_uppercase:nn{el}{#1}&\addfontfeatures{RawFeature={upper=el}}#1&\addfontfeatures{RawFeature={upper=el-xiota}}#1
+}
+\ExplSyntaxOff
+\begin{document}
+\showoutput
+\START
+\tiny
+\begin{tabular}{ccccc}
+   \showUpper{Hallo}\\
+   \showUpper{άδικος}\\
+   \showUpper{κείμενο}\\
+   \showUpper{ίριδα}\\
+   \showUpper{Μαΐου}\\
+   \showUpper{Πόρος}\\
+   \showUpper{Ρύθμιση}\\
+   \showUpper{ΰ, Τηρώ, Μάιος}\\
+   \showUpper{άυλος}\\
+   \showUpper{ΑΫΛΟΣ}\\
+   \showUpper{Άκλιτα}\\
+   \showUpper{ρήματα ή άκλιτες}\\
+   \showUpper{μετοχές}\\
+   \showUpper{Επειδή η αναγνώριση}\\
+   \showUpper{της αξιοπρέπειας}\\
+   \showUpper{νομικού ή διεθνούς}\\
+   \showUpper{Ἐπειδὴ ἡ ἀναγνώριση}\\
+   \showUpper{νομικοῦ ἢ διεθνοῦς}\\
+   \showUpper{Νέο, Δημιουργία}\\
+   \showUpper{Ελάτε να φάτε τα}\\
+   \showUpper{καλύτερα παϊδάκια!}\\
+   \showUpper{Μαΐου, τρόλεϊ}\\
+   \showUpper{Το ένα ή το άλλο.}\\
+   \showUpper{ρωμέικα}\\
+   \showUpper{εἰσενέγκῄς ἡμᾶς}\\
+   \showUpper{εἰσενέγκῄς ἡμᾶς}\\
+   \showUpper{εἰσενέγκῄς ἡμᾶς}\\
+   \showUpper{εἰσενέγκῄς ἡμᾶς}
+\end{tabular}
+\clearpage
+\END
+\end{document}

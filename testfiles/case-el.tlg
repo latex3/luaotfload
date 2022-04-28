@@ -1,0 +1,2627 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+LaTeX Font Info:    External font `cmex10' loaded for size
+(Font)              <5> on input line ....
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+Package fontspec Info: Font family 'NotoSerif(1)' created for font 'Noto
+(fontspec)             Serif' with options
+(fontspec)             [Ligatures=TeX,Script=Greek,Language=Greek,RawFeature={upper=el}].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"NotoSerif:mode=node;script=grek;language=dflt;+tlig;upper=el;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
+(fontspec)             <->"NotoSerif:mode=node;script=grek;language=dflt;+tlig;upper=el;+smcp;"
+(fontspec)             - 'bold' (b/n) with NFSS spec.:
+(fontspec)             <->"NotoSerif/B:mode=node;script=grek;language=dflt;+tlig;upper=el;"
+(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.:
+(fontspec)             <->"NotoSerif/B:mode=node;script=grek;language=dflt;+tlig;upper=el;+smcp;"
+(fontspec)             - 'italic' (m/it) with NFSS spec.:
+(fontspec)             <->"NotoSerif/I:mode=node;script=grek;language=dflt;+tlig;upper=el;"
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
+(fontspec)             <->"NotoSerif/I:mode=node;script=grek;language=dflt;+tlig;upper=el;+smcp;"
+(fontspec)             - 'bold italic' (b/it) with NFSS spec.:
+(fontspec)             <->"NotoSerif/BI:mode=node;script=grek;language=dflt;+tlig;upper=el;"
+(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.:
+(fontspec)             <->"NotoSerif/BI:mode=node;script=grek;language=dflt;+tlig;upper=el;+smcp;"
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+Package fontspec Info: Font family 'NotoSerif(2)' created for font 'Noto
+(fontspec)             Serif' with options
+(fontspec)             [Ligatures=TeX,Script=Greek,Language=Greek,RawFeature={upper=el-xiota}].
+(fontspec)              
+(fontspec)              This font family consists of the following NFSS
+(fontspec)             series/shapes:
+(fontspec)              
+(fontspec)             - 'normal' (m/n) with NFSS spec.:
+(fontspec)             <->"NotoSerif:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
+(fontspec)             <->"NotoSerif:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;+smcp;"
+(fontspec)             - 'bold' (b/n) with NFSS spec.:
+(fontspec)             <->"NotoSerif/B:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;"
+(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.:
+(fontspec)             <->"NotoSerif/B:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;+smcp;"
+(fontspec)             - 'italic' (m/it) with NFSS spec.:
+(fontspec)             <->"NotoSerif/I:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;"
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
+(fontspec)             <->"NotoSerif/I:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;+smcp;"
+(fontspec)             - 'bold italic' (b/it) with NFSS spec.:
+(fontspec)             <->"NotoSerif/BI:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;"
+(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.:
+(fontspec)             <->"NotoSerif/BI:mode=node;script=grek;language=dflt;+tlig;upper=el-xiota;+smcp;"
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+luaotfload | aux : font no 34 (nil) defines no feature for script grek with language ell
+Package fontspec Warning: Language 'Greek' not available for font 'NotoSerif'
+(fontspec)                with script 'Greek'.
+Completed box being shipped out [1]
+\vbox(633.0+0.0)x407.0, direction TLT
+.\glue 16.0
+.\vbox(617.0+0.0)x345.0, shifted 62.0, direction TLT
+..\vbox(12.0+0.0)x345.0, glue set 12.0fil, direction TLT
+...\glue 0.0 plus 1.0fil
+...\hbox(0.0+0.0)x345.0, direction TLT
+....\hbox(0.0+0.0)x345.0, direction TLT
+..\glue 25.0
+..\glue(\lineskip) 0.0
+..\vbox(550.0+0.0)x345.0, glue set 384.54382fil, direction TLT
+...\write-{}
+...\glue(\topskip) 0.0
+...\hbox(86.45757+83.95755)x345.0, glue set 54.99fil, direction TLT
+....\localpar
+.....\localinterlinepenalty=0
+.....\localbrokenpenalty=0
+.....\localleftbox=null
+.....\localrightbox=null
+....\hbox(0.0+0.0)x15.0, direction TLT
+....\hbox(86.45757+83.95755)x275.01, direction TLT
+.....\mathon
+.....\vbox(86.45757+83.95755)x275.01, direction TLT
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 19.37997fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 H
+........\TU/NotoSerif(0)/m/n/5 a
+........\TU/NotoSerif(0)/m/n/5 l
+........\TU/NotoSerif(0)/m/n/5 l
+........\TU/NotoSerif(0)/m/n/5 o
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.5325fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 H
+........\TU/NotoSerif(0)/m/n/5 A
+........\TU/NotoSerif(0)/m/n/5 L
+........\TU/NotoSerif(0)/m/n/5 L
+........\TU/NotoSerif(0)/m/n/5 O
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.5325fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 H
+........\TU/NotoSerif(1)/m/n/5 A
+........\TU/NotoSerif(1)/m/n/5 L
+........\TU/NotoSerif(1)/m/n/5 L
+........\TU/NotoSerif(1)/m/n/5 O
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.5325fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 H
+........\TU/NotoSerif(2)/m/n/5 A
+........\TU/NotoSerif(2)/m/n/5 L
+........\TU/NotoSerif(2)/m/n/5 L
+........\TU/NotoSerif(2)/m/n/5 O
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 17.84248fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 δ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 κ
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.005fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.005fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.005fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 16.52998fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 κ
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ί
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 ο
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.35748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.35748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.35748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 19.59749fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ί
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 δ
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 22.62fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 22.62fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 22.62fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.545+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x63.52496, glue set 18.12999fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 ΐ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 υ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 20.87999fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Ϊ
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 20.87999fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Ϊ
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 20.87999fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Ϊ
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 18.26248fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Π
+........\TU/NotoSerif(0)/m/n/5 ό
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.63249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Π
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.63249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Π
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 20.63249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Π
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 15.92747fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 ύ
+........\TU/NotoSerif(0)/m/n/5 θ
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 σ
+........\TU/NotoSerif(0)/m/n/5 η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.6375fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Θ
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.6375fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Θ
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.6375fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Θ
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.545+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x63.52496, glue set 7.90749fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ΰ
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 η
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ώ
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 10.06fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ϋ
+........\kern-0.4 (font)
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ω
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Ϊ
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 10.06fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ϋ
+........\kern-0.4 (font)
+........\TU/NotoSerif(1)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ω
+........\TU/NotoSerif(1)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Ϊ
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 10.06fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ϋ
+........\kern-0.4 (font)
+........\TU/NotoSerif(2)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ω
+........\TU/NotoSerif(2)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Ϊ
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.545+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x63.52496, glue set 18.78998fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 υ
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 21.29251fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Α
+........\kern-0.35 (font)
+........\TU/NotoSerif(0)/m/n/5 Ϋ
+........\kern-0.35 (font)
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 21.29251fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Α
+........\kern-0.35 (font)
+........\TU/NotoSerif(1)/m/n/5 Ϋ
+........\kern-0.35 (font)
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 21.29251fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Α
+........\kern-0.35 (font)
+........\TU/NotoSerif(2)/m/n/5 Ϋ
+........\kern-0.35 (font)
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.545+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x63.52496, glue set 17.8075fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Α
+........\kern-0.35 (font)
+........\TU/NotoSerif(0)/m/n/5 Ϋ
+........\kern-0.35 (font)
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 21.29251fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Α
+........\kern-0.35 (font)
+........\TU/NotoSerif(0)/m/n/5 Ϋ
+........\kern-0.35 (font)
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 21.29251fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Α
+........\kern-0.35 (font)
+........\TU/NotoSerif(1)/m/n/5 Ϋ
+........\kern-0.35 (font)
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 21.29251fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Α
+........\kern-0.35 (font)
+........\TU/NotoSerif(2)/m/n/5 Ϋ
+........\kern-0.35 (font)
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 17.54999fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ά
+........\TU/NotoSerif(0)/m/n/5 κ
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 19.985fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 19.985fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 19.985fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 5.2125fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ή
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 κ
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.4525fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.4525fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.4525fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 16.61499fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 χ
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.3625fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Χ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.3625fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Χ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 17.3625fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Χ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 0.2fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 π
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 δ
+........\TU/NotoSerif(0)/m/n/5 ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 α
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 α
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 γ
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 ώ
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 σ
+........\TU/NotoSerif(0)/m/n/5 η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Π
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Γ
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ω
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Π
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Γ
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ω
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Π
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Γ
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ω
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 5.50249fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 η
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 ξ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 π
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 π
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.84999fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Ξ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\TU/NotoSerif(0)/m/n/5 Π
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Π
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.84999fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Ξ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\TU/NotoSerif(1)/m/n/5 Π
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Π
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.84999fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Ξ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\TU/NotoSerif(2)/m/n/5 Π
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Π
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 2.75249fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 κ
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ύ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 δ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 θ
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ύ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 1.08748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Θ
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 1.08748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Θ
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 1.08748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Θ
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ἐ
+........\TU/NotoSerif(0)/m/n/5 π
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 δ
+........\TU/NotoSerif(0)/m/n/5 ὴ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ἡ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ἀ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 α
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 γ
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 ώ
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 σ
+........\TU/NotoSerif(0)/m/n/5 η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Π
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Γ
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ω
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Π
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Γ
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ω
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Π
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Η
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Γ
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ω
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 2.75249fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 κ
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ῦ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ἢ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 δ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 θ
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ῦ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 1.08748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Θ
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 1.08748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Θ
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 1.08748fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Θ
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 6.295fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 η
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 υ
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 γ
+........\TU/NotoSerif(0)/m/n/5 ί
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 7.00249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Γ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 7.00249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Γ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 7.00249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Γ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 5.43248fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 φ
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.99fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Φ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.99fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Φ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.99fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Φ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\kern-0.3 (font)
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\kern-0.3 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.545+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x63.52496, glue set 2.1325fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 κ
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 ύ
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 π
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 ϊ
+........\TU/NotoSerif(0)/m/n/5 δ
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 κ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 !
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 2.6425fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\kern-0.35 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\kern-0.25 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Π
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Ϊ
+........\TU/NotoSerif(0)/m/n/5 Δ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 !
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 2.6425fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\kern-0.35 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\kern-0.25 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Π
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Ϊ
+........\TU/NotoSerif(1)/m/n/5 Δ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 !
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 2.6425fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\kern-0.35 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\kern-0.25 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Π
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Ϊ
+........\TU/NotoSerif(2)/m/n/5 Δ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 !
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.545+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x63.52496, glue set 9.23999fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 α
+........\TU/NotoSerif(0)/m/n/5 ΐ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 υ
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ό
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ϊ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 10.79498fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Ϊ
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 Υ
+........\kern-0.4 (font)
+........\TU/NotoSerif(0)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ϊ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 10.79498fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Ϊ
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(1)/m/n/5 Υ
+........\kern-0.4 (font)
+........\TU/NotoSerif(1)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ϊ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 10.79498fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Ϊ
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.15 (font)
+........\TU/NotoSerif(2)/m/n/5 Υ
+........\kern-0.4 (font)
+........\TU/NotoSerif(2)/m/n/5 ,
+........\glue(\spaceskip) 1.3 plus 0.81248 minus 0.34666
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ϊ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 5.58748fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\kern-0.15 (font)
+........\TU/NotoSerif(0)/m/n/5 ο
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 τ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ά
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 λ
+........\TU/NotoSerif(0)/m/n/5 ο
+........\TU/NotoSerif(0)/m/n/5 .
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.0725fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\TU/NotoSerif(0)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(0)/m/n/5 .
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.0725fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\TU/NotoSerif(1)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(1)/m/n/5 .
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.0725fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\kern-0.05 (font)
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Ή
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Τ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\TU/NotoSerif(2)/m/n/5 Λ
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 Ο
+........\kern-0.1 (font)
+........\TU/NotoSerif(2)/m/n/5 .
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.545+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x63.52496, glue set 15.68748fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ρ
+........\TU/NotoSerif(0)/m/n/5 ω
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 ι
+........\TU/NotoSerif(0)/m/n/5 κ
+........\kern-0.05 (font)
+........\TU/NotoSerif(0)/m/n/5 α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 17.52249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ρ
+........\TU/NotoSerif(0)/m/n/5 Ω
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ϊ
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 17.52249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ρ
+........\TU/NotoSerif(1)/m/n/5 Ω
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ϊ
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.545+1.80002)x70.49501, glue set 17.52249fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ρ
+........\TU/NotoSerif(2)/m/n/5 Ω
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ϊ
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 6.19499fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ἰ
+........\TU/NotoSerif(0)/m/n/5 σ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 γ
+........\TU/NotoSerif(0)/m/n/5 κ
+........\TU/NotoSerif(0)/m/n/5 ῄ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ἡ
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ᾶ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.5025fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Γ
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 ῌ
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.42fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Γ
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.5025fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Γ
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 ῌ
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 6.19499fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ἰ
+........\TU/NotoSerif(0)/m/n/5 σ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 γ
+........\TU/NotoSerif(0)/m/n/5 κ
+........\TU/NotoSerif(0)/m/n/5 ῄ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ἡ
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ᾶ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.5025fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Γ
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 ῌ
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.42fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Γ
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.5025fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Γ
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 ῌ
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 6.19499fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ἰ
+........\TU/NotoSerif(0)/m/n/5 σ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 γ
+........\TU/NotoSerif(0)/m/n/5 κ
+........\TU/NotoSerif(0)/m/n/5 ῄ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ἡ
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ᾶ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.14fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Γ
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Ή
+........\TU/NotoSerif(0)/m/n/5 ͅ
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.42fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Γ
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.5025fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Γ
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 ῌ
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+......\glue(\lineskip) 0.0
+......\hbox(4.19998+1.80002)x275.01, direction TLT
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x63.52496, glue set 6.19499fil, direction TLT
+........\rule(4.19998+1.80002)x0.0
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ἰ
+........\TU/NotoSerif(0)/m/n/5 σ
+........\TU/NotoSerif(0)/m/n/5 ε
+........\TU/NotoSerif(0)/m/n/5 ν
+........\TU/NotoSerif(0)/m/n/5 έ
+........\TU/NotoSerif(0)/m/n/5 γ
+........\TU/NotoSerif(0)/m/n/5 κ
+........\TU/NotoSerif(0)/m/n/5 ῄ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(0)/m/n/5 ἡ
+........\TU/NotoSerif(0)/m/n/5 μ
+........\TU/NotoSerif(0)/m/n/5 ᾶ
+........\TU/NotoSerif(0)/m/n/5 ς
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 5.14fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ι
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Ν
+........\TU/NotoSerif(0)/m/n/5 Ε
+........\TU/NotoSerif(0)/m/n/5 Γ
+........\TU/NotoSerif(0)/m/n/5 Κ
+........\TU/NotoSerif(0)/m/n/5 Ή
+........\TU/NotoSerif(0)/m/n/5 ͅ
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.64934 minus 0.43376
+........\TU/NotoSerif(0)/m/n/5 Η
+........\TU/NotoSerif(0)/m/n/5 Μ
+........\TU/NotoSerif(0)/m/n/5 Α
+........\TU/NotoSerif(0)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.42fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Ν
+........\TU/NotoSerif(1)/m/n/5 Ε
+........\TU/NotoSerif(1)/m/n/5 Γ
+........\TU/NotoSerif(1)/m/n/5 Κ
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Ι
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(1)/m/n/5 Η
+........\TU/NotoSerif(1)/m/n/5 Μ
+........\TU/NotoSerif(1)/m/n/5 Α
+........\TU/NotoSerif(1)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.......\hbox(4.19998+1.80002)x70.49501, glue set 4.5025fil, direction TLT
+........\glue 6.0
+........\glue 0.0 plus 1.0fil
+........\glue 0.00002
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ι
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Ν
+........\TU/NotoSerif(2)/m/n/5 Ε
+........\TU/NotoSerif(2)/m/n/5 Γ
+........\TU/NotoSerif(2)/m/n/5 Κ
+........\TU/NotoSerif(2)/m/n/5 ῌ
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue(\spaceskip) 1.3 plus 0.65 minus 0.43333
+........\TU/NotoSerif(2)/m/n/5 Η
+........\TU/NotoSerif(2)/m/n/5 Μ
+........\TU/NotoSerif(2)/m/n/5 Α
+........\TU/NotoSerif(2)/m/n/5 Σ
+........\glue 0.0 plus 1.0fil
+........\glue 6.0
+.......\glue(\tabskip) 0.0
+.....\mathoff
+....\penalty 10000
+....\glue(\parfillskip) 0.0 plus 1.0fil
+....\glue(\rightskip) 0.0
+...\glue -5.0
+...\glue 0.0 plus 1.0fil
+...\glue 0.0
+...\glue 0.0 plus 0.0001fil
+..\glue(\baselineskip) 22.82
+..\hbox(7.18+0.0)x345.0, direction TLT
+...\hbox(7.18+0.0)x345.0, glue set 169.705fil, direction TLT
+....\glue 0.0 plus 1.0fil
+....\TU/NotoSerif(0)/m/n/10 1
+....\glue 0.0 plus 1.0fil

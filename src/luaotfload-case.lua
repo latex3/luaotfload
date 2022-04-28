@@ -62,6 +62,12 @@ local greek_diacritic = {
   [0x0343] = HAS_OTHER_GREEK_DIACRITIC,
 }
 
+local greek_precombined_iota = {
+  [0x0391] = 0x1FBC,
+  [0x0397] = 0x1FCC,
+  [0x03A9] = 0x1FFC,
+}
+
 -- Greek handling based on https://icu.unicode.org/design/case/greek-upper
 -- with smaller variations since we ant to preserve nodes whenever possible.
 local function init_greek_data()
@@ -239,13 +245,13 @@ local function process(table, feature)
   --   - node: Greek. Last vowel with accent and without dialytika
   local function processor(head, font, after, seen_cased, seen_soft_dotted, seen_I, seen_greek)
     local lang = font_lang[font]
-    local greek
-    if lang == 'el' then
+    local greek, greek_iota
+    if lang == 'el' or lang == 'el-xiota' then
       if table == uppercase then
         if not greek_data then
           init_greek_data()
         end
-        greek = greek_data
+        greek, greek_iota = greek_data, lang == 'el-xiota'
       end
       lang = false
     end
@@ -285,10 +291,12 @@ local function process(table, feature)
             -- TODO: Keep dialytika node around
             datum = datum | diacritic_data
             -- Preserve ypogegrammeni (iota subscript) but convert them into capital iotas.
-            -- There are different conventions here so this might change.
+            -- If el-xiota is active keep the combining character instead.
             if diacritic_data & HAS_YPOGEGRAMMENI ~= 0 then
-              has_ypogegrammeni = false
-              setchar(post, 0x0399) -- FIXME: 0x0399 Fits with ICU, but maybe consider 
+              has_ypogegrammeni = true
+              if not greek_iota then
+                setchar(post, 0x0399)
+              end
               last = post
               post = getnext(post)
             else
@@ -332,6 +340,13 @@ local function process(table, feature)
                 upper = 0x03ab
                 datum = datum & ~HAS_DIALYTIKA
               end
+            end
+          end
+          if greek_iota and add_ypogegrammeni then
+            local mapped = greek_precombined_iota[upper]
+            if mapped then -- AFAICT always true
+              upper = mapped
+              add_ypogegrammeni = false
             end
           end
           setchar(n, upper)

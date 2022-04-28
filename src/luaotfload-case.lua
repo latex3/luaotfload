@@ -275,7 +275,7 @@ local function process(table, feature)
           -- When a vowel ges an accent removed and does not have a dialytika and is followed by a Ι or Υ,
           -- then this iota or ypsilon gets a dialytika.
           if datum & HAS_VOWEL ~= 0 and seen_greek and seen_greek ~= true and (upper == 0x0399 or upper == 0x03a5) then
-            first_datum = first_datum | HAS_DIALYTIKA;
+            datum = datum | HAS_DIALYTIKA;
           end
           local has_ypogegrammeni = datum & HAS_YPOGEGRAMMENI ~= 0
           local add_ypogegrammeni = has_ypogegrammeni
@@ -334,18 +334,17 @@ local function process(table, feature)
               free(saved_tonos)
               saved_tonos = nil
             end
-            -- Handle precomposed dialytika
-            if first_datum & HAS_DIALYTIKA ~= 0 then
+            -- Handle precomposed dialytika. If both a combining ans a precomposed
+            -- dialyika are present (typically because the precomposed one is
+            -- automatically added at the beginning) prefer the combining one to
+            -- preserve attributes.
+            if datum & HAS_DIALYTIKA ~= 0 and not saved_dialytika then
               if upper == 0x0399 then -- upper == 'Ι'
                 upper = 0x03AA
               elseif upper == 0x03A5 then -- upper == 'Υ'
                 upper = 0x03AB
               else
                 assert(false) -- Should not be possible
-              end
-              if saved_dialytika then
-                free(saved_dialytika)
-                saved_dialytika = nil
               end
             end
           end

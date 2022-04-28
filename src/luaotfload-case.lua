@@ -262,9 +262,12 @@ local function process(table, feature)
       local char, id = is_char(n, font)
       if char then
         if greek and (char >= 0x0370 and char <= 0x03ff or char >= 0x1f00 and char <= 0x1fff or char == 0x2126) then
+          -- In the greek uppercase situation we want to remove diacritics except under some exceptions.
           local first_datum = greek[char] or 0
           local datum = first_datum
           local upper = datum & UPPER_MASK
+          -- When a vowel ges an accent removed and does not have a dialytika and is followed by a Ι or Υ,
+          -- then this iota or ypsilon gets a dialytika.
           if datum & HAS_VOWEL ~= 0 and seen_greek and seen_greek ~= true and (upper == 0x0399 or upper == 0x03a5) then
             first_datum = first_datum | HAS_DIALYTIKA;
           end
@@ -278,22 +281,29 @@ local function process(table, feature)
             if not char then break end
             local diacritic_data = greek_diacritic[char]
             if not diacritic_data then break end
+            -- Preserve flags to be aware if a dialytika has to be reinserted
+            -- TODO: Keep dialytika node around
             datum = datum | diacritic_data
+            -- Preserve ypogegrammeni (iota subscript) but convert them into capital iotas.
+            -- There are different conventions here so this might change.
             if diacritic_data & HAS_YPOGEGRAMMENI ~= 0 then
               has_ypogegrammeni = false
               setchar(post, 0x0399) -- FIXME: 0x0399 Fits with ICU, but maybe consider 
               last = post
               post = getnext(post)
             else
+              -- Otherwise they get removed
               local old = post
               head, post = remove(head, post)
               if char == 0x0301 and not saved_tonos then
+                -- But if we have a tonos we might want to reinsert it later
                 saved_tonos = old
               else
                 free(old)
               end
             end
           end
+          -- Special case: An isolated Ή preserves the tonos.
           if upper == 0x0397
               and not has_ypogegrammeni
               and not seen_cased
@@ -301,16 +311,19 @@ local function process(table, feature)
               then
             if first_datum & HAS_ACCENT ~= 0 then
               upper = 0x0389
+              -- If it's precomposed we don't have to keep any combining accents
               if saved_tonos then
                 free(saved_tonos)
                 saved_tonos = nil
               end
             end
           else
+            -- Not the special case so we don't have to keep the tonos node
             if saved_tonos then
               free(saved_tonos)
               saved_tonos = nil
             end
+            -- Handle precomposed dialytika
             if first_datum & HAS_DIALYTIKA ~= 0 then
               if upper == 0x0399 then -- upper == 'Ι'
                 upper = 0x03AA
@@ -322,6 +335,7 @@ local function process(table, feature)
             end
           end
           setchar(n, upper)
+          -- Potentially reinsert accents
           if datum & HAS_DIALYTIKA ~= 0 then
             head, n = insert_after(head, n, copy(n))
             setchar(n, 0x0308)
@@ -333,8 +347,10 @@ local function process(table, feature)
             head, n = insert_after(head, n, copy(n))
             setchar(n, 0x0399)
           end
+          -- If we preserved any combining ypogegrammeni nodes, skip them now
           n = last or n
           seen_greek = datum & (HAS_VOWEL | HAS_ACCENT | HAS_DIALYTIKA) == HAS_VOWEL | HAS_ACCENT and n or true
+          seen_I, seen_soft_dotted = nil
         else
           local mapping = table[char]
           if mapping then

@@ -231,8 +231,8 @@ local function resolve_kpse (specification)
         local resolved = resolvers_findfile(name, suffix)
         if resolved then return resolved end
     end
-    for t, format in next, fonts.formats do --- brute force
-        local resolved = kpsefind_file (name, format)
+    for _, t in ipairs{'otf', 'ttf', 'pfb', 'lua', 'afm'} do --- brute force
+        local resolved = resolvers_findfile (name, t)
         if resolved then return resolved, t end
     end
 end

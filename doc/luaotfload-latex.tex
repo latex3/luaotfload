@@ -35,18 +35,18 @@
 
 \makeatletter
 
-\usepackage {metalogo,multicol,fancyvrb,xspace}
+\usepackage {metalogo,multicol,fancyvrb}
 \usepackage [x11names] {xcolor}
 
-\def \primarycolor   {DodgerBlue4} %%-> rgb  16  78 139 | #104e8b
-\def \secondarycolor {Goldenrod4}  %%-> rgb 139 105 200 | #8b6914
+\colorlet{primary}{DodgerBlue4}
+\colorlet{secondary}{Goldenrod4}
 
 \usepackage[
     bookmarks=true,
    colorlinks=true,
-    linkcolor=\primarycolor,
-     urlcolor=\secondarycolor,
-    citecolor=\primarycolor,
+    linkcolor=primary,
+     urlcolor=secondary,
+    citecolor=primary,
     unicode,
      pdftitle={The Luaotfload package},
    pdfsubject={OpenType layout system for Plain TeX and LaTeX},
@@ -58,7 +58,7 @@
 \usepackage {unicode-math}
 
 \setmainfont[
-% Numbers     = OldStyle, %% buggy with font cache
+  Numbers     = OldStyle, %% buggy with font cache
   Ligatures   = TeX,
 ]{Linux Libertine O}
 \setmonofont[Ligatures=TeX,Scale=MatchLowercase]{InconsolataN-Regular.otf}
@@ -68,15 +68,9 @@
 
 \usepackage{hologo}
 
-\newcommand\TEX      {\TeX\xspace}
-\newcommand\LUA      {Lua\xspace}
-\newcommand\PDFTEX   {pdf\TeX\xspace}
-\newcommand\LUATEX   {Lua\TeX\xspace}
-\newcommand\XETEX    {\XeTeX\xspace}
-\newcommand\LATEX    {\LaTeX\xspace}
-\newcommand\LUALATEX {Lua\LaTeX\xspace}
-\newcommand\CONTEXT  {Con\TeX t\xspace}
-\newcommand\OpenType {\identifier{Open\kern-.25ex Type}\xspace}
+\newcommand\Lua      {Lua}
+\newcommand\ConTeXt  {\hologo{ConTeXt}}
+\newcommand\OpenType {\identifier{Open\kern-.25ex Type}}
 
 %% \groupedcommand, with some omissions taken from syst-aux.mkiv
 \let \handlegroupnormalbefore \relax

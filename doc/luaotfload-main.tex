@@ -1355,16 +1355,30 @@ obviously, \inlinecode{random}.
   \beginaltitem {upper/lower}
    The\phantomsection\label{upperlower}\marginpar{New in 3.16}
    font features \texttt{upper} and \texttt{lower} can be used to map
-   the text of a font to upper or lowercase before displaying it. Currently
-   this implements the untailored Unicode case mapping algorithm, but it is
-   planned to add tailoring later. For example
+   the text of a font to upper or lowercase before displaying it.
+
+   By default the casemapping is automatically tailored based on the active
+   \texttt{language} font feature. This automatic tailoring can be overwritten
+   by passing a two letter language tag to the \texttt{upper} or \texttt{lower}
+   feature. In addition to ordinary language tags, the tags \texttt{el-xiota}
+   and \texttt{de-xeszett} can be used. \texttt{el-xiota} adapts the greek
+   rules for uppercasing to keep iota subscripts as combining characters which
+   sufficiently well behaving fonts can render in appropriate ways while the
+   default for greek is to convert these into capital iotas. \texttt{de-xeszett}
+   adapts uppercasing for german to use the capital eszett instead of
+   uppercasing the eszett to double capital s.
 
    \beginlisting
-   \font\test={name:LatinModernRoman:mode=node;+upper;}
+   \font\test={kpse:LinLibertine_R.otf:mode=node;+upper;}
+   \test Grüße
+   \font\test={kpse:LinLibertine_R.otf:mode=node;upper=de-xeszett;}
    \test Grüße
    \endlisting
 
-   {\Large\font\test={name:LatinModernRoman:mode=node;+upper;}\test Grüße}
+   {\Large
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;+upper;}\test Grüße
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;upper=de-xeszett;}\test Grüße
+   }
 
   \endaltitem
 

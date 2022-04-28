@@ -62,6 +62,8 @@ local greek_diacritic = {
   [0x0343] = HAS_OTHER_GREEK_DIACRITIC,
 }
 
+-- Greek handling based on https://icu.unicode.org/design/case/greek-upper
+-- with smaller variations since we ant to preserve nodes whenever possible.
 local function init_greek_data()
   local NFD = require'lua-uni-normalize'.NFD
   local data = {}
@@ -259,7 +261,7 @@ local function process(table, feature)
       if not n then break end
       local char, id = is_char(n, font)
       if char then
-        if greek and (char >= 0x0370 and char <= 0x03ff or char >= 0x1f00 and char <= 0x1fff or char == 0x1234) then --FIXME
+        if greek and (char >= 0x0370 and char <= 0x03ff or char >= 0x1f00 and char <= 0x1fff or char == 0x2126) then
           local first_datum = greek[char] or 0
           local datum = first_datum
           local upper = datum & UPPER_MASK

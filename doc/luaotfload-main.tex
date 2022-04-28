@@ -1380,6 +1380,25 @@ obviously, \inlinecode{random}.
      \font\test={kpse:LinLibertine\string_R.otf:mode=node;upper=de-xeszett;}\test Grüße
    }
 
+   \beginlisting
+   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;+upper;}
+   No specified language: {\test εἰσενέγκῄς ἡμᾶς}\par
+   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;language=ell;+upper;}
+   Greek uppercasing: {\test εἰσενέγκῄς ἡμᾶς}\par
+   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;language=ell;+upper=el-xiota;}
+   Greek variant: {\test εἰσενέγκῄς ἡμᾶς}\par
+   \endlisting
+
+   {%
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;+upper;}
+     No specified language: {\test εἰσενέγκῄς ἡμᾶς}\par
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;language=ell;+upper;}
+     Greek uppercasing: {\test εἰσενέγκῄς ἡμᾶς}\par
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;language=ell;+upper=el-xiota;}
+     Greek variant: {\test εἰσενέγκῄς ἡμᾶς}\par
+   }
+
+
   \endaltitem
 
   \beginaltitem {Variable fonts}

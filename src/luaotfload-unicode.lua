@@ -232,6 +232,47 @@ do
   f:close()
 end
 
+do
+  local function eq(a, b)
+    if not a then return false end
+    if not b then return false end
+    if a == b then return true end
+    if #a ~= #b then return false end
+    for i=1,#a do if a[i] ~= b[i] then return false end end
+    return true
+  end
+  local function collapse(t, inherited)
+    inherited = t._ or inherited
+    local empty = true
+    for k,v in next, t do
+      if k ~= '_' then
+        if eq(inherited, collapse(v, inherited)) then
+          t[k] = nil
+        else
+          empty = false
+        end
+      end
+    end
+    return empty and inherited
+  end
+  local function cleanup(t)
+    for k,v in next, t do
+      if not tonumber(v) then
+        local collapsed = collapse(v)
+        if collapsed and #collapsed == 1 then
+          v = collapsed[1]
+          if k == v then
+            v = nil
+          end
+          t[k] = v
+        end
+      end
+    end
+  end
+  cleanup(uppercase)
+  cleanup(lowercase)
+end
+
 return {
   casefold = casefold,
   alphnum_only = alphnum_only,

@@ -4,7 +4,7 @@
 \setmainfont[Script=Greek,Language=Greek]{Noto Serif}
 \ExplSyntaxOn
 \NewDocumentCommand\showUpper{m}{
-   #1&\text_uppercase:nn{el}{#1}&\addfontfeatures{RawFeature={upper=el}}#1&\addfontfeatures{RawFeature={upper=el-xiota}}#1
+   #1&\text_uppercase:nn{el}{#1}&\addfontfeatures{RawFeature={upper=el}}#1&\addfontfeatures{RawFeature={upper=el-x-iota}}#1
 }
 \ExplSyntaxOff
 \begin{document}

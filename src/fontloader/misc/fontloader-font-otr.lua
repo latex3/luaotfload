@@ -2499,15 +2499,15 @@ function readers.getinfo(filename,specification) -- string, nil|number|table
     end
 end
 
-function readers.rehash(fontdata,hashmethod)
+function readers.rehash() -- fontdata,hashmethod
     report("the %a helper is not yet implemented","rehash")
 end
 
-function readers.checkhash(fontdata)
+function readers.checkhash() --fontdata
     report("the %a helper is not yet implemented","checkhash")
 end
 
-function readers.pack(fontdata,hashmethod)
+function readers.pack() -- fontdata,hashmethod
     report("the %a helper is not yet implemented","pack")
 end
 

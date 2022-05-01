@@ -3820,6 +3820,7 @@ function readers.hvar(f,fontdata,specification)
     local variations = { }
     local innerindex = { } -- size is mapcount
     local outerindex = { } -- size is mapcount
+    local deltas     = { }
 
     if variationoffset > 0 then
         regions, deltas = readvariationdata(f,variationoffset,factors)

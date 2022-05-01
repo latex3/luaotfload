@@ -293,7 +293,7 @@ end
 local function unsafetobreak(glyph)
   return glyph
      and glyph.flags
-     and glyph.flags & fl_unsafe
+     and glyph.flags & fl_unsafe ~= 0
 end
 
 local shape

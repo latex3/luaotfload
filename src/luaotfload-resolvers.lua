@@ -148,6 +148,10 @@ local function resolve_tex_format (specification)
     local name = specification.name
     for i=1, #tex_formats do
         local format = tex_formats [i]
+        local name = name
+        if name:sub(-#format-1) ~= '.' .. format then -- Add an explicit extension to avoid finding local fonts in other formats
+            name = name .. '.' .. format
+        end
         local resolved = resolvers_findfile(name, format)
         if resolved then
             return resolved, format

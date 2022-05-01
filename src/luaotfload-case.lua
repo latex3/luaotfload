@@ -39,8 +39,8 @@ local disc = node.id'disc'
 
 -- Here we manipulate the uppercase table a bit to add the `de-alt` language using capital eszett.
 
-uppercase[0x00DF]['de-xeszett'] = { _ = { 0x1E9E } }
-uppercase[0x00DF]['de-alt'] = uppercase[0x00DF]['de-xeszett']
+uppercase[0x00DF]['de-x-eszett'] = { _ = { 0x1E9E } }
+uppercase[0x00DF]['de-alt'] = uppercase[0x00DF]['de-x-eszett']
 
 local UPPER_MASK = 0x3FF
 local HAS_VOWEL = 0x200000
@@ -251,12 +251,12 @@ local function process(table, feature)
   local function processor(head, font, after, seen_cased, seen_soft_dotted, seen_I, seen_greek)
     local lang = font_lang[font]
     local greek, greek_iota
-    if lang == 'el' or lang == 'el-xiota' then
+    if lang == 'el' or lang == 'el-x-iota' then
       if table == uppercase then
         if not greek_data then
           init_greek_data()
         end
-        greek, greek_iota = greek_data, lang == 'el-xiota'
+        greek, greek_iota = greek_data, lang == 'el-x-iota'
       end
       lang = false
     end
@@ -296,7 +296,7 @@ local function process(table, feature)
             -- TODO: Keep dialytika node around
             datum = datum | diacritic_data
             -- Preserve ypogegrammeni (iota subscript) but convert them into capital iotas.
-            -- If el-xiota is active keep the combining character instead.
+            -- If el-x-iota is active keep the combining character instead.
             if diacritic_data & HAS_YPOGEGRAMMENI ~= 0 then
               has_ypogegrammeni = true
               if not greek_iota then

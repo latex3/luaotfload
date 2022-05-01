@@ -1362,24 +1362,24 @@ obviously, \inlinecode{random}.
    By default the casemapping is automatically tailored based on the active
    \texttt{language} font feature. This automatic tailoring can be overwritten
    by passing a two letter language tag to the \texttt{upper} or \texttt{lower}
-   feature. In addition to ordinary language tags, the tags \texttt{el-xiota}
-   and \texttt{de-xeszett} can be used. \texttt{el-xiota} adapts the greek
-   rules for uppercasing to keep iota subscripts as combining characters which
-   sufficiently well behaving fonts can render in appropriate ways while the
-   default for greek is to convert these into capital iotas. \texttt{de-xeszett}
-   adapts uppercasing for german to use the capital eszett instead of
-   uppercasing the eszett to double capital s.
+   feature. In addition to ordinary language tags, the tags \texttt{el-x-iota},
+   \texttt{hy-x-yiwn} and \texttt{de-x-eszett} can be used. \texttt{el-x-iota}
+   adapts the greek rules for uppercasing to keep iota subscripts as combining
+   characters which sufficiently well behaving fonts can render in appropriate
+   ways while the default for greek is to convert these into capital iotas.
+   \texttt{de-x-eszett} adapts uppercasing for german to use the capital eszett
+   instead of uppercasing the eszett to double capital s.
 
    \beginlisting
    \font\test={kpse:LinLibertine_R.otf:mode=node;+upper;}
    \test Grüße
-   \font\test={kpse:LinLibertine_R.otf:mode=node;upper=de-xeszett;}
+   \font\test={kpse:LinLibertine_R.otf:mode=node;upper=de-x-eszett;}
    \test Grüße
    \endlisting
 
    {\Large
      \font\test={kpse:LinLibertine\string_R.otf:mode=node;+upper;}\test Grüße
-     \font\test={kpse:LinLibertine\string_R.otf:mode=node;upper=de-xeszett;}\test Grüße
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;upper=de-x-eszett;}\test Grüße
    }
 
    \beginlisting
@@ -1387,7 +1387,7 @@ obviously, \inlinecode{random}.
    No specified language: {\test εἰσενέγκῄς ἡμᾶς}\par
    \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;language=ell;+upper;}
    Greek uppercasing: {\test εἰσενέγκῄς ἡμᾶς}\par
-   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;language=ell;+upper=el-xiota;}
+   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;language=ell;+upper=el-x-iota;}
    Greek variant: {\test εἰσενέγκῄς ἡμᾶς}\par
    \endlisting
 
@@ -1396,7 +1396,7 @@ obviously, \inlinecode{random}.
      No specified language: {\test εἰσενέγκῄς ἡμᾶς}\par
      \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;language=ell;+upper;}
      Greek uppercasing: {\test εἰσενέγκῄς ἡμᾶς}\par
-     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;language=ell;+upper=el-xiota;}
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;language=ell;+upper=el-x-iota;}
      Greek variant: {\test εἰσενέγκῄς ἡμᾶς}\par
    }
 

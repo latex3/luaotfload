@@ -278,8 +278,7 @@ uppercase[0x00DF]['de-x-eszett'] = { _ = { 0x1E9E } }
 uppercase[0x00DF]['de-alt'] = uppercase[0x00DF]['de-x-eszett']
 
 -- Special handling for Eastern Armenian based on Unicode document L2/20-143.
--- TODO: Coordinate variant name with l3text
-uppercase[0x0587]['hy'] = { _ = { 0x0535, 0x054E } }
+uppercase[0x0587]['hy-x-yiwn'] = { _ = { 0x0535, 0x054E } }
 
 return {
   casefold = casefold,

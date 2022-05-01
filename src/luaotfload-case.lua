@@ -35,12 +35,8 @@ local disc = node.id'disc'
 -- * Final_Sigma is never language dependent
 -- * Other contexts are always language dependent
 -- * The only languages with special mappings are Lithuanian (lt/"LTH "/lit), Turkish (tr/"TRK "/tur), and Azeri/Azerbaijani (az/"AZE "/aze)
+--   (Additionally we add special mappings for de-x-eszett, el, el-x-iota, hy which are not present in SpecialCasing.txt)
 ]]
-
--- Here we manipulate the uppercase table a bit to add the `de-alt` language using capital eszett.
-
-uppercase[0x00DF]['de-x-eszett'] = { _ = { 0x1E9E } }
-uppercase[0x00DF]['de-alt'] = uppercase[0x00DF]['de-x-eszett']
 
 local UPPER_MASK = 0x3FF
 local HAS_VOWEL = 0x200000

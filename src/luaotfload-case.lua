@@ -120,7 +120,12 @@ local function font_lang(feature)
     local lang = features[feature]
     if type(lang) ~= 'string' or lang == 'auto' then
       lang = features.language
-      lang = lang == 'lth' and 'lt' or lang == 'trk' and 'tr' or lang == 'aze' and 'az' or (lang == 'ell' or lang == 'pgr') and 'el' or false
+      lang = lang == 'lth' and 'lt'
+          or lang == 'trk' and 'tr'
+          or lang == 'aze' and 'az'
+          or lang == 'hye' and 'hy'
+          or (lang == 'ell' or lang == 'pgr') and 'el'
+          or false
     end
     t[fid] = lang
     return lang

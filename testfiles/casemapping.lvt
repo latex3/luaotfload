@@ -1,0 +1,75 @@
+\input{regression-test}
+\documentclass{article}
+\usepackage{fontspec}
+\setmainfont[Script=Latin]{Noto Serif}
+\ExplSyntaxOn
+\NewDocumentCommand\showMapping{o m}{
+   #2%
+  % &\text_uppercase:n{#2}%
+  % &\IfValueT{#1}{\text_uppercase:nn{#1}{#2}}%
+  &\addfontfeatures{RawFeature={+lower}}#2%
+  &\IfValueT{#1}{\addfontfeatures{RawFeature={lower=#1}}#2}%
+  &\addfontfeatures{RawFeature={+upper}}#2%
+  &\IfValueT{#1}{\addfontfeatures{RawFeature={upper=#1}}#2}%
+}
+\ExplSyntaxOff
+\begin{document}
+\showoutput
+\START
+\tiny
+Generic font:
+
+\begin{tabular}{ccccc}
+   \showMapping[de-alt]{Hallo}\\
+   \showMapping[de-alt]{Tschüß}\\
+   \showMapping[el]{ΕἸΣΕνέγκῄΣ ἩμᾶΣ}\\
+   \showMapping[lt]{rūgštumi̇̀s}\\
+   \showMapping[lt]{RŪGŠTUMÌS}\\
+\end{tabular}
+
+Greek font:
+
+\setmainfont[Script=Greek,RawFeature={language=ell}]{Noto Serif}
+% Derived from ICU with some added cases
+\begin{tabular}{ccccc}
+   \showMapping[el-x-iota]{Tschüß}\\
+   \showMapping[el-x-iota]{Présentation}\\
+   \showMapping[el-x-iota]{άδικος}\\
+   \showMapping[el-x-iota]{κείμενο}\\
+   \showMapping[el-x-iota]{ίριδα}\\
+   \showMapping[el-x-iota]{Μαΐου}\\
+   \showMapping[el-x-iota]{Πόρος}\\
+   \showMapping[el-x-iota]{Ρύθμιση}\\
+   \showMapping[el-x-iota]{ΰ, Τηρώ, Μάιος}\\
+   \showMapping[el-x-iota]{άυλος}\\
+   \showMapping[el-x-iota]{ΑΫΛΟΣ}\\
+   \showMapping[el-x-iota]{Άκλιτα}\\
+   \showMapping[el-x-iota]{ρήματα ή άκλιτες}\\
+   \showMapping[el-x-iota]{μετοχές}\\
+   \showMapping[el-x-iota]{Επειδή η αναγνώριση}\\
+   \showMapping[el-x-iota]{της αξιοπρέπειας}\\
+   \showMapping[el-x-iota]{νομικού ή διεθνούς}\\
+   \showMapping[el-x-iota]{Ἐπειδὴ ἡ ἀναγνώριση}\\
+   \showMapping[el-x-iota]{νομικοῦ ἢ διεθνοῦς}\\
+   \showMapping[el-x-iota]{Νέο, Δημιουργία}\\
+   \showMapping[el-x-iota]{Ελάτε να φάτε τα}\\
+   \showMapping[el-x-iota]{καλύτερα παϊδάκια!}\\
+   \showMapping[el-x-iota]{Μαΐου, τρόλεϊ}\\
+   \showMapping[el-x-iota]{Το ένα ή το άλλο.}\\
+   \showMapping[el-x-iota]{ρωμέικα}\\
+   \showMapping[el-x-iota]{εἰσενέγκῄς ἡμᾶς}\\
+   \showMapping[el-x-iota]{εἰσενέγκῄς ἡμᾶς}\\
+   \showMapping[el-x-iota]{εἰσενέγκῄς ἡμᾶς}\\
+   \showMapping[el-x-iota]{εἰσενέγκῄς ἡμᾶς}\\
+   \showMapping[el-x-iota]{ΕἸΣΕΝΈΓΚΉͅΣ ἩΜᾶΣ}\\
+\end{tabular}
+
+Turkish font:
+
+\setmainfont[Script=Latin,RawFeature={language=trk}]{Noto Serif}
+\begin{tabular}{ccccc}
+   \showMapping{Informatika}\\
+\end{tabular}
+\clearpage
+\END
+\end{document}

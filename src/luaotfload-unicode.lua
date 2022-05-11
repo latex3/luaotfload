@@ -23,46 +23,6 @@ local codepoint = lpeg.S'0123456789ABCDEF'^4/function(c)return tonumber(c, 16)en
 local empty = {}
 local result = {}
 
-local casefold do
-  local nl = ('#' * (1-lpeg.P'\n')^0)^-1 * '\n'
-  local entry = codepoint * "; " * lpeg.C(1) * ";" * lpeg.Ct((' ' * codepoint)^1) * "; " * nl
-  local file = lpeg.Cf(
-      lpeg.Ct(
-          lpeg.Cg(lpeg.Ct"", "C")
-        * lpeg.Cg(lpeg.Ct"", "F")
-        * lpeg.Cg(lpeg.Ct"", "S")
-        * lpeg.Cg(lpeg.Ct"", "T"))
-    * nl^0 * lpeg.Cg(entry)^0 * nl^0 * -1
-  , function(t, base, class, mapping)
-    rawset(rawget(t, class), base, mapping)
-    return t
-  end)
-
-  local f = io.open(kpse.find_file"CaseFolding.txt")
-  local data = file:match(f:read'*a')
-  f:close()
-  function casefold(s, full, special)
-    local first = special and data.T or empty
-    local second = data.C
-    local third = full and data.F or data.S
-    local result = result
-    for i = #result, 1, -1 do result[i] = nil end
-    local i = 1
-    for _, c in utf8codes(s) do
-      local datum = first[c] or second[c] or third[c]
-      if datum then
-        local l = #datum
-        move(datum, 1, l, i, result)
-        i = i + l
-      else
-        result[i] = c
-        i = i + 1
-      end
-    end
-    return utf8char(unpack(result))
-  end
-end
-
 local alphnum_only do
   local niceentry = lpeg.Cg(codepoint * ';' * (1-lpeg.P';')^0 * ';' * lpeg.S'LN' * lpeg.Cc(true))
   local entry = niceentry^0 * (1-lpeg.P'\n')^0 * lpeg.P'\n'
@@ -284,7 +244,6 @@ uppercase[0x0587]['hy'] = { _ = { 0x0535, 0x054E } }
 uppercase[0x0587]['hy-x-yiwn'] = { _ = uppercase[0x0587]._ }
 
 return {
-  casefold = casefold,
   alphnum_only = alphnum_only,
   casemapping = {
     uppercase = uppercase,

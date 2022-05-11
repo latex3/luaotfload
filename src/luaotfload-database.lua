@@ -201,7 +201,7 @@ local resolversfindfile        = context_environment.resolvers.findfile
 
 --- some of our own
 local unicode                  = require'luaotfload-unicode'
-local casefold                 = unicode.casefold
+local casefold                 = require'lua-uni-case'.casefold
 local alphnum_only             = unicode.alphnum_only
 
 local name_index               = nil --> upvalue for names.data

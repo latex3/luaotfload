@@ -30,8 +30,6 @@ local table             = table
 local tabletohash       = table.tohash
 local tablesort         = table.sort
 
-local stringunpack      = string.unpack
-
 --- this appears to be based in part on luatex-fonts-def.lua
 
 local fonts             = fonts
@@ -54,15 +52,6 @@ if as_script then
     end
 else
     normalize = otf.features.normalize
-end
-
---[[HH (font-xtx) --
-    tricky: we sort of bypass the parser and directly feed all into
-    the sub parser
---HH]]--
-
-function definers.getspecification(str)
-    return "", str, "", ":", str
 end
 
 local log              = luaotfload.log
@@ -470,7 +459,7 @@ if as_script == true then --- skip the remainder of the file
 end
 
 do
-    local helpers = fonts.handlers.otf.readers.helpers
+    local helpers = otf.readers.helpers
     local axistofactors = helpers.axistofactors
     local cleanname = helpers.cleanname
     local getaxisscale = helpers.getaxisscale

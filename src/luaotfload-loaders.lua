@@ -105,46 +105,79 @@ local function not_found_msg (specification, size, id)
              "--------------------------------------------------------")
 end
 
+local definers --- (string, spec -> size -> id -> tmfdata) hash_t
 do
   local hashed_cache = {}
-  local tfmdata_cache = fonts.hashes.identifiers
-  local function register(tfmdata, id)
-    if tfmdata and id then
-      local hash = tfmdata.properties.hash
+  local fontdata_cache = fonts.hashes.identifiers
+  local function register(fontdata, id)
+    if fontdata and id then
+      local hash = fontdata.properties.hash
       if not hash then
-        logreport('both', 3, 'loaders', "Registering font %s with id %s with missing hash.", id, tfmdata.properties.filename or "unknown")
+        logreport('both', 2, 'loaders', "Registering font %s with id %s with missing hash.", id, fontdata.properties.filename or "unknown")
       elseif not hashed_cache[hash] then
         hashed_cache[hash] = id
-        logreport('both', 5, 'loaders', "Registering font %s with id %s and hash hash.", id, tfmdata.properties.filename or "unknown", hash)
+        logreport('both', 4, 'loaders', "Registering font %s with id %s and hash %s.", id, fontdata.properties.filename or "unknown", hash)
       end
-      tfmdata_cache[id] = tfmdata
+      fontdata_cache[id] = fontdata
     end
   end
   function registered(hash)
    local id = hashed_cache[hash]
-   return id, tfmdata_cache[id]
+   return id, fontdata_cache[id]
   end
   fonts.definers.register = register
   fonts.definers.registered = registered
-end
 
+  local extra_hash_funcs = {}
 
-local definers --- (string, spec -> size -> id -> tmfdata) hash_t
-do
-  local ctx_read = fonts.definers.read
-  local register = fonts.definers.register
-  local function read(specification, size, id)
-    local tfmdata = ctx_read(specification, size, id)
-    if not tfmdata or id or tonumber(tfmdata) then
-      return tfmdata
+  local function ltx_read(spec, size, id)
+    spec = type(spec) == 'string' and fonts.definers.analyze(spec, size) or spec
+    spec = fonts.definers.resolve(spec)
+
+    local hash = fonts.constructors.hashinstance(spec)
+
+    -- extra_hash_func allows the loader to determine additional hash parts
+    -- depending on the actual font. This is used e.g. for variable fonts which
+    -- should be hashed based on their designsize / modifiers too.
+    local extra_hash_func = extra_hash_funcs[hash]
+    if extra_hash_func then
+      hash = hash .. ' @ ' .. table.join(extra_hash_func(spec), ' @ ')
     end
-    id = font.define(tfmdata)
-    register(tfmdata, id)
+
+    local cached = registered(hash)
+    if cached then return cached end -- already loaded
+
+    local fontdata = fonts.definers.loadfont(spec)
+    if not fontdata then
+      logreport('both', 2, 'loaders', 'Failed to load font ' .. specification.name)
+      return
+    end
+
+    -- If extra_hash_func was already set then the hash is already extended.
+    -- Otherwise we have to do it now if requested.
+    if not extra_hash_func then
+      extra_hash_func = fontdata.properties.extra_hash_func
+      if extra_hash_func then
+        hash = hash .. ' @ ' .. table.join(extra_hash_func(spec), ' @ ')
+      end
+    end
+    fontdata.properties.hash = hash
+    register(fontdata, id)
+    return fontdata
+  end
+
+  local function read(specification, size, id)
+    local fontdata = ltx_read(specification, size, id)
+    if not fontdata or id or tonumber(fontdata) then
+      return fontdata
+    end
+    id = font.define(fontdata)
+    register(fontdata, id)
     return id
   end
 
   local function patch (specification, size, id)
-    local fontdata = ctx_read (specification, size, id)
+    local fontdata = ltx_read (specification, size, id)
 ----if not fontdata then not_found_msg (specification, size, id) end
     if type (fontdata) == "table" and fontdata.encodingbytes == 2 then
       --- We need to test for `encodingbytes` to avoid passing

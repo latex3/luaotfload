@@ -1155,19 +1155,7 @@ function actions.query (job)
 
     local query = job.query
 
-    local tmpspec = {
-        name          = query,
-        lookup        = "name",
-        specification = query,
-        optsize       = 0,
-        features      = { },
-    }
-
-    tmpspec = fonts.names.handle_request (tmpspec)
-
-    if not tmpspec.size then
-        tmpspec.size = 655360 --- assume 10pt
-    end
+    local tmpspec = fonts.definers.analyze (query, 655360)
 
     local foundname, subfont, success, needle
 

@@ -76,7 +76,7 @@ local function cmp_by_idx (a, b) return a.idx < b.idx end
 
 local defined_combos = 0
 
-local function handle_combination (combo, spec)
+local function handle_combination (combo, spec, size)
     defined_combos = defined_combos + 1
     if not combo [1] then
         report ("both", 0, "features",
@@ -143,7 +143,7 @@ local function handle_combination (combo, spec)
 
     local basechar       = basefnt.characters
     local baseprop       = basefnt.properties
-    baseprop.name        = spec.name
+    baseprop.name        = spec
     baseprop.virtualized = true
     basefnt.fonts        = fontids
 
@@ -194,13 +194,16 @@ local function handle_combination (combo, spec)
                 " *> font %d / %d: imported %d glyphs into combo.",
                 i, nc, cnt)
     end
-    spec.lookup     = "combo"
-    spec.file       = basefnt.filename
-    spec.name       = stringformat ("luaotfload<%d>", defined_combos)
-    spec.features   = { normal = { spec.specification } }
-    spec.forced     = "evl"
-    spec.eval       = function () return basefnt end
-    return spec
+    return {
+        lookup        = "combo",
+        file          = basefnt.filename,
+        name          = stringformat ("luaotfload<%d>", defined_combos),
+        specification = spec,
+        features      = { normal = { } },
+        forced        = "evl",
+        eval          = function () return basefnt end,
+        size          = size,
+    }
 end
 
 ---[[ begin excerpt from font-ott.lua ]]
@@ -359,10 +362,9 @@ do
     extract_subfont   = full_path * sub_expr
 end
 
---- spec -> spec
-local function handle_request (specification)
+local function analyze(spec_string, size)
     local request = lpegmatch(luaotfload.parsers.font_request,
-                              specification.specification)
+                              spec_string)
 ----inspect(request)
     if not request then
         --- happens when called with an absolute path
@@ -370,7 +372,7 @@ local function handle_request (specification)
         --- we try to behave as friendly as possible
         --- just go with it ...
         report("log", 1, "features", "invalid request %q of type anon",
-            specification.specification)
+               spec_string)
         report("log", 1, "features",
                "use square bracket syntax or consult the documentation.")
         --- The result of \fontname must be re-feedable into \font
@@ -382,35 +384,42 @@ local function handle_request (specification)
         --- parentheses).
         --- https://github.com/lualatex/luaotfload/issues/57
         local fullpath, sub = lpegmatch(extract_subfont,
-                                        specification.specification)
+                                        spec_string)
         if fullpath and sub then
-            specification.sub  = tonumber(sub) or sub
-            specification.name = fullpath
+            return {
+                lookup = 'path',
+                sub = tonumber(sub) or sub,
+                name = fullpath,
+                size = size,
+            }
         else
-            specification.name = specification.specification
+            return {
+                lookup = 'path',
+                name = spec_string,
+                size = size,
+            }
         end
-        specification.lookup = "path"
-        return specification
     end
 
     local lookup, name = request.lookup, request.name
     if lookup == "combo" then
-        return handle_combination (name, specification)
+        return handle_combination (name, spec_string, size)
     end
 
-    local features = specification.features
-    if not features then
-        features = { }
-        specification.features = features
-    end
+    local features = {
+        raw = request.features or {}
+    }
 
-    features.raw = request.features or {}
-    request.features = apply_default_features(features.raw)
+    local specification = {
+        specification = spec_string,
+        size = size,
+        lookup = lookup,
+        name = name,
+        sub = request.sub or false,
+        features = features,
+    }
 
-    if name then
-        specification.name     = name
-        specification.lookup   = lookup or specification.lookup
-    end
+    local processed_features = apply_default_features(features.raw)
 
     if request.modifiers then
         local style, optsize = handle_slashed(request.modifiers)
@@ -420,11 +429,11 @@ local function handle_request (specification)
     for n=1, #import_values do
         local feat       = import_values[n][1]
         local keep       = import_values[n][2]
-        local newvalue   = request.features[feat]
+        local newvalue   = processed_features[feat]
         if newvalue then
-            specification[feat] = request.features[feat]
+            specification[feat] = newvalue
             if not keep then
-                request.features[feat] = nil
+                processed_features[feat] = nil
             end
         end
     end
@@ -432,7 +441,7 @@ local function handle_request (specification)
     --- The next line sets the “rand” feature to “random”; I haven’t
     --- investigated it any further (luatex-fonts-ext), so it will
     --- just stay here.
-    features.normal = normalize (request.features)
+    features.normal = normalize (processed_features)
     if features.normal.instance then
         if features.normal.axis then
             report("term and log", 0, "features", "instance and axis provided, instance will be ignored")
@@ -440,7 +449,6 @@ local function handle_request (specification)
             specification.instance = features.normal.instance
         end
     end
-    specification.sub = request.sub or specification.sub or false
 
     local forced_mode = request.features and request.features.mode
     if forced_mode then
@@ -452,6 +460,8 @@ local function handle_request (specification)
 
     return specification
 end
+
+fonts.definers.analyze = analyze
 
 if as_script == true then --- skip the remainder of the file
     report ("log", 5, "features",
@@ -521,15 +531,6 @@ do
         end
     end
 end
-
--- MK: Added
-function fonts.definers.analyze (spec_string, size)
-    return handle_request {
-        size = size,
-        specification = spec_string,
-    }
-end
--- /MK
 
 -- We assume that the other otf stuff is loaded already; though there’s
 -- another check below during the initialization phase.

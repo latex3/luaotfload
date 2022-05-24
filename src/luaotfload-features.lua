@@ -453,9 +453,6 @@ local function handle_request (specification)
     return specification
 end
 
-fonts.names.handle_request = handle_request
-
-
 if as_script == true then --- skip the remainder of the file
     report ("log", 5, "features",
             "Exiting early from luaotfload-features.lua.")

@@ -104,14 +104,29 @@ local function not_found_msg (specification, size, id)
   logreport ("both", 0, "loaders",
              "--------------------------------------------------------")
 end
---[[doc--
 
-    \subsection{\CONTEXT override}
-    \label{define-font}
-    We provide a simplified version of the original font definition
-    callback.
-
---doc]]--
+do
+  local hashed_cache = {}
+  local tfmdata_cache = fonts.hashes.identifiers
+  local function register(tfmdata, id)
+    if tfmdata and id then
+      local hash = tfmdata.properties.hash
+      if not hash then
+        logreport('both', 3, 'loaders', "Registering font %s with id %s with missing hash.", id, tfmdata.properties.filename or "unknown")
+      elseif not hashed_cache[hash] then
+        hashed_cache[hash] = id
+        logreport('both', 5, 'loaders', "Registering font %s with id %s and hash hash.", id, tfmdata.properties.filename or "unknown", hash)
+      end
+      tfmdata_cache[id] = tfmdata
+    end
+  end
+  function registered(hash)
+   local id = hashed_cache[hash]
+   return id, tfmdata_cache[id]
+  end
+  fonts.definers.register = register
+  fonts.definers.registered = registered
+end
 
 
 local definers --- (string, spec -> size -> id -> tmfdata) hash_t

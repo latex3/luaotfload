@@ -149,7 +149,7 @@ do
 
     local fontdata = fonts.definers.loadfont(spec)
     if not fontdata then
-      logreport('both', 2, 'loaders', 'Failed to load font ' .. specification.name)
+      logreport('both', 2, 'loaders', 'Failed to load font ' .. spec.name)
       return
     end
 

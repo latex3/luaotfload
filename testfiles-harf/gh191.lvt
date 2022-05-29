@@ -5,7 +5,7 @@
 \begin{document}
 \showoutput
 \START
-\font\gentium {kpse:GentiumPlus-R.ttf:mode=harf}\gentium
+\font\gentium {kpse:GentiumPlus-Regular.ttf:mode=harf}\gentium
 abc def \special{}ghi\-jkl\special{} mno pqr\-stu vwx
 \par\newpage
 \directlua{

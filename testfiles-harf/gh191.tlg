@@ -29,40 +29,28 @@ Completed box being shipped out [1]
 ....\gentium f
 ....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
 ....\special{}
+....\gentium g
+....\gentium h
+....\gentium i
 ....\discretionary (penalty 50)
-.....< \gentium g
-.....< \gentium h
-.....< \gentium i
 .....< \gentium -
-.....> \gentium j
-.....> \gentium k
-.....> \gentium l
-.....= \gentium g
-.....= \gentium h
-.....= \gentium i
-.....= \gentium j
-.....= \gentium k
-.....= \gentium l
+....\gentium j
+....\gentium k
+....\gentium l
 ....\special{}
 ....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
 ....\gentium m
 ....\gentium n
 ....\gentium o
 ....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
+....\gentium p
+....\gentium q
+....\gentium r
 ....\discretionary (penalty 50)
-.....< \gentium p
-.....< \gentium q
-.....< \gentium r
 .....< \gentium -
-.....> \gentium s
-.....> \gentium t
-.....> \gentium u
-.....= \gentium p
-.....= \gentium q
-.....= \gentium r
-.....= \gentium s
-.....= \gentium t
-.....= \gentium u
+....\gentium s
+....\gentium t
+....\gentium u
 ....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
 ....\gentium v
 ....\gentium w

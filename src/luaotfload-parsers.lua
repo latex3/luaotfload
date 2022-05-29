@@ -593,6 +593,8 @@ local combo             = Cg(P"combo", "lookup") * colon * ws
 --- we’ll emit a warning.
 local prefixed          = Cg(P"name" + "file" + "kpse" + "my", "lookup")
                           * colon * ws * Cg(fontname, "name")
+                        + Cg(P"id", "lookup")
+                          * colon * ws * Cg(R'09'^1 / tonumber, "id")
 local unprefixed        = Cg(Cc"anon", "lookup") * Cg(fontname, "name")
 --- Bracketed “path” lookups: These may contain any character except
 --- for unbalanced brackets. A backslash escapes any following

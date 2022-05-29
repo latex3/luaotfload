@@ -408,6 +408,25 @@ local function analyze(spec_string, size)
         features = features,
     }
 
+    if lookup == 'id' then
+        local original_font = fontidentifiers [request.id]
+        if not original_font then return end
+        local original_spec = original_font.specification
+        if not original_spec then return end
+        if size < 0 then
+            specification.size = original_spec.size * size // -1000
+        end
+        specification.lookup = original_spec.lookup
+        specification.name = original_spec.name
+        specification.sub = specification.sub or original_spec.sub
+        specification.style = original_spec.style
+        specification.optsize = original_spec.optsize
+        specification.forced = original_spec.forced
+        if original_spec.features then
+            features.raw = table.merged(original_spec.features.raw, features.raw)
+        end
+    end
+
     local processed_features = apply_default_features(features.raw)
 
     if request.modifiers then

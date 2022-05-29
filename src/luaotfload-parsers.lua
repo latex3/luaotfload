@@ -577,6 +577,9 @@ local combolist         = Ct(combodef1 * (comborowsep * combodef)^1)
 local subfont           = P"(" * Cg(R'09'^1 / function (s)
                             return tonumber(s) + 1
                           end + (1 - S"()")^1, "sub") * P")"
+-- An optional subfont shouldn't use subfont^-1 to ensure that parens
+-- at the subfont location are never interpreted in different ways.
+local maybe_subfont     = subfont + #(1 - P"(" + -1)
 
 --- lookups -----------------------------------------------------------
 local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
@@ -604,7 +607,6 @@ local path_balanced     = { (path_content + V(2))^1
                           , lbrk * V(1)^-1 * rbrk }
 local path_lookup       = Cg(Cc"path", "lookup")
                           * lbrk * Cg(Cs(path_balanced), "name") * rbrk
-                          * subfont^-1
 
 --- features ----------------------------------------------------------
 local balanced_braces   = P{((1 - S'{}') + '{' * V(1) * '}')^0}
@@ -631,12 +633,11 @@ local feature_list      = Cf(Ct""
 --- top-level rules ---------------------------------------------------
 --- \font\foo=<specification>:<features>
 local features          = Cg(feature_list, "features")
-local specification     = (prefixed + unprefixed)
-                        * subfont^-1
+local specification     = (path_lookup + prefixed + unprefixed)
+                        * maybe_subfont
                         * modifier_list
-local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
-                           + combo --> TODO: feature list needed?
-                           + specification * (colon    * features)^-1)
+local font_request      = Ct(specification * (colon^-1 * features)^-1
+                           + combo) --> TODO: feature list needed?
 
 --  lpeg.print(font_request)
 --- v2.5 parser: 1065 rules

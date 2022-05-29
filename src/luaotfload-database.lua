@@ -2438,7 +2438,7 @@ local function count_removed (files)
         local f = old[i]
         if not kpsereadable_file (f) then
             logreport ("log", 2, "db",
-                      "File %q does not exist in file system.")
+                      "File %q does not exist in file system.", f)
             nrem = nrem + 1
         end
     end

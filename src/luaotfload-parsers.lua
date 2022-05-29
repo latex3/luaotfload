@@ -498,27 +498,6 @@ local function handle_xetex_option (val)
   return tostring(1 + tonumber(val))
 end
 
---[[doc--
-
-    Dirty test if a file: request is actually a path: lookup; don’t
-    ask! Note this fails on Windows-style absolute paths. These will
-    *really* have to use the correct request.
-
---doc]]--
-
-local function check_garbage (_,i, garbage)
-  if stringfind(garbage, "/") then
-    logreport("log", 0, "load",  --- ffs use path!
-              "warning: path in file: lookups is deprecated; ")
-    logreport("log", 0, "load", "use bracket syntax instead!")
-    logreport("log", 0, "load",
-              "position: %d; full match: %q",
-              i, garbage)
-    return true
-  end
-  return false
-end
-
 local featuresep = comma + semicolon
 
 --- modifiers ---------------------------------------------------------
@@ -601,7 +580,6 @@ local subfont           = P"(" * Cg(R'09'^1 / function (s)
 
 --- lookups -----------------------------------------------------------
 local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
-local unsupported       = Cmt((1-S":(")^1, check_garbage)
 local combo             = Cg(P"combo", "lookup") * colon * ws
                           * Cg(combolist, "name")
 --- initially we intended file: to emulate the behavior of
@@ -610,9 +588,7 @@ local combo             = Cg(P"combo", "lookup") * colon * ws
 --- turns out fontspec and other widely used packages rely on file:
 --- with paths already, so we’ll add a less strict rule here.  anyways,
 --- we’ll emit a warning.
-local prefixed          = P"file:" * ws * Cg(Cc"path", "lookup")
-                          * Cg(unsupported, "name")
-                        + Cg(P"name" + "file" + "kpse" + "my", "lookup")
+local prefixed          = Cg(P"name" + "file" + "kpse" + "my", "lookup")
                           * colon * ws * Cg(fontname, "name")
 local unprefixed        = Cg(Cc"anon", "lookup") * Cg(fontname, "name")
 --- Bracketed “path” lookups: These may contain any character except

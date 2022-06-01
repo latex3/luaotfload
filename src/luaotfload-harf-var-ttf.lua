@@ -171,6 +171,7 @@ local function parse_glyf(loca, glyf, gid)
       component.flags = flags
       component.payload = glyf:sub(offset, offset + payload_length - 1)
       components[#components+1] = component
+      offset = offset + payload_length
     until flags & 0x20 == 0
     return components
   else

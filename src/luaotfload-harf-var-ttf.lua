@@ -398,7 +398,13 @@ local function interpolate_glyf(loca, gvar_index, gvar, glyf, gid, coords, map)
   if not var then
     local start = loca[gid+1] + 1
     local stop = loca[gid+2]
-    return glyf:sub(start, stop)
+    -- If the glyph uses components then we can never just copy it but have to parse
+    -- it to rewrite the components if necessary.
+    if stop >= start + 2 and sio.readinteger2(glyf, start) < 0 then
+      return serialize_glyf(parse_glyf(loca, glyf, gid), map)
+    else
+      return glyf:sub(start, stop)
+    end
   end
   local points = parse_glyf(loca, glyf, gid)
   if not points then return '' end

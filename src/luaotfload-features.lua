@@ -494,7 +494,7 @@ do
     function helpers.getfactors(tfmdata, instance) -- `instance` might refer to an `axis` value here
         assert(instance == true or type(instance) == "string", "Fontloader changed interface of helpers.getfactors. This is a bug, please notify the luaotfload maintainers.")
         local variabledata = tfmdata.variabledata
-        if not variabledata or instance == "" then return end
+        if not variabledata then return end
         local instances = variabledata.instances
         local axis = variabledata.axis
         local designaxis = variabledata.designaxis

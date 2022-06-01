@@ -87,7 +87,7 @@ local variable_pattern do
   local number = l.C(l.S'+-'^-1 * (l.R'09'^1 * ('.' * l.R'09'^0)^-1 + '.' * l.R'09'^1))
   local name_or_tag = l.C(l.R('AZ', 'az')^1)
   local pair = l.Ct(name_or_tag * white * '=' * white * (number + l.Cc(nil) * 'auto'))
-  variable_pattern = l.Ct(pair * (white * ',' * white * pair)^0)
+  variable_pattern = l.Ct(pair * (white * ',' * white * pair)^0) * -1
 end
 
 local function loadfont(spec)

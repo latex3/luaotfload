@@ -53,6 +53,8 @@ local identifiers           = fonts.hashes.identifiers
 
 local add_color_callback --[[ this used to be a global‽ ]]
 
+local custom_setcolor, custom_settransparent, custom_parsecolor
+
 --[[doc--
 Color string parser.
 --doc]]--
@@ -72,8 +74,8 @@ local extract_color  = spaces * octet * octet * octet / function(r,g,b)
                          return stringformat("%.3g %.3g %.3g rg", r, g, b)
                        end * (opaque + octet)^-1 * spaces * -1
 
---- something is carried around in ``res``
---- for later use by color_handler() --- but what?
+-- Keep the currently collected page resources needed for the current
+-- colors in `res`.
 
 local res = nil
 
@@ -89,14 +91,22 @@ end
 --- string -> (string | nil)
 local function sanitize_color_expression (digits)
     digits = tostring(digits)
-    local rgb, a = lpegmatch(extract_color, digits)
-    if not rgb then
-        logreport("both", 0, "color",
-                  "%q is not a valid rgb[a] color expression",
-                  digits)
-        return
+    local rgb, a
+    if custom_parsecolor then
+        rgb, a = custom_parsecolor (digits)
+    else
+        rgb, a = lpegmatch(extract_color, digits)
+        if not rgb then
+            logreport("both", 0, "color",
+                      "%q is not a valid rgb[a] color expression",
+                      digits)
+            return
+        end
     end
-    return rgb, (a and pageresources(a))
+    if a and not custom_settransparent then
+        a = pageresources(a)
+    end
+    return rgb, a
 end
 
 local color_stack = 0
@@ -124,8 +134,6 @@ local colorstack_t      = node.subtype("pdf_colorstack")
 
 local color_callback
 local color_attr        = luatexbase.new_attribute("luaotfload_color_attribute")
-
-local custom_setcolor
 
 -- Pass nil for new_color or old_color to indicate no color
 -- If color is nil, pass tail to decide where to add whatsit
@@ -390,6 +398,12 @@ end
 -- Call with nil to disable.
 function luaotfload.set_colorhandler(cb)
   custom_setcolor = cb
+end
+function luaotfload.set_transparenthandler(cb)
+  custom_setcolor = cb
+end
+function luaotfload.set_colorparser(cb)
+  custom_parsecolor = cb
 end
 
 return function ()

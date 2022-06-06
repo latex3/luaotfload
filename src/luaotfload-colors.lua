@@ -110,26 +110,43 @@ local function sanitize_color_expression (digits)
         rgb, a = custom_splitcolor (digits)
     else
         rgb, a = lpegmatch(split_color, digits)
+        if not rgb and not a then
+            logreport("both", 0, "color",
+                      "%q is not a valid rgb[a] color expression",
+                      digits)
+            return
+        end
     end
     if rgb then
         if custom_parsecolor then
             rgb = custom_parsecolor(rgb)
         else
             rgb = lpegmatch(extract_color, rgb)
+            if not rgb then
+                logreport("both", 0, "color",
+                          "Invalid color part in color expression %q",
+                          digits)
+                return
+            end
         end
     end
     if a then
         if custom_parsetransparent then
             a = custom_parsetransparent(a)
         else
-            a = pageresources(lpegmatch(extract_transparent, a))
+            if type(a) == 'string' then
+                a = lpegmatch(extract_transparent, a)
+                if not a then
+                    logreport("both", 0, "color",
+                              "Invalid transparency part in color expression %q",
+                              digits)
+                    return
+                end
+            end
+            if a then
+                a = pageresources(a)
+            end
         end
-    end
-    if not rgb and not a then
-        logreport("both", 0, "color",
-                  "%q is not a valid rgb[a] color expression",
-                  digits)
-        return
     end
     return rgb, a
 end

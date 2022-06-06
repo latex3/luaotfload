@@ -53,7 +53,8 @@ local identifiers           = fonts.hashes.identifiers
 
 local add_color_callback --[[ this used to be a global‽ ]]
 
-local custom_setcolor, custom_settransparent, custom_parsecolor
+local custom_setcolor, custom_settransparent, custom_splitcolor,
+      custom_parsecolor, custom_parsetransparent
 
 --[[doc--
 Color string parser.
@@ -70,9 +71,22 @@ local octet          = digit16 * digit16 / function(s)
     return tonumber(s, 16) / 255
 end
 
-local extract_color  = spaces * octet * octet * octet / function(r,g,b)
+local function lpeg_repeat(patt, count)
+    patt = P(patt)
+    local result = patt
+    for i = 2, count do
+        result = result * patt
+    end
+    return result
+end
+
+local split_color     = spaces * C(lpeg_repeat(digit16, 6)) * (opaque + C(lpeg_repeat(digit16, 2)))^-1 * spaces * -1;
+
+local extract_color  = octet * octet * octet / function(r,g,b)
                          return stringformat("%.3g %.3g %.3g rg", r, g, b)
-                       end * (opaque + octet)^-1 * spaces * -1
+                       end * -1
+
+local extract_transparent = octet * -1
 
 -- Keep the currently collected page resources needed for the current
 -- colors in `res`.
@@ -92,19 +106,30 @@ end
 local function sanitize_color_expression (digits)
     digits = tostring(digits)
     local rgb, a
-    if custom_parsecolor then
-        rgb, a = custom_parsecolor (digits)
+    if custom_splitcolor then
+        rgb, a = custom_splitcolor (digits)
     else
-        rgb, a = lpegmatch(extract_color, digits)
-        if not rgb then
-            logreport("both", 0, "color",
-                      "%q is not a valid rgb[a] color expression",
-                      digits)
-            return
+        rgb, a = lpegmatch(split_color, digits)
+    end
+    if rgb then
+        if custom_parsecolor then
+            rgb = custom_parsecolor(rgb)
+        else
+            rgb = lpegmatch(extract_color, rgb)
         end
     end
-    if a and not custom_settransparent then
-        a = pageresources(a)
+    if a then
+        if custom_parsetransparent then
+            a = custom_parsetransparent(a)
+        else
+            a = pageresources(lpegmatch(extract_transparent, a))
+        end
+    end
+    if not rgb and not a then
+        logreport("both", 0, "color",
+                  "%q is not a valid rgb[a] color expression",
+                  digits)
+        return
     end
     return rgb, a
 end
@@ -402,8 +427,14 @@ end
 function luaotfload.set_transparenthandler(cb)
   custom_setcolor = cb
 end
+function luaotfload.set_colorsplitter(cb)
+  custom_splitcolor = cb
+end
 function luaotfload.set_colorparser(cb)
   custom_parsecolor = cb
+end
+function luaotfload.set_transparentparser(cb)
+  custom_parsetransparent = cb
 end
 
 return function ()

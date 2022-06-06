@@ -437,6 +437,13 @@ function luaotfload.set_transparentparser(cb)
   custom_parsetransparent = cb
 end
 
+setmetatable(fonts.handlers.otf.statistics.usedfeatures.color, {
+  __index = function(t, k)
+    t[k] = k
+    return k
+  end,
+})
+
 return function ()
     logreport = luaotfload.log.report
     if not fonts then

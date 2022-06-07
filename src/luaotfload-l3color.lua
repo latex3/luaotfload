@@ -47,7 +47,7 @@ luaotfload.set_colorparser(function (value)
   tex.runtoks(function()
     token.get_next()
     color_export[6] = value
-    tex.sprint(-1, color_export)
+    tex.sprint(-2, color_export)
   end)
   local list = token.scan_list()
   if not list.head or list.head.next or list.head.subtype ~= node.subtype'pdf_colorstack' then

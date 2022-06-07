@@ -453,6 +453,25 @@ end
 function luaotfload.set_transparentparser(cb)
   custom_parsetransparent = cb
 end
+function luaotfload.set_transparentstack(stack)
+  if type(transparent_stack) == 'number' then
+    tex.error"luaotfload's transparency stack can't be changed after it has been used"
+  else
+    local t = type(stack)
+    if t == 'function' or t == 'number' then
+      function transparent_stack()
+        if t == 'function' then
+          transparent_stack = stack()
+        else
+          transparent_stack = stack
+        end
+        return transparent_stack
+      end
+    else
+      tex.error("Invalid argument in luaotfload.set_transparentstack")
+    end
+  end
+end
 
 setmetatable(fonts.handlers.otf.statistics.usedfeatures.color, {
   __index = function(t, k)

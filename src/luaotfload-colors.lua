@@ -442,7 +442,7 @@ function luaotfload.set_colorhandler(cb)
   custom_setcolor = cb
 end
 function luaotfload.set_transparenthandler(cb)
-  custom_setcolor = cb
+  custom_settransparent = cb
 end
 function luaotfload.set_colorsplitter(cb)
   custom_splitcolor = cb
@@ -481,6 +481,7 @@ setmetatable(fonts.handlers.otf.statistics.usedfeatures.color, {
 })
 
 return function ()
+    assert(logreport == luaotfload.log.report)
     logreport = luaotfload.log.report
     if not fonts then
         logreport ("log", 0, "color",

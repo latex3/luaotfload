@@ -2492,20 +2492,6 @@ commands applyind the described color or transparency.
 
 All error handling and reporting should be done in the callbacks.
 
-\endfunctionlist
-
-When these functions aren't used, then the color is set based on colorstack 0.
-By default a new colorstack is allocated for transparency, but alternatively an
-existsing colorstack for this prpose can be set:
-
-\beginfunctionlist
-
-  \beginaltitem  {luaotfload.set_transparent_colorstack(stack : int)}
-            Use colorstack \luaident{stack} for setting transparency.
-  \endaltitem
-
-\endfunctionlist
-
 \endsubsubsection
 
 \endsubsection

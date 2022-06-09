@@ -2407,6 +2407,108 @@ are defined for which scripts.
 \endsubsubsection
 
 \endsubsection
+
+\beginsubsection {Format Author’s Interface}
+
+Additionally some functions are provided which should only be needed for
+format authors trying to integrate \identifier{luaotfload}'s color handling
+with the conventions of a specific format.
+
+End users should never have to work with these.
+
+\endsubsubsection
+
+\beginsubsubsection{Color setting}
+
+\identifier{luaotfload}'s \inlinecode{color} feature can apply color in two
+different ways: By default it inserts \inlinecode{pdf_colorstack} whatsits
+containing the PDF code to change the color.
+
+Alternatively a function can be provided which gets called on every glyph
+node to be colored. This function can then e.g. apply an attribute which gets
+interpreted later.
+
+This can be enabled separately for colors and transparency by passing such
+callback functions:
+
+\beginfunctionlist
+
+  \beginaltitem  {luaotfload.set_colorhandler((head : node, n : node, color :
+      string) -> (head : node, n : node)}
+            Mark the node \luaident{n} in the list starting with \luaident{head}
+            to be colored with color \luaident{color}.
+
+            By default the color is represented by literal PDF code setting the
+            color.
+  \endaltitem
+
+  \beginaltitem  {luaotfload.set_transparenthandler((head : node, n : node,
+      level : string) -> (head : node, n : node)}
+            Mark the node \luaident{n} in the list starting with \luaident{head}
+            to be set transparently with transparency level \luaident{level}.
+
+            By default the transparency level is represented by literal PDF code setting the
+            transparency.
+  \endaltitem
+
+\endfunctionlist
+
+When these functions aren't used, then the color is set based on colorstack 0.
+By default a new colorstack is allocated for transparency, but alternatively an
+existsing colorstack for this prpose can be set:
+
+\beginfunctionlist
+
+  \beginaltitem  {luaotfload.set_transparent_colorstack(stack : int)}
+            Use colorstack \luaident{stack} for setting transparency.
+  \endaltitem
+
+\endfunctionlist
+
+\endsubsubsection
+
+\beginsubsubsection{Color selection}
+
+Additionally the translation of the argument to \inlinecode{color} to an
+actual PDF color can be customized though three \luaident{exclusive} callbacks:
+
+Since there is only a single \inlinecode{color} feature which sets both the
+color and the transparency, the first callback
+\luaident{luaotfload.split_color} gets called with a single string representing
+the feature value and is supposed to return two values representing the color
+and the transparency part.
+
+The default implementation splits the string the feature value at a comma and
+strips outer spaces for both result values, except the HTML style 8 hexdigit
+RGBA values get split into the first 6 and the last two digits.
+
+Afterwards the return values get passed to the
+\luaident{luaotfload.parse_color} respectively
+\luaident{luaotfload.parse_transparent} callbacks (except that \luaident{false}
+and \luaident{nil} skip the corresponding callback).
+
+These callbacks should translate these strings components into valid PDF
+commands applyind the described color or transparency.
+
+All error handling and reporting should be done in the callbacks.
+
+\endfunctionlist
+
+When these functions aren't used, then the color is set based on colorstack 0.
+By default a new colorstack is allocated for transparency, but alternatively an
+existsing colorstack for this prpose can be set:
+
+\beginfunctionlist
+
+  \beginaltitem  {luaotfload.set_transparent_colorstack(stack : int)}
+            Use colorstack \luaident{stack} for setting transparency.
+  \endaltitem
+
+\endfunctionlist
+
+\endsubsubsection
+
+\endsubsection
 \endsection
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

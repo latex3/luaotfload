@@ -48,13 +48,14 @@ local nodetail              = nodedirect.tail
 local getattribute          = nodedirect.has_attribute
 local setattribute          = nodedirect.set_attribute
 
+local call_callback         = luatexbase.call_callback
+
 local stringformat          = string.format
 local identifiers           = fonts.hashes.identifiers
 
 local add_color_callback --[[ this used to be a global‽ ]]
 
-local custom_setcolor, custom_settransparent, custom_splitcolor,
-      custom_parsecolor, custom_parsetransparent
+local custom_setcolor, custom_settransparent
 
 --[[doc--
 Color string parser.
@@ -62,7 +63,7 @@ Color string parser.
 
 local lpeg           = require"lpeg"
 local lpegmatch      = lpeg.match
-local C, Cg, Ct, P, R, S = lpeg.C, lpeg.Cg, lpeg.Ct, lpeg.P, lpeg.R, lpeg.S
+local C, Cc, P, R, S = lpeg.C, lpeg.Cc, lpeg.P, lpeg.R, lpeg.S
 
 local spaces         = S"\t "^0
 local digit16        = R("09", "af", "AF")
@@ -80,13 +81,31 @@ local function lpeg_repeat(patt, count)
     return result
 end
 
-local split_color     = spaces * C(lpeg_repeat(digit16, 6)) * (opaque + C(lpeg_repeat(digit16, 2)))^-1 * spaces * -1;
+local split_color     = spaces * C(lpeg_repeat(digit16, 6)) * (opaque + C(lpeg_repeat(digit16, 2)))^-1 * spaces * -1
+                      + spaces * (C((spaces * (1 - R', ')^1)^1) + Cc(nil)) * spaces * (',' * spaces * C((spaces * (1 - R' ,')^1)^1)^-1 * spaces)^-1 * -1
+
+luatexbase.create_callback('luaotfload.split_color', 'exclusive', function(value)
+    local rgb, a = lpegmatch(split_color, value)
+    if not rgb and not a then
+        logreport("both", 0, "color",
+                  "%q is not a valid rgb[a] color expression",
+                  digits)
+    end
+    return rgb, a
+end)
 
 local extract_color  = octet * octet * octet / function(r,g,b)
                          return stringformat("%.3g %.3g %.3g rg", r, g, b)
                        end * -1
-
-local extract_transparent = octet * -1
+luatexbase.create_callback('luaotfload.parse_color', 'exclusive', function(value)
+    local rgb = lpegmatch(extract_color, value)
+    if not rgb then
+        logreport("both", 0, "color",
+                  "Invalid color part in color expression %q",
+                  value)
+    end
+    return rgb
+end)
 
 -- Keep the currently collected page resources needed for the current
 -- colors in `res`.
@@ -102,51 +121,35 @@ local function pageresources(alpha)
     return f
 end
 
+local extract_transparent = octet * -1
+luatexbase.create_callback('luaotfload.parse_transparent', 'exclusive', function(value)
+    local a
+    if type(value) == 'string' then
+        a = lpegmatch(extract_transparent, value)
+        if not a then
+            logreport("both", 0, "color",
+                      "Invalid transparency part in color expression %q",
+                      value)
+        end
+    else
+        a = value
+    end
+    if a then
+        a = pageresources(a)
+    end
+    return a
+end)
+
+
 --- string -> (string | nil)
 local function sanitize_color_expression (digits)
     digits = tostring(digits)
-    local rgb, a
-    if custom_splitcolor then
-        rgb, a = custom_splitcolor (digits)
-    else
-        rgb, a = lpegmatch(split_color, digits)
-        if not rgb and not a then
-            logreport("both", 0, "color",
-                      "%q is not a valid rgb[a] color expression",
-                      digits)
-            return
-        end
-    end
+    local rgb, a = call_callback('luaotfload.split_color', digits)
     if rgb then
-        if custom_parsecolor then
-            rgb = custom_parsecolor(rgb)
-        else
-            rgb = lpegmatch(extract_color, rgb)
-            if not rgb then
-                logreport("both", 0, "color",
-                          "Invalid color part in color expression %q",
-                          digits)
-                return
-            end
-        end
+        rgb = call_callback('luaotfload.parse_color', rgb)
     end
     if a then
-        if custom_parsetransparent then
-            a = custom_parsetransparent(a)
-        else
-            if type(a) == 'string' then
-                a = lpegmatch(extract_transparent, a)
-                if not a then
-                    logreport("both", 0, "color",
-                              "Invalid transparency part in color expression %q",
-                              digits)
-                    return
-                end
-            end
-            if a then
-                a = pageresources(a)
-            end
-        end
+        a = call_callback('luaotfload.parse_transparent', a)
     end
     return rgb, a
 end
@@ -444,16 +447,7 @@ end
 function luaotfload.set_transparenthandler(cb)
   custom_settransparent = cb
 end
-function luaotfload.set_colorsplitter(cb)
-  custom_splitcolor = cb
-end
-function luaotfload.set_colorparser(cb)
-  custom_parsecolor = cb
-end
-function luaotfload.set_transparentparser(cb)
-  custom_parsetransparent = cb
-end
-function luaotfload.set_transparentstack(stack)
+function luaotfload.set_transparent_colorstack(stack)
   if type(transparent_stack) == 'number' then
     tex.error"luaotfload's transparency stack can't be changed after it has been used"
   else
@@ -468,7 +462,7 @@ function luaotfload.set_transparentstack(stack)
         return transparent_stack
       end
     else
-      tex.error("Invalid argument in luaotfload.set_transparentstack")
+      tex.error("Invalid argument in luaotfload.set_transparent_colorstack")
     end
   end
 end

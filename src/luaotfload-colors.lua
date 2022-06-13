@@ -82,7 +82,7 @@ local function lpeg_repeat(patt, count)
 end
 
 local split_color     = spaces * C(lpeg_repeat(digit16, 6)) * (opaque + C(lpeg_repeat(digit16, 2)))^-1 * spaces * -1
-                      + spaces * (C((spaces * (1 - R', ')^1)^1) + Cc(nil)) * spaces * (',' * spaces * C((spaces * (1 - R' ,')^1)^1)^-1 * spaces)^-1 * -1
+                      + spaces * (C((spaces * (1 - S', ')^1)^1) + Cc(nil)) * spaces * (',' * spaces * C((spaces * (1 - S' ,')^1)^1)^-1 * spaces)^-1 * -1
 
 luatexbase.create_callback('luaotfload.split_color', 'exclusive', function(value)
     local rgb, a = lpegmatch(split_color, value)

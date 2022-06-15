@@ -1,5 +1,13 @@
 Change History
 --------------
+2022-06-15 luaotfload v3.22
+
+    *  Tailored case mappings
+    *  Avoid database rebuilds when switching Lua versions
+    *  Improved attribute settings of ActualText nodes in harf mode
+    *  Callback-based customization for color parameter
+    *  Various bug fixes
+
 2022-03-18 luaotfload v3.21
 
     *  Fix performance regression introduced in version 3.19.

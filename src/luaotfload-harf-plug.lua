@@ -4,8 +4,8 @@
 -----------------------------------------------------------------------
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
   name          = "luaotfload-harf-plug",
-  version       = "3.21",       --TAGVERSION
-  date          = "2022-03-18", --TAGDATE
+  version       = "3.22",       --TAGVERSION
+  date          = "2022-06-15", --TAGDATE
   description   = "luaotfload submodule / HarfBuzz shaping",
   license       = "GPL v2.0",
   author        = "Khaled Hosny, Marcel Krüger",
@@ -136,8 +136,8 @@ local function setprop(n, prop, value)
   props[prop] = value
 end
 
-local function inherit(t, base, properties)
-  local n = newnode(t)
+local function inherit(t, sub, base, properties)
+  local n = newnode(t, sub)
   setattrs(n, getattrs(base))
   if properties then
     setproperty(n, setmetatable({}, {__index = properties}))
@@ -146,7 +146,7 @@ local function inherit(t, base, properties)
 end
 -- New kern node of amount `v`, inheriting the properties/attributes of `n`.
 local function newkern(v, n)
-  local kern = inherit(kern_t, n, getproperty(n))
+  local kern = inherit(kern_t, 0, n, getproperty(n))
   setkern(kern, v)
   return kern
 end
@@ -293,7 +293,7 @@ end
 local function unsafetobreak(glyph)
   return glyph
      and glyph.flags
-     and glyph.flags & fl_unsafe
+     and glyph.flags & fl_unsafe ~= 0
 end
 
 local shape
@@ -782,11 +782,11 @@ local function tonodes(head, node, run, glyphs)
     elseif nextcluster + 1 == nodeindex then -- Oops, we went too far
       nodeindex = nodeindex - 1
       if node then
-        local new = inherit(glyph_t, getprev(node), lastprops)
+        local new = inherit(glyph_t, 0, getprev(node), lastprops)
         head, node = insertbefore(head, node, new)
       else
         node = tail(head)
-        local new = inherit(glyph_t, node, lastprops)
+        local new = inherit(glyph_t, 0, node, lastprops)
         head, node = insertafter(head, node, new)
       end
       setfont(node, fontid)
@@ -1050,8 +1050,8 @@ function process(head, font, _attr, direction)
   return newhead or head
 end
 
-local function pageliteral(data)
-  local n = newnode(whatsit_t, pdfliteral_t)
+local function pageliteral(data, base)
+  local n = inherit(whatsit_t, pdfliteral_t, base, getproperty(base))
   setwhatsitfield(n, "mode", 1) -- page
   setwhatsitfield(n, "data", data) -- page
   return n
@@ -1069,12 +1069,12 @@ local function post_process(head)
 
     if startactual then
       local actualtext = "/Span<</ActualText<FEFF"..startactual..">>>BDC"
-      head = insertbefore(head, n, pageliteral(actualtext))
+      head = insertbefore(head, n, pageliteral(actualtext, n))
       props[startactual_p] = nil
     end
 
     if endactual then
-      head = insertafter(head, n, pageliteral("EMC"))
+      head = insertafter(head, n, pageliteral("EMC", n))
       props[endactual_p] = nil
     end
 

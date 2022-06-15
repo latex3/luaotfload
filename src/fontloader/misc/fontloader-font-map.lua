@@ -253,9 +253,9 @@ function mappings.addtounicode(data,filename,checklookups,forceligatures)
     local usedmap       = cidinfo and fonts.cid.getmap(cidinfo)
     local uparser       = makenameparser() -- hm, every time?
     if usedmap then
-          oparser  = usedmap and makenameparser(cidinfo.ordering)
-          cidnames = usedmap.names
-          cidcodes = usedmap.unicodes
+        oparser  = usedmap and makenameparser(cidinfo.ordering)
+        cidnames = usedmap.names
+        cidcodes = usedmap.unicodes
     end
     local ns = 0
     local nl = 0

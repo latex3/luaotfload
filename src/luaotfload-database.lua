@@ -5,8 +5,8 @@
 do -- block to avoid to many local variables error
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-database",
-     version       = "3.21",       --TAGVERSION
-     date          = "2022-03-18", --TAGDATE
+     version       = "3.22",       --TAGVERSION
+     date          = "2022-06-15", --TAGDATE
      description   = "luaotfload submodule / database",
      license       = "GPL v2.0",
      author        = "Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
@@ -201,7 +201,7 @@ local resolversfindfile        = context_environment.resolvers.findfile
 
 --- some of our own
 local unicode                  = require'luaotfload-unicode'
-local casefold                 = unicode.casefold
+local casefold                 = require'lua-uni-case'.casefold
 local alphnum_only             = unicode.alphnum_only
 
 local name_index               = nil --> upvalue for names.data
@@ -516,8 +516,11 @@ end
 local function load_lua_file (path_lua, path_luc)
     local foundname, chunk = load_maybe_gzip (path_luc, true)
     if foundname then
-        chunk = assert (load (chunk, 'b'))
+        chunk = load (chunk, 'b')
     else
+        chunk = nil
+    end
+    if not chunk then
         foundname, chunk = load_maybe_gzip (path_lua, false)
         if foundname then
             chunk = assert (load (chunk, 't'))
@@ -2435,7 +2438,7 @@ local function count_removed (files)
         local f = old[i]
         if not kpsereadable_file (f) then
             logreport ("log", 2, "db",
-                      "File %q does not exist in file system.")
+                      "File %q does not exist in file system.", f)
             nrem = nrem + 1
         end
     end

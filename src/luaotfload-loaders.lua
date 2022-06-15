@@ -8,8 +8,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-loaders",
-    version       = "3.21",       --TAGVERSION
-    date          = "2022-03-18", --TAGDATE
+    version       = "3.22",       --TAGVERSION
+    date          = "2022-06-15", --TAGDATE
     description   = "luaotfload submodule / callback handling",
     license       = "GPL v2.0"
 }
@@ -104,32 +104,80 @@ local function not_found_msg (specification, size, id)
   logreport ("both", 0, "loaders",
              "--------------------------------------------------------")
 end
---[[doc--
-
-    \subsection{\CONTEXT override}
-    \label{define-font}
-    We provide a simplified version of the original font definition
-    callback.
-
---doc]]--
-
 
 local definers --- (string, spec -> size -> id -> tmfdata) hash_t
 do
-  local ctx_read = fonts.definers.read
-  local register = fonts.definers.register
-  local function read(specification, size, id)
-    local tfmdata = ctx_read(specification, size, id)
-    if not tfmdata or id or tonumber(tfmdata) then
-      return tfmdata
+  local hashed_cache = {}
+  local fontdata_cache = fonts.hashes.identifiers
+  local function register(fontdata, id)
+    if fontdata and id then
+      local hash = fontdata.properties.hash
+      if not hash then
+        logreport('both', 2, 'loaders', "Registering font %s with id %s with missing hash.", id, fontdata.properties.filename or "unknown")
+      elseif not hashed_cache[hash] then
+        hashed_cache[hash] = id
+        logreport('both', 4, 'loaders', "Registering font %s with id %s and hash %s.", id, fontdata.properties.filename or "unknown", hash)
+      end
+      fontdata_cache[id] = fontdata
     end
-    id = font.define(tfmdata)
-    register(tfmdata, id)
+  end
+  function registered(hash)
+   local id = hashed_cache[hash]
+   return id, fontdata_cache[id]
+  end
+  fonts.definers.register = register
+  fonts.definers.registered = registered
+
+  local extra_hash_funcs = {}
+
+  local function ltx_read(spec, size, id)
+    spec = type(spec) == 'string' and fonts.definers.analyze(spec, size) or spec
+    spec = fonts.definers.resolve(spec)
+
+    local hash = fonts.constructors.hashinstance(spec)
+
+    -- extra_hash_func allows the loader to determine additional hash parts
+    -- depending on the actual font. This is used e.g. for variable fonts which
+    -- should be hashed based on their designsize / modifiers too.
+    local extra_hash_func = extra_hash_funcs[hash]
+    if extra_hash_func then
+      hash = hash .. ' @ ' .. table.join(extra_hash_func(spec), ' @ ')
+    end
+
+    local cached = registered(hash)
+    if cached then return cached end -- already loaded
+
+    local fontdata = fonts.definers.loadfont(spec)
+    if not fontdata then
+      logreport('both', 2, 'loaders', 'Failed to load font ' .. spec.name)
+      return
+    end
+
+    -- If extra_hash_func was already set then the hash is already extended.
+    -- Otherwise we have to do it now if requested.
+    if not extra_hash_func then
+      extra_hash_func = fontdata.properties.extra_hash_func
+      if extra_hash_func then
+        hash = hash .. ' @ ' .. table.join(extra_hash_func(spec), ' @ ')
+      end
+    end
+    fontdata.properties.hash = hash
+    register(fontdata, id)
+    return fontdata
+  end
+
+  local function read(specification, size, id)
+    local fontdata = ltx_read(specification, size, id)
+    if not fontdata or id or tonumber(fontdata) then
+      return fontdata
+    end
+    id = font.define(fontdata)
+    register(fontdata, id)
     return id
   end
 
   local function patch (specification, size, id)
-    local fontdata = ctx_read (specification, size, id)
+    local fontdata = ltx_read (specification, size, id)
 ----if not fontdata then not_found_msg (specification, size, id) end
     if type (fontdata) == "table" and fontdata.encodingbytes == 2 then
       --- We need to test for `encodingbytes` to avoid passing

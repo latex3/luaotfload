@@ -2515,7 +2515,7 @@ do
             local scriptoffset     = tableoffset + readushort(f)
             local featureoffset    = tableoffset + readushort(f)
             local lookupoffset     = tableoffset + readushort(f)
-            local variationsoffset = version > 0x00010000 and (tableoffset + readulong(f)) or 0
+            local variationsoffset = version > 0x00010000 and readulong(f) or 0
             if not scriptoffset then
                 return
             end
@@ -2541,7 +2541,7 @@ do
             end
             --
             if variationsoffset > 0 then
-                loadvariations(f,fontdata,variationsoffset,lookuptypes,featurehash,featureorder)
+                loadvariations(f,fontdata,tableoffset + variationsoffset,lookuptypes,featurehash,featureorder)
             end
         end
     end
@@ -3820,6 +3820,7 @@ function readers.hvar(f,fontdata,specification)
     local variations = { }
     local innerindex = { } -- size is mapcount
     local outerindex = { } -- size is mapcount
+    local deltas     = { }
 
     if variationoffset > 0 then
         regions, deltas = readvariationdata(f,variationoffset,factors)

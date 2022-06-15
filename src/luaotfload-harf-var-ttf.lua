@@ -5,8 +5,8 @@
 do
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-harf-var-ttf",
-     version       = "3.21",       --TAGVERSION
-     date          = "2022-03-18", --TAGDATE
+     version       = "3.22",       --TAGVERSION
+     date          = "2022-06-15", --TAGDATE
      description   = "luaotfload submodule / gvar table processing",
      license       = "GPL v2.0",
      author        = "Marcel Krüger",
@@ -166,11 +166,12 @@ local function parse_glyf(loca, glyf, gid)
         payload_length = payload_length + 8
       end
       if flags & 0x120 == 0x100 then -- Only applies to the last character
-        payload_length = payload_length + 2 + sio.readcardinal2(offset + payload_length)
+        payload_length = payload_length + 2 + sio.readcardinal2(glyf, offset + payload_length)
       end
       component.flags = flags
       component.payload = glyf:sub(offset, offset + payload_length - 1)
       components[#components+1] = component
+      offset = offset + payload_length
     until flags & 0x20 == 0
     return components
   else
@@ -328,6 +329,9 @@ local function serialize_glyf(points, map)
       local x, y = component.x, component.y
       x = x and math.floor(x + .5)
       y = y and math.floor(y + .5)
+      if component.flags & 0x3 == 0x2 and (x >= 0x100 or x < -0x100 or y >= 0x100 or y < 0x100) then
+        component.flags = component.flags | 0x1
+      end
       result = result
           .. string.pack(component.flags & 0x2 == 0 and '>I2I2'
                       or component.flags & 0x1 == 0x1 and '>I2I2i2i2'
@@ -395,7 +399,13 @@ local function interpolate_glyf(loca, gvar_index, gvar, glyf, gid, coords, map)
   if not var then
     local start = loca[gid+1] + 1
     local stop = loca[gid+2]
-    return glyf:sub(start, stop)
+    -- If the glyph uses components then we can never just copy it but have to parse
+    -- it to rewrite the components if necessary.
+    if stop >= start + 2 and sio.readinteger2(glyf, start) < 0 then
+      return serialize_glyf(parse_glyf(loca, glyf, gid), map)
+    else
+      return glyf:sub(start, stop)
+    end
   end
   local points = parse_glyf(loca, glyf, gid)
   if not points then return '' end

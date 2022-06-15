@@ -32,7 +32,7 @@
 \beginfrontmatter
 
   \setdocumenttitle  {The \identifier{luaotfload} package}
-  \setdocumentdate   {2022-03-18 v3.21}
+  \setdocumentdate   {2022-06-15 v3.22}
   \setdocumentauthor {LaTeX3 Project\\
                       Elie Roux · Khaled Hosny · Philipp Gesang · Ulrike Fischer · Marcel Krüger\\
                       Home: \hyperlink {https://github.com/latex3/luaotfload}}
@@ -40,14 +40,14 @@
   \typesetdocumenttitle
 
   \beginabstractcontent
-    This package is an adaptation of the \CONTEXT font loading system.
-    It allows for loading \OpenType fonts with an extended syntax and adds
+    This package is an adaptation of the \ConTeXt\ font loading system.
+    It allows for loading \OpenType\ fonts with an extended syntax and adds
     support for a variety of font features.
 
     After discussion of the font loading API, this manual gives an
     overview of the core components of \identifier{Luaotfload}: The
     packaged font loader code, the names database, configuration, and
-    helper functions on the \LUA\ end.
+    helper functions on the \Lua\ end.
   \endabstractcontent
 
 \endfrontmatter
@@ -62,6 +62,16 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 \endsection
 
 \beginsection{Changes}
+\beginsubsection {New in version 3.22}
+\begin{itemize}
+  \item Tailored case mappings
+  \item Avoid database rebuilds when switching Lua versions
+  \item Improved attribute settings of ActualText nodes in harf mode
+  \item Callback-based customization for color parameter
+  \item Various bug fixes
+\end{itemize}
+\endsubsection
+
 \beginsubsection {New in version 3.21 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
   \item Fix performance regression introduced in version 3.19.
@@ -80,7 +90,7 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 
 \beginsubsection {New in version 3.19 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
-  \item When used with Lua\TeX\ 1.15.0 or newer, variable fonts are supported
+  \item When used with \LuaTeX\ 1.15.0 or newer, variable fonts are supported
     when using the \texttt{harf} shaper too.
   \item A new algorithm for selecting fonts based on font family names allows
     to more reliably load fonts based on their family name.
@@ -105,7 +115,7 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
 
 \beginsubsection {New in version 3.17 (by Ulrike Fischer/Marcel Krüger)}
 \begin{itemize}
-  \item The experimental support for OpenType variable fonts has been extended
+  \item The experimental support for \OpenType\ variable fonts has been extended
     to more reliably support modern fonts.
   \item A number of small bugfixes.
  \end{itemize}
@@ -123,7 +133,7 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
    first/second discretionaries (the mechanism described in the LuaTeX manual,
    section 5.6 for the of-f-ice example) to support a limited amount of
    nesting.
-  \item When the \texttt{node} shaper is used, experimental support for OpenType variable
+  \item When the \texttt{node} shaper is used, experimental support for \OpenType\ variable
    fonts has been added. To use them, set the font feature \texttt{axis} to
    a comma separated list of axis names and values. (E.g.  \texttt{axis={weight=600}})
    The supported axis names and value range depend on the font (see~page~\pageref{variablefonts}).
@@ -141,7 +151,7 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
   \item In multiple error cases, error messages are shown instead of silently
     generating bad output.
   \item Write glyph ids instead of internal identifiers to DVI files. This
-    allows using OpenType fonts when working with \identifier{dvilualatex}.
+    allows using \OpenType\ fonts when working with \identifier{dvilualatex}.
     (This requires additional support from the DVI reader)
   \item The\marginpar{\mbox{}\hfill \textbf{Change!}} set of font features which
     are enabled by default has been changed to be more similar to HarfBuzz.
@@ -304,14 +314,14 @@ On the other side there is a lot new:
 
 \begindescriptions
 
-  \beginaltitem {Fontloader} The fontloader files imported from \CONTEXT\ have been updated to the current version.
-   This was necessary to make \identifier{Luaotfload} compatible with the coming \LUATEX 1.08/1.09. Compared to the previous version from february 2017 quite a number of things have changed. Most importantly the handling of arabic fonts has greatly improved. But this also means that changes in the output are possible.
+  \beginaltitem {Fontloader} The fontloader files imported from \ConTeXt\ have been updated to the current version.
+   This was necessary to make \identifier{Luaotfload} compatible with the coming \LuaTeX\ 1.08/1.09. Compared to the previous version from february 2017 quite a number of things have changed. Most importantly the handling of arabic fonts has greatly improved. But this also means that changes in the output are possible.
   \endaltitem
 
   \beginaltitem {Lualibs} The update of the fontloader files also required an update of the \identifier{Lualibs} package. This \identifier{Luaotfload} version needs version 2.6 of \identifier{Lualibs}.
   \endaltitem
 
-  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LUATEX 1.08/1.09 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package was maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload}.
+  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LuaTeX\ 1.08/1.09 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package was maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload}.
   \endaltitem
 
   \beginaltitem {Documentation}
@@ -326,16 +336,16 @@ On the other side there is a lot new:
 \beginsection {Introduction}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-Font management and installation has always been painful with \TEX.  A
+Font management and installation has always been painful with \TeX.  A
 lot of files are needed for one font (\abbrev{tfm}, \abbrev{pfb},
 \abbrev{map}, \abbrev{fd}, \abbrev{vf}), and due to the 8-Bit encoding
 each font is limited to 256 characters.
 
-But the font world has evolved since the original \TEX, and new
+But the font world has evolved since the original \TeX, and new
 typographic systems have appeared, most notably the so called
-\emphasis{smart font} technologies like \OpenType fonts (\abbrev{otf}).
+\emphasis{smart font} technologies like \OpenType\ fonts (\abbrev{otf}).
 
-These fonts can contain many more characters than \TEX fonts, as well
+These fonts can contain many more characters than \TeX\ fonts, as well
 as additional functionality like ligatures, old-style numbers, small
 capitals, etc., and support more complex writing systems like Arabic
 and Indic\footnote{%
@@ -343,25 +353,25 @@ and Indic\footnote{%
   scripts correctly. For these scripts it is recommended to use the harf mode along with the binary \identifier{luahbtex}.}
 scripts.
 
-\OpenType fonts are widely deployed and available for all modern
+\OpenType\ fonts are widely deployed and available for all modern
 operating systems.
 
 As of 2013 they have become the de facto standard for advanced text
 layout.
 
-However, until recently the only way to use them directly in the \TEX
-world was with the \XETEX engine.
+However, until recently the only way to use them directly in the \TeX\
+world was with the \XeTeX\ engine.
 
-Unlike \XETEX, \LUATEX has no built-in support for \OpenType or
-technologies other than the original \TEX fonts.
+Unlike \XeTeX, \LuaTeX\ has no built-in support for \OpenType\ or
+technologies other than the original \TeX\ fonts.
 
-Instead, it provides hooks for executing \LUA code during the \TEX run
+Instead, it provides hooks for executing \Lua\ code during the \TeX\ run
 that allow implementing extensions for loading fonts and manipulating
 how input text is processed without modifying the underlying engine.
 
 This is where \identifier{luaotfload} comes into play:
-Based on code from \CONTEXT, it extends \LUATEX with functionality necessary
-for handling \OpenType fonts.
+Based on code from \ConTeXt, it extends \LuaTeX\ with functionality necessary
+for handling \OpenType\ fonts.
 
 Additionally, it provides means for accessing fonts known to the operating
 system conveniently by indexing the metadata.
@@ -372,9 +382,9 @@ system conveniently by indexing the metadata.
 \beginsection {Thanks}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\identifier{Luaotfload} is part of \LUALATEX, the community-driven
-project to provide a foundation for using the \LATEX format with the
-full capabilites of the \LUATEX engine.
+\identifier{Luaotfload} is part of \hologo{LuaLaTeX}, the community-driven
+project to provide a foundation for using the \LaTeX\ format with the
+full capabilites of the \LuaTeX\ engine.
 %
 As such, the distinction between end users, contributors, and project
 maintainers is intentionally kept less strict, lest we unduly
@@ -388,8 +398,8 @@ Their contributions -- be it patches, advice, or systematic
 testing -- made the switch from version 1.x to 2.2 possible.
 %
 Also, Hans Hagen, the author of the font loader, made porting the
-code to \LATEX a breeze due to the extra effort he invested into
-isolating it from the rest of \CONTEXT, not to mention his assistance
+code to \LaTeX\ a breeze due to the extra effort he invested into
+isolating it from the rest of \ConTeXt, not to mention his assistance
 in the task and willingness to respond to our suggestions.
 
 \endsection
@@ -405,7 +415,7 @@ in the task and willingness to respond to our suggestions.
       \meta{prefix}\nonproportional{:}%
       \meta{font name}\nonproportional{:}%
       \meta{font features}\nonproportional{\string}}%
-      \meta{\TEX font features}
+      \meta{\TeX\ font features}
 \endnarrower
 
 \noindent
@@ -437,7 +447,7 @@ for a more formal description see figure \ref{font-syntax}.
    \smallcaps {tfmname} is the name of a \abbrev{tfm} file.
    \smallcaps {digit}  again refers to bytes 48--57, and
    \smallcaps {all\textunderscore characters} to all byte values.
-   \smallcaps {csname} and \smallcaps {dimension} are the \TEX concepts.}
+   \smallcaps {csname} and \smallcaps {dimension} are the \TeX\ concepts.}
 %
       <definition>      ::= `\\font', {\sc csname}, `=', <font request>, [ <size> ] ;
 
@@ -592,7 +602,7 @@ As is obvious from the last exception, the \inlinecode {file:} lookup will
 not process paths to the font location -- only those
 files found when generating the database are addressable this way.
 %
-Continue below in the \XETEX section if you need to load your fonts
+Continue below in the \XeTeX\ section if you need to load your fonts
 by path.
 %
 The file names corresponding to the example font names above are
@@ -620,7 +630,7 @@ Inside the square brackets, every character except for a closing bracket is
 permitted, allowing for  arbitrary paths to a font file -- including Windows
 style paths with UNC or drive letter prepended -- to be specified.
 %
-The \identifier{Luaotfload} syntax differs from \XETEX in that the subfont
+The \identifier{Luaotfload} syntax differs from \XeTeX\ in that the subfont
 selector goes \emphasis{after} the closing bracket:
 
 \beginnarrower
@@ -636,13 +646,13 @@ same way as an ordinary \inlinecode {file:} lookup.
 \beginsubsection {Compatibility}
 
 In addition to the regular prefixed requests, \identifier{luaotfload}
-accepts loading fonts the \XETEX way.
+accepts loading fonts the \XeTeX\ way.
 %
 There are again two modes: bracketed and unbracketed.
 For the bracketed variety, see above, \ref{sec:bracket}.
 
 Unbracketed (or, for lack of a better word: \emphasis{anonymous})
-font requests resemble the conventional \TEX syntax.
+font requests resemble the conventional \TeX\ syntax.
 
 \beginnarrower
   \nonproportional{\string\font\string\fontname\space= }%
@@ -653,7 +663,7 @@ font requests resemble the conventional \TEX syntax.
 
 However, they have a broader spectrum of possible interpretations:
 before anything else, \identifier{luaotfload} attempts to load a
-traditional \TEX Font Metric (\abbrev{tfm} or \abbrev{ofm}).
+traditional \TeX\ Font Metric (\abbrev{tfm} or \abbrev{ofm}).
 %
 If this fails, it performs a \inlinecode {path:} lookup, which itself will
 fall back to a \inlinecode {file:} lookup.
@@ -665,7 +675,7 @@ The behavior of this “anonymous” lookup is configurable, see the configuatio
 manpage for details.
 
 Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
-font style notation from \XETEX.
+font style notation from \XeTeX.
 
 \beginnarrower
   \nonproportional{\string\font\string\fontname\space= }%
@@ -681,8 +691,8 @@ Currently, four style modifiers are supported:
   \inlinecode {B} for bold   weight,
   \inlinecode {BI} or \inlinecode {IB} for the combination of both.
 %
-Other “slashed” modifiers are too specific to the \XETEX engine and
-have no meaning in \LUATEX.
+Other “slashed” modifiers are too specific to the \XeTeX\ engine and
+have no meaning in \LuaTeX.
 
 \endsubsection
 
@@ -697,10 +707,10 @@ For example, conventional \TeX\ font can be loaded with a
   \font \lmromanten = {file:ec-lmr10} at 10pt
 \endlisting
 
-The \OpenType version of Janusz Nowacki’s font \emphasis{Antykwa
+The \OpenType\ version of Janusz Nowacki’s font \emphasis{Antykwa
 Półtawskiego}\footnote{%
   \hyperlink {http://jmn.pl/antykwa-poltawskiego/}, also available in
-  in \TEX Live.
+  in \TeX\ Live.
 }
 in its condensed variant can be loaded as follows:
 
@@ -709,7 +719,7 @@ in its condensed variant can be loaded as follows:
 \endlisting
 
 The next example shows how to load the \emphasis{Porson} font digitized by
-the Greek Font Society using \XETEX-style syntax and an absolute path from a
+the Greek Font Society using \XeTeX-style syntax and an absolute path from a
 non-standard directory:
 
 \beginlisting
@@ -777,7 +787,7 @@ Which fits nicely with the whole set:
 
 If the entire \emphasis{Iwona} family\footnote{%
   \hyperlink {http://jmn.pl/kurier-i-iwona/},
-  also in \TEX Live.
+  also in \TeX\ Live.
 }
 is installed in some location accessible by \identifier{luaotfload},
 the regular shape can be loaded as follows:
@@ -823,12 +833,12 @@ general scheme for font requests:
   \meta{font name}%
   \nonproportional{:}%
   \meta{font features}%
-  \meta{\TEX font features}%
+  \meta{\TeX\ font features}%
   \nonproportional{"}
 \endnarrower
 
 \noindent
-If style modifiers are present (\XETEX style), they must precede
+If style modifiers are present (\XeTeX\ style), they must precede
 \meta{font features}.
 
 The element \meta{font features} is a semicolon-separated list of feature
@@ -878,19 +888,19 @@ obviously, \inlinecode{random}.
 \begindescriptions
 
   \beginaltitem {mode}
-         \identifier{luaotfload} had three \OpenType processing
+         \identifier{luaotfload} had three \OpenType\ processing
          \emphasis{modes}:
          \identifier{base}, \identifier{node} and \identifier{harf}.
 
-         \identifier{base} mode works by mapping \OpenType
-         features to traditional \TEX ligature and kerning mechanisms.
+         \identifier{base} mode works by mapping \OpenType\
+         features to traditional \TeX\ ligature and kerning mechanisms.
          %
          Supporting only non-contextual substitutions and kerning
          pairs, it is the slightly faster, albeit somewhat limited, variant.
          %
          \identifier{node} mode works by processing \TeX’s internal
-         node list directly at the \LUA end and supports
-         a wider range of \OpenType features.
+         node list directly at the \Lua\ end and supports
+         a wider range of \OpenType\ features.
          %
          The downside is that the intricate operations required for
          \identifier{node} mode may slow down typesetting especially
@@ -937,7 +947,7 @@ obviously, \inlinecode{random}.
 
   \endaltitem
   \beginaltitem {script} \phantomsection\label{script-tag}
-         An \OpenType script tag;\footnote{%
+         An \OpenType\ script tag;\footnote{%
            See \hyperlink {http://www.microsoft.com/typography/otspec/scripttags.htm}
            for a list of valid values.
            %
@@ -952,7 +962,7 @@ obviously, \inlinecode{random}.
   \endaltitem
 
   \beginaltitem {language}
-         An \OpenType language system identifier,\footnote{%
+         An \OpenType\ language system identifier,\footnote{%
            Cf. \hyperlink {http://www.microsoft.com/typography/otspec/languagetags.htm}.
          }
          defaulting to \inlinecode{dflt}.
@@ -1010,7 +1020,7 @@ obviously, \inlinecode{random}.
 
 
   \beginaltitem {axis\&instance}
-    Experimental!\marginpar{\mbox{}\hfill NEW in v3.15!} Support for OpenType variable fonts. \emph{Varible fonts are only
+    Experimental!\marginpar{\mbox{}\hfill NEW in v3.15!} Support for \OpenType\ variable fonts. \emph{Varible fonts are only
     supported in \texttt{base} and \texttt{node} mode, not in \texttt{harf}
     mode.}
 
@@ -1081,7 +1091,7 @@ obviously, \inlinecode{random}.
          Context, see the file \fileent{typo-krn.lua} there.
          %
          The main difference is that \identifier{luaotfload} does not
-         use \LUATEX attributes to assign letterspacing to regions,
+         use \LuaTeX\ attributes to assign letterspacing to regions,
          but defines virtual letterspaced versions of a font.
 
          The option \identifier{kernfactor} accepts a numeric value that
@@ -1093,7 +1103,8 @@ obviously, \inlinecode{random}.
          pair of glyphs.
          %
 
-         Spaces\marginpar{\mbox{}\hfill NEW in v2.96!} between words are now stretched too. This is consistent with the \XETEX behaviour (and the amount of stretching should be similar). This
+         Spaces\marginpar{\mbox{}\hfill NEW in v2.96!} between words are now
+         stretched too. This is consistent with the \XeTeX\ behaviour (and the amount of stretching should be similar). This
          naturally changes the output of a document.  In case you want the old behaviour back use
          \beginlisting
            \directlua{luaotfload.letterspace.keepwordspacing = true}
@@ -1114,7 +1125,8 @@ obviously, \inlinecode{random}.
 
 
          Ligatures\marginpar{\mbox{}\hfill NEW in v2.96!}  are no longer split into their component glyphs.
-         This change too make the \identifier{luaotfload} more compatible with \XETEX. It also makes it much easier to activate or deactivate ligature sets in letterspaced fonts.
+         This change too make the \identifier{luaotfload} more compatible with
+         \XeTeX. It also makes it much easier to activate or deactivate ligature sets in letterspaced fonts.
          If you want to split ligatures, you should deactivate as you would do it with a not-letterspaced font, e.g. with the fontspec \identifier{Ligatures} option, or the low-level \identifier{-liga} and similar.
 
 
@@ -1128,7 +1140,7 @@ obviously, \inlinecode{random}.
           \test No ligatures: fi -- ff \par
          }
 
-         For compatibility with \XETEX an alternative
+         For compatibility with \XeTeX\ an alternative
          \identifier{letterspace} option is supplied that interprets the
          supplied value as a \emphasis{percentage} of the font size but
          is otherwise identical to \identifier{kernfactor}.
@@ -1145,7 +1157,7 @@ obviously, \inlinecode{random}.
 
          Setting the ligatures with the font options is the recommended way, to activate or deactivate them. In case of special requirements
          specific pairs of letters and ligatures may be exempt from
-         letterspacing by defining the \LUA functions
+         letterspacing by defining the \Lua\ functions
          \luaident{keeptogether} and \luaident{keepligature},
          respectively, inside the namespace \inlinecode {luaotfload.letterspace}.
          %
@@ -1162,7 +1174,7 @@ obviously, \inlinecode{random}.
          analyzed into components.
          %
          (For details refer to the \emphasis{glyph nodes} section in the
-         \LUATEX reference manual.)
+         \LuaTeX\ reference manual.)
          %
          The implementation of both functions is left entirely to the
          user.
@@ -1180,7 +1192,7 @@ obviously, \inlinecode{random}.
          namely \emphasis{character protrusion} and \emphasis{font
          expansion}.
          %
-         Their arguments are names of \LUA tables that contain
+         Their arguments are names of \Lua\ tables that contain
          values for the respective features.\footnote{%
             For examples of the table layout please refer to the
             section of the file \fileent{luaotfload-fonts-ext.lua} where the
@@ -1208,7 +1220,7 @@ obviously, \inlinecode{random}.
                \inlinecode {pdfadjustspacing=2}
            to activate protrusion and expansion, respectively.
            See the
-           \hyperlink [\PDFTEX manual]{http://mirrors.ctan.org/systems/pdftex/manual/pdftex-a.pdf}%
+           \hyperlink [\hologo{pdfTeX} manual]{http://mirrors.ctan.org/systems/pdftex/manual/pdftex-a.pdf}%
            for details.
          }:
 
@@ -1355,23 +1367,56 @@ obviously, \inlinecode{random}.
   \beginaltitem {upper/lower}
    The\phantomsection\label{upperlower}\marginpar{New in 3.16}
    font features \texttt{upper} and \texttt{lower} can be used to map
-   the text of a font to upper or lowercase before displaying it. Currently
-   this implements the untailored Unicode case mapping algorithm, but it is
-   planned to add tailoring later. For example
+   the text of a font to upper or lowercase before displaying it.
+
+   By default the casemapping is automatically tailored based on the active
+   \texttt{language} font feature. This automatic tailoring can be overwritten
+   by passing a two letter language tag to the \texttt{upper} or \texttt{lower}
+   feature. In addition to ordinary language tags, the tags \texttt{el-x-iota},
+   \texttt{hy-x-yiwn} and \texttt{de-x-eszett} can be used. \texttt{el-x-iota}
+   adapts the greek rules for uppercasing to keep iota subscripts as combining
+   characters which sufficiently well behaving fonts can render in appropriate
+   ways while the default for greek is to convert these into capital iotas.
+   \texttt{de-x-eszett} adapts uppercasing for german to use the capital eszett
+   instead of uppercasing the eszett to double capital s.
 
    \beginlisting
-   \font\test={name:LatinModernRoman:mode=node;+upper;}
+   \font\test={kpse:LinLibertine_R.otf:mode=node;+upper;}
+   \test Grüße
+   \font\test={kpse:LinLibertine_R.otf:mode=node;upper=de-x-eszett;}
    \test Grüße
    \endlisting
 
-   {\Large\font\test={name:LatinModernRoman:mode=node;+upper;}\test Grüße}
+   {\Large
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;+upper;}\test Grüße
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;upper=de-x-eszett;}\test Grüße
+   }
+
+   \beginlisting
+   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;+upper;}
+   No specified language: {\test εἰσενέγκῄς ἡμᾶς}\par
+   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;language=ell;+upper;}
+   Greek uppercasing: {\test εἰσενέγκῄς ἡμᾶς}\par
+   \font\test={kpse:LinLibertine_R.otf:mode=node;script=grek;language=ell;+upper=el-x-iota;}
+   Greek variant: {\test εἰσενέγκῄς ἡμᾶς}\par
+   \endlisting
+
+   {%
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;+upper;}
+     No specified language: {\test εἰσενέγκῄς ἡμᾶς}\par
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;language=ell;+upper;}
+     Greek uppercasing: {\test εἰσενέγκῄς ἡμᾶς}\par
+     \font\test={kpse:LinLibertine\string_R.otf:mode=node;script=grek;language=ell;+upper=el-x-iota;}
+     Greek variant: {\test εἰσενέγκῄς ἡμᾶς}\par
+   }
+
 
   \endaltitem
 
   \beginaltitem {Variable fonts}
    When\phantomsection\label{variablefonts}\marginpar{New in 3.16}
    the \texttt{node} shaper is used,
-   experimental support for OpenType variable
+   experimental support for \OpenType\ variable
    fonts has been added. To use them, set the font feature \texttt{axis} to
    a comma separated list of axis names and values. (E.g.  \texttt{axis={weight=600}})
    The supported axis names and value range depend on the font (see~page~\pageref{variablefonts}).
@@ -1419,8 +1464,8 @@ obviously, \inlinecode{random}.
 
 \beginsubsection {Non-standard font features}
 \identifier{luaotfload} adds a number of features that are not defined
-in the original \OpenType specification, most of them
-aiming at emulating the behavior familiar from other \TEX engines.
+in the original \OpenType\ specification, most of them
+aiming at emulating the behavior familiar from other \TeX\ engines.
 %
 Currently (2014) there are three of them:
 
@@ -1433,12 +1478,12 @@ Currently (2014) there are three of them:
   \endaltitem
 
   \beginaltitem {tlig}
-          Applies legacy \TEX ligatures\footnote{%
+          Applies legacy \TeX\ ligatures\footnote{%
             These contain the feature set \inlinecode {trep} of earlier
             versions of \identifier{luaotfload}.
 
-            Note to \XETEX users: this is the equivalent of the
-            assignment \inlinecode {mapping=text-tex} using \XETEX's input
+            Note to \XeTeX\ users: this is the equivalent of the
+            assignment \inlinecode {mapping=text-tex} using \XeTeX's input
             remapping feature.
           }:
 
@@ -1572,13 +1617,13 @@ the respective font, if available.
 \label{sec:fontdb}
 
 As mentioned above, \identifier{luaotfload} keeps track of which
-fonts are available to \LUATEX by means of a \emphasis{database}.
+fonts are available to \LuaTeX\ by means of a \emphasis{database}.
 %
 This allows referring to fonts not only by explicit filenames but
 also by the proper names contained in the metadata which is often
 more accessible to humans.\footnote{%
   The tool \hyperlink[\fileent{otfinfo}]{http://www.lcdf.org/type/}
-  (comes with \TEX Live), when invoked on a font file with the
+  (comes with \TeX\ Live), when invoked on a font file with the
   \inlinecode {-i} option, lists the variety of name fields defined for
   it.
 }
@@ -1614,12 +1659,12 @@ To this end, \identifier{luaotfload} comes with the utility
 \fileent{luaotfload-tool} that offers an interface to the database
 functionality.
 %
-Being a \LUA script, there are two ways to run it:
+Being a \Lua\ script, there are two ways to run it:
 either make it executable (\inlinecode {chmod +x} on unixoid systems) or
 pass it as an argument to \fileent{texlua}.\footnote{%
   Tests by the maintainer show only marginal performance gain by
   running with Luigi Scarso’s
-  \hyperlink [\identifier{Luajit\kern-.25ex\TEX}]{https://foundry.supelec.fr/projects/luajittex/},
+  \hyperlink [\identifier{Luajit\kern-.25ex\TeX}]{https://foundry.supelec.fr/projects/luajittex/},
   which is probably due to the fact that most of the time is spent
   on file system operations.
 
@@ -1749,8 +1794,8 @@ using the \inlinecode {-i} option (\inlinecode {--info}).
 %
 \noindent
 The meaning of the printed values is described in section 4.4 of the
-\LUATEX reference manual.\footnote{%
-  In \TEX Live: \fileent{texmf-dist/doc/luatex/base/luatexref-t.pdf}.
+\LuaTeX\ reference manual.\footnote{%
+  In \TeX\ Live: \fileent{texmf-dist/doc/luatex/base/luatexref-t.pdf}.
 }
 
 For a much more detailed report about a given font try the
@@ -1773,7 +1818,7 @@ capabilities refer to the manpage
 \beginsubsection {Blacklisting Fonts}
 \label{font-blacklist}
 
-Some fonts are problematic in general, or just in \LUATEX.
+Some fonts are problematic in general, or just in \LuaTeX.
 %
 If you find that compiling your document takes far too long or eats
 away all your system’s memory, you can track down the culprit by
@@ -1795,7 +1840,7 @@ is ignored, so use this to add comments.
 Place this file to some location where the \identifier{kpse}
 library can find it, e.~g.
 \fileent{texmf-local/tex/luatex/luaotfload} if you are running
-\identifier{\TEX Live},\footnote{%
+\identifier{\TeX\ Live},\footnote{%
   You may have to run \inlinecode {mktexlsr} if you created a new file in
   your \fileent{texmf} tree.
 }
@@ -1829,19 +1874,19 @@ An example with explicit paths:
 
 To a large extent, \identifier{luaotfload} relies on code originally
 written by Hans Hagen for the
-\hyperlink[\identifier{\CONTEXT}]{http://wiki.contextgarden.net}
+\hyperlink[\identifier{\ConTeXt}]{http://wiki.contextgarden.net}
 format.
 %
-It integrates the font loader, written entirely in \LUA, as distributed
-in the \identifier{\LUATEX-Fonts} package.
+It integrates the font loader, written entirely in \Lua, as distributed
+in the \identifier{\LuaTeX-Fonts} package.
 %
-The original \LUA source files have been combined using the \CONTEXT
+The original \Lua\ source files have been combined using the \ConTeXt\
 packaging library into a single, self-contained blob. In
 this form the font loader depends only on the \identifier{lualibs}
 package and requires only minor adaptions to integrate into
 \identifier{luaotfload}.
 
-The guiding principle is to let \CONTEXT/\LUATEX-Fonts take care of the
+The guiding principle is to let \ConTeXt/\LuaTeX-Fonts take care of the
 implementation, and update the imported code as frequently as
 necessary.
 %
@@ -1850,8 +1895,8 @@ As maintainers, we aim at importing files from upstream essentially
 clashes.
 %
 This job has been greatly alleviated since the advent of
-\LUATEX-Fonts, prior to which the individual dependencies had to be
-manually spotted and extracted from the \CONTEXT source code in a
+\LuaTeX-Fonts, prior to which the individual dependencies had to be
+manually spotted and extracted from the \ConTeXt\ source code in a
 complicated and error-prone fashion.
 
 \endsubsection
@@ -1865,16 +1910,16 @@ See see the figure on page \pageref{file-graph} for a
 graphical representation of the dependencies.
 %
 \label{package}%
-Through the script \fileent{mkimport} a \CONTEXT library
+Through the script \fileent{mkimport} a \ConTeXt\ library
 is invoked to create the \identifier{luaotfload} fontloader as a merged
 (amalgamated) source file.\footnote{%
-  In \CONTEXT, this facility can be accessed by means of a
+  In \ConTeXt, this facility can be accessed by means of a
   \hyperlink[script]{https://bitbucket.org/phg/context-mirror/src/beta/scripts/context/lua/mtx-package.lua?at=beta}
   which is integrated into \fileent{mtxrun} as a subcommand.
   Run \inlinecode {mtxrun --script package --help} to display further
   information.
   For the actual merging code see the file
-  \fileent{util-mrg.lua} that is part of \CONTEXT.
+  \fileent{util-mrg.lua} that is part of \ConTeXt.
 }
 %
 This file constitutes the “default fontloader” and is part of the
@@ -1882,29 +1927,29 @@ This file constitutes the “default fontloader” and is part of the
 where the uppercase letters are placeholders for the build date.
 %
 A companion to it, \fileent{luatex-basics-gen.lua} (renamed to \fileent{fontloader-basics-gen.lua} in \identifier{luaotfload})
-must be loaded beforehand to set up parts of the environment required by the \CONTEXT
-libraries.
+must be loaded beforehand to set up parts of the environment required
+by the \ConTeXt\ libraries.
 %
-During a \TEX\ run, the fontloader initialization and injection happens
+During a \TeX\ run, the fontloader initialization and injection happens
 in the module \fileent{luaotfload-init.lua}.
 %
-Additionally, the “reference fontloader” as imported from \LUATEX-Fonts
+Additionally, the “reference fontloader” as imported from \LuaTeX-Fonts
 is provided as the file \fileent{fontloader-reference.lua}.
 %
-This file is self-contained in that it packages all the auxiliary \LUA
+This file is self-contained in that it packages all the auxiliary \Lua\
 libraries too, as Luaotfload did up to the 2.5 series; since that job
 has been offloaded to the \identifier{Lualibs} package, loading this
 fontloader introduces a certain code duplication.
 
-A number of \emphasis{\LUA utility libraries} are not part of the
+A number of \emphasis{\Lua\ utility libraries} are not part of the
 \identifier{luaotfload} fontloader, contrary to its equivalent in
-\LUATEX-Fonts. These are already provided by the \identifier{lualibs}
+\LuaTeX-Fonts. These are already provided by the \identifier{lualibs}
 and have thus been omitted from the merge.\footnote{%
   Faithful listeners will remember the pre-2.6 era when the fontloader
   used to be integrated as-is which caused all kinds of code
   duplication with the pervasive \identifier{lualibs} package.
   This conceptual glitch has since been amended by tightening the
-  coupling with the excellent \CONTEXT\ toolchain.
+  coupling with the excellent \ConTeXt\ toolchain.
 }
 
 \begindoublecolumns
@@ -1913,13 +1958,13 @@ and have thus been omitted from the merge.\footnote{%
   \enddefinitions
 \enddoublecolumns
 
-The reference fontloader is home to several \LUA files that can be
+The reference fontloader is home to several \Lua\ files that can be
 grouped twofold as below:
 
 \begindefinitions
   \beginnormalitem
     The \emphasis{font loader} itself.
-    These files have been written for \LUATEX-Fonts and they are
+    These files have been written for \LuaTeX-Fonts and they are
     distributed along with \identifier{luaotfload} so as to resemble
     the state of the code when it was imported. Their purpose is either
     to give a slightly aged version of a file if upstream considers
@@ -1936,7 +1981,7 @@ grouped twofold as below:
 
   \beginnormalitem
     Code related to \emphasis{font handling and node processing}, taken
-    directly from \CONTEXT.
+    directly from \ConTeXt.
     \begindoublecolumns
       \begindefinitions
       \directlua{printctxfontlist ()}
@@ -1946,15 +1991,15 @@ grouped twofold as below:
 \enddefinitions
 
 As an alternative to the merged file, \identifier {Luaotfload} may load
-individual unpackaged \LUA libraries that come with the source, or even
+individual unpackaged \Lua\ libraries that come with the source, or even
 use the files from Context directly.
 %
-Thus if you prefer running bleeding edge code from the \CONTEXT beta,
+Thus if you prefer running bleeding edge code from the \ConTeXt\ beta,
 choose the \inlinecode {context} fontloader via the configuration file
 (see sections \ref{sec:conf} and \ref{sec:pkg} below).
 
 Also, the merged file at some point loads the Adobe Glyph List from a
-\LUA table that is contained in \fileent{luaotfload-glyphlist.lua},
+\Lua\ table that is contained in \fileent{luaotfload-glyphlist.lua},
 which is automatically generated by the script
 \fileent{mkglyphlist}.\footnote{%
   See \fileent{luaotfload-font-enc.lua}.
@@ -1963,23 +2008,23 @@ which is automatically generated by the script
 }
 %
 There is a make target \identifier{glyphs} that will create a fresh
-glyph list so we don’t need to import it from \CONTEXT any longer.
+glyph list so we don’t need to import it from \ConTeXt\ any longer.
 
 In addition to these, \identifier{luaotfload} requires a number of
 files not contained in the merge. Some of these have no equivalent in
-\LUATEX-Fonts or \CONTEXT, some were taken unmodified from the latter.
+\LuaTeX-Fonts or \ConTeXt, some were taken unmodified from the latter.
 
 
 \beginfilelist
     \beginaltitem {luaotfload-features.lua}
       font feature handling; incorporates some of the code from
-      \fileent{font-otc} from \CONTEXT;
+      \fileent{font-otc} from \ConTeXt;
     \endaltitem
     \beginaltitem {luaotfload-configuration.lua}
       handling of \fileent{luaotfload.conf(5)}.
     \endaltitem
     \beginaltitem {luaotfload-log.lua}
-      overrides the \CONTEXT logging functionality.
+      overrides the \ConTeXt\ logging functionality.
     \endaltitem
     \beginaltitem {luaotfload-loaders.lua}
       registers readers in the fontloader for various kinds of
@@ -2028,13 +2073,13 @@ To specify the fontloader you wish to use, the configuration file
 %
 Its value can be one of the identifiers \inlinecode{default} or
 \inlinecode{reference} (see above, section \ref{package}) or the name
-of a file somewhere in the search path of \LUATEX.
+of a file somewhere in the search path of \LuaTeX.
 %
-This will make \identifier {Luaotfload} locate the \CONTEXT source by
+This will make \identifier {Luaotfload} locate the \ConTeXt\ source by
 means of \identifier{kpathsea} lookups and use those instead of the
 merged package.
 %
-The parameter may be extended with a path to the \CONTEXT
+The parameter may be extended with a path to the \ConTeXt\
 \fileent{texmf}, separated with a colon:
 
 \beginlisting
@@ -2044,14 +2089,14 @@ The parameter may be extended with a path to the \CONTEXT
 
 \noindent This setting allows accessing an installation -- e. g. the
 standalone distribution or a source repository -- outside the current
-\TEX distribution.
+\TeX\ distribution.
 
 Like the \identifier{Lualibs} package, the fontloader is deployed as a
-\emphasis{merged package} containing a series of \LUA files joined
+\emphasis{merged package} containing a series of \Lua\ files joined
 together in their expected order and stripped of non-significant parts.
 %
 The \fileent{mkimport} utility assists in pulling the files from a
-\CONTEXT tree and packaging them for use with \identifier{Luaotfload}.%
+\ConTeXt\ tree and packaging them for use with \identifier{Luaotfload}.%
 %
 The state of the files currently in \identifier{Luaotfload}’s
 repository can be queried:
@@ -2059,7 +2104,7 @@ repository can be queried:
 ./scripts/mkimport news
 \endlisting
 %
-The subcommand for importing takes the prefix of the desired \CONTEXT
+The subcommand for importing takes the prefix of the desired \ConTeXt\
 \identifier{texmf} as an optional argument:
 \beginlisting
 ./scripts/mkimport import ~/context/tex/texmf-context
@@ -2084,7 +2129,7 @@ Whether files have been updated in the upstream distribution can be
 queried by \inlinecode{./scripts/mkimport news}.
 %
 This will compare the imported files with their counterparts in the
-\CONTEXT distribution and report changes.
+\ConTeXt\ distribution and report changes.
 
 \endsubsection
 
@@ -2151,11 +2196,11 @@ as below:
 
 This specifies that for the given project, \identifier{Luaotfload}
 shall not attempt to automatically scan for fonts if it can’t resolve a
-request. The font-based colorization will happen during \LUATEX’s
+request. The font-based colorization will happen during \LuaTeX’s
 pre-linebreak filter. The fontloader will output verbose information
 about the fonts at definition time along with globally increased
 verbosity. Lastly, the fontloader defaults to the less expensive
-\luaident{base} mode like it does in \CONTEXT.
+\luaident{base} mode like it does in \ConTeXt.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \beginsection {Auxiliary Functions}
@@ -2223,7 +2268,7 @@ writes an entire font object to the file \fileent{fontdump.lua}:
 code, taking up 3~\abbrev{mb} of disk space.
 %
 By inspecting the output you can get a first impression of how a font
-is structured in \LUATEX’s memory, what elements it is composed of,
+is structured in \LuaTeX’s memory, what elements it is composed of,
 and in what ways it can be rearranged.
 
 \beginsubsubsection {Compatibility with Earlier Versions}
@@ -2247,16 +2292,16 @@ subtables in the meantime.
 
 \beginsubsubsection{Patches}
 
-These are mostly concerned with establishing compatibility with \XETEX.
+These are mostly concerned with establishing compatibility with \XeTeX.
 
 \beginfunctionlist
 
   \beginaltitem  {set_sscale_dimens}
-    Calculate \texmacro{fontdimen}s 10 and 11 to emulate \XETEX.
+    Calculate \texmacro{fontdimen}s 10 and 11 to emulate \XeTeX.
   \endaltitem
 
   \beginaltitem  {set_capheight}
-    Calculates \texmacro{fontdimen} 8 like \XETEX.
+    Calculates \texmacro{fontdimen} 8 like \XeTeX.
   \endaltitem
 
   \beginaltitem  {patch_cambria_domh}
@@ -2269,7 +2314,7 @@ These are mostly concerned with establishing compatibility with \XETEX.
 
 \beginsubsection {Package Author’s Interface}
 
-As \LUATEX release 1.0 is nearing, the demand for a reliable interface
+As \LuaTeX\ release 1.0 is nearing, the demand for a reliable interface
 for package authors increases.
 
 \endsubsubsection
@@ -2334,7 +2379,7 @@ are defined for which scripts.
 
   \beginaltitem  {aux.sprint_math_dimension(id : int, dimension : string)}
             Same as \luaident{get_math_dimension()}, but output the value
-            in scaled points at the \TEX end.
+            in scaled points at the \TeX\ end.
   \endaltitem
 
 \endfunctionlist
@@ -2368,6 +2413,94 @@ are defined for which scripts.
   \endaltitem
 
 \endfunctionlist
+
+\endsubsubsection
+
+\endsubsection
+
+\beginsubsection {Format Author’s Interface}
+
+Additionally some functions are provided which should only be needed for
+format authors trying to integrate \identifier{luaotfload}'s color handling
+with the conventions of a specific format.
+
+End users should never have to work with these.
+
+\endsubsubsection
+
+\beginsubsubsection{Color setting}
+
+\identifier{luaotfload}'s \inlinecode{color} feature can apply color in two
+different ways: By default it inserts \inlinecode{pdf_colorstack} whatsits
+containing the PDF code to change the color.
+
+Alternatively a function can be provided which gets called on every glyph
+node to be colored. This function can then e.g. apply an attribute which gets
+interpreted later.
+
+This can be enabled separately for colors and transparency by passing such
+callback functions:
+
+\beginfunctionlist
+
+  \beginaltitem  {luaotfload.set_colorhandler((head : node, n : node, color :
+      string) -> (head : node, n : node)}
+            Mark the node \luaident{n} in the list starting with \luaident{head}
+            to be colored with color \luaident{color}.
+
+            By default the color is represented by literal PDF code setting the
+            color.
+  \endaltitem
+
+  \beginaltitem  {luaotfload.set_transparenthandler((head : node, n : node,
+      level : string) -> (head : node, n : node)}
+            Mark the node \luaident{n} in the list starting with \luaident{head}
+            to be set transparently with transparency level \luaident{level}.
+
+            By default the transparency level is represented by literal PDF code setting the
+            transparency.
+  \endaltitem
+
+\endfunctionlist
+
+When these functions aren't used, then the color is set based on colorstack 0.
+By default a new colorstack is allocated for transparency, but alternatively an
+existsing colorstack for this prpose can be set:
+
+\beginfunctionlist
+
+  \beginaltitem  {luaotfload.set_transparent_colorstack(stack : int)}
+            Use colorstack \luaident{stack} for setting transparency.
+  \endaltitem
+
+\endfunctionlist
+
+\endsubsubsection
+
+\beginsubsubsection{Color selection}
+
+Additionally the translation of the argument to \inlinecode{color} to an
+actual PDF color can be customized though three \luaident{exclusive} callbacks:
+
+Since there is only a single \inlinecode{color} feature which sets both the
+color and the transparency, the first callback
+\luaident{luaotfload.split_color} gets called with a single string representing
+the feature value and is supposed to return two values representing the color
+and the transparency part.
+
+The default implementation splits the string the feature value at a comma and
+strips outer spaces for both result values, except the HTML style 8 hexdigit
+RGBA values get split into the first 6 and the last two digits.
+
+Afterwards the return values get passed to the
+\luaident{luaotfload.parse_color} respectively
+\luaident{luaotfload.parse_transparent} callbacks (except that \luaident{false}
+and \luaident{nil} skip the corresponding callback).
+
+These callbacks should translate these strings components into valid PDF
+commands applyind the described color or transparency.
+
+All error handling and reporting should be done in the callbacks.
 
 \endsubsubsection
 
@@ -2425,7 +2558,7 @@ being (see above, page \pageref{font-blacklist}).
 \beginsubsection {Font Features}
 
 A common problem is the lack of features for some
-\OpenType fonts even when specified.
+\OpenType\ fonts even when specified.
 %
 This can be related to the fact that some fonts do not provide features
 for the \inlinecode {dflt} script (see above on page \pageref{script-tag}),
@@ -2449,10 +2582,10 @@ languages by querying it in \fileent{luaotfload-tool}:
 
 \endsubsection
 
-\beginsubsection {\LUATEX Programming}
+\beginsubsection {\LuaTeX\ Programming}
 
 Another strategy that helps avoiding problems is to not access raw
-\LUATEX internals directly.
+\LuaTeX\ internals directly.
 %
 Some of them, even though they are dangerous to access, have not been
 overridden or disabled.
@@ -2471,10 +2604,10 @@ Instead, the function \luaident{font.getfont()} should be used
 because it has been replaced by a safe variant.
 
 However, \luaident{font.getfont()} only covers fonts handled by the
-font loader, e.~g. \identifier{OpenType} and \identifier{TrueType}
+font loader, e.~g. \OpenType\ and \identifier{TrueType}
 fonts, but not \abbrev{tfm} or \abbrev{ofm}.
 %
-Should you absolutely require access to all fonts known to \LUATEX,
+Should you absolutely require access to all fonts known to \LuaTeX,
 including the virtual and autogenerated ones, then you need to query
 both \luaident{font.getfont()} and \luaident{font.fonts}.
 %
@@ -2506,7 +2639,7 @@ recognizes only that exact version as its license.
 The „any later version” clause of the original license text as
 copyrighted by the \hyperlink [Free Software Foundation]{http://www.fsf.org/}
 \emphasis {does not apply} to either \identifier {luaotfload} or the
-code imported from \CONTEXT.
+code imported from \ConTeXt.
 
 The complete text of the license is given as a separate file \fileent
 {COPYING} in the toplevel directory of the

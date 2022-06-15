@@ -130,7 +130,7 @@ local function validspecification(specification,name)
     end
 end
 
-local function addfeature(data,feature,specifications)
+local function addfeature(data,feature,specifications,prepareonly)
 
     -- todo: add some validator / check code so that we're more tolerant to
     -- user errors
@@ -225,6 +225,9 @@ local function addfeature(data,feature,specifications)
     local coveractions = coverup.actions
     local stepkey      = coverup.stepkey
     local register     = coverup.register
+
+    -- todo: directly pass a coverage i.e. for privates that later will be
+    -- set
 
     local function prepare_substitution(list,featuretype,nocheck)
         local coverage = { }
@@ -461,13 +464,13 @@ local function addfeature(data,feature,specifications)
         return false
     end
 
+    -- 0 == remove, false = ignore (remove is default)
+
     local function prepare_chain(list,featuretype,sublookups,nocheck)
         -- todo: coveractions
         local rules    = list.rules
         local coverage = { }
         if rules then
-            local rulehash   = { }
-            local rulesize   = 0
             local lookuptype = types[featuretype]
             for nofrules=1,#rules do
                 local rule         = rules[nofrules]
@@ -498,6 +501,15 @@ local function addfeature(data,feature,specifications)
                 local lookups = rule.lookups or false
                 local subtype = nil
                 if lookups and sublookups then
+                    -- inspect(lookups)
+                    if #lookups > 0 then
+                        local ns = stop - start + 1
+                        for i=1,ns do
+                            if lookups[i] == nil then
+                                lookups[i] = 0
+                            end
+                        end
+                    end
                     local l = { }
                     for k, v in sortedhash(lookups) do
                         local t = type(v)
@@ -535,6 +547,7 @@ local function addfeature(data,feature,specifications)
                 if nofsequences > 0 then -- we merge coverage into one
                     -- we copy as we can have different fonts
                     if hassteps(lookups) then
+                        -- sequence is the before|current|after match list
                         local hashed = { }
                         for i=1,nofsequences do
                             local t = { }
@@ -547,9 +560,9 @@ local function addfeature(data,feature,specifications)
                             end
                             hashed[i] = t
                         end
+                        -- hashed is the before|current|after match hash
                         sequence = hashed
-                        rulesize = rulesize + 1
-                        rulehash[rulesize] = {
+                        local ruleset = {
                             nofrules,     -- 1
                             lookuptype,   -- 2
                             sequence,     -- 3
@@ -561,8 +574,15 @@ local function addfeature(data,feature,specifications)
                         }
                         for unic in sortedhash(sequence[start]) do
                             local cu = coverage[unic]
-                            if not cu then
-                                coverage[unic] = rulehash -- can now be done cleaner i think
+                            if cu then
+                                local n = cu.n + 1
+                                cu[n] = ruleset
+                                cu.n = n
+                            else
+                                coverage[unic] = {
+                                    ruleset,
+                                    n = 1,
+                                }
                             end
                         end
                         sequence.n = nofsequences
@@ -571,7 +591,6 @@ local function addfeature(data,feature,specifications)
                     end
                 end
             end
-            rulehash.n = rulesize
         end
         return coverage
     end
@@ -811,8 +830,11 @@ local function addfeature(data,feature,specifications)
                         order     = featureorder,
                         [stepkey] = steps,
                         nofsteps  = nofsteps,
-                        type      = types[featuretype],
+                        type      = specification.handler or types[featuretype],
                     }
+                    if prepareonly then
+                        return sequence
+                    end
                 end
             end
 
@@ -899,6 +921,23 @@ local function enhance(data,filename,raw)
         addfeature(data,specification.name,specification)
     end
 end
+
+-- local function enhance(data,filename,raw)
+--     local first = 1
+--     local last  = #extrafeatures
+--     while true do
+--         for slot=first,last do
+--             local specification = extrafeatures[slot]
+--             addfeature(data,specification.name,specification)
+--         end
+--         if #extrafeatures > last then
+--             first = last + 1
+--             last  = #extrafeatures
+--         else
+--             break
+--         end
+--     end
+-- end
 
 otf.enhancers.enhance = enhance
 

@@ -5,8 +5,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
     name          = "luaotfload-unicode",
-    version       = "3.21",       --TAGVERSION
-    date          = "2022-03-18", --TAGDATE
+    version       = "3.22",       --TAGVERSION
+    date          = "2022-06-15", --TAGDATE
     description   = "luaotfload submodule / Unicode helpers",
     license       = "CC0 1.0 Universal",
     author        = "Marcel Krüger"
@@ -22,46 +22,6 @@ local move = table.move
 local codepoint = lpeg.S'0123456789ABCDEF'^4/function(c)return tonumber(c, 16)end
 local empty = {}
 local result = {}
-
-local casefold do
-  local nl = ('#' * (1-lpeg.P'\n')^0)^-1 * '\n'
-  local entry = codepoint * "; " * lpeg.C(1) * ";" * lpeg.Ct((' ' * codepoint)^1) * "; " * nl
-  local file = lpeg.Cf(
-      lpeg.Ct(
-          lpeg.Cg(lpeg.Ct"", "C")
-        * lpeg.Cg(lpeg.Ct"", "F")
-        * lpeg.Cg(lpeg.Ct"", "S")
-        * lpeg.Cg(lpeg.Ct"", "T"))
-    * nl^0 * lpeg.Cg(entry)^0 * nl^0 * -1
-  , function(t, base, class, mapping)
-    rawset(rawget(t, class), base, mapping)
-    return t
-  end)
-
-  local f = io.open(kpse.find_file"CaseFolding.txt")
-  local data = file:match(f:read'*a')
-  f:close()
-  function casefold(s, full, special)
-    local first = special and data.T or empty
-    local second = data.C
-    local third = full and data.F or data.S
-    local result = result
-    for i = #result, 1, -1 do result[i] = nil end
-    local i = 1
-    for _, c in utf8codes(s) do
-      local datum = first[c] or second[c] or third[c]
-      if datum then
-        local l = #datum
-        move(datum, 1, l, i, result)
-        i = i + l
-      else
-        result[i] = c
-        i = i + 1
-      end
-    end
-    return utf8char(unpack(result))
-  end
-end
 
 local alphnum_only do
   local niceentry = lpeg.Cg(codepoint * ';' * (1-lpeg.P';')^0 * ';' * lpeg.S'LN' * lpeg.Cc(true))
@@ -232,8 +192,58 @@ do
   f:close()
 end
 
+do
+  local function eq(a, b)
+    if not a then return false end
+    if not b then return false end
+    if a == b then return true end
+    if #a ~= #b then return false end
+    for i=1,#a do if a[i] ~= b[i] then return false end end
+    return true
+  end
+  local function collapse(t, inherited)
+    inherited = t._ or inherited
+    local empty = true
+    for k,v in next, t do
+      if k ~= '_' then
+        if eq(inherited, collapse(v, inherited)) then
+          t[k] = nil
+        else
+          empty = false
+        end
+      end
+    end
+    return empty and inherited
+  end
+  local function cleanup(t)
+    for k,v in next, t do
+      if not tonumber(v) then
+        local collapsed = collapse(v)
+        if collapsed and #collapsed == 1 then
+          v = collapsed[1]
+          if k == v then
+            v = nil
+          end
+          t[k] = v
+        end
+      end
+    end
+  end
+  cleanup(uppercase)
+  cleanup(lowercase)
+end
+
+-- Here we manipulate the uppercase table a bit to add the `de-alt` language using capital eszett.
+uppercase[0x00DF]['de-x-eszett'] = { _ = { 0x1E9E } }
+uppercase[0x00DF]['de-alt'] = uppercase[0x00DF]['de-x-eszett']
+
+-- Special handling for Eastern Armenian based on Unicode document L2/20-143.
+uppercase[0x0587]['hy'] = { _ = { 0x0535, 0x054E } }
+-- Resore Unicode behavior. This entry is redundant, but we have to be aware of it
+-- if we later start to ignore unknown private use tags
+uppercase[0x0587]['hy-x-yiwn'] = { _ = uppercase[0x0587]._ }
+
 return {
-  casefold = casefold,
   alphnum_only = alphnum_only,
   casemapping = {
     uppercase = uppercase,

@@ -5,8 +5,8 @@
 do
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-harf-var-cff2",
-     version       = "3.21",       --TAGVERSION
-     date          = "2022-03-18", --TAGDATE
+     version       = "3.22",       --TAGVERSION
+     date          = "2022-06-15", --TAGDATE
      description   = "luaotfload submodule / CFF2 table processing",
      license       = "GPL v2.0",
      author        = "Marcel Krüger",
@@ -371,7 +371,7 @@ local function parse_vstore(buf, offset, variation)
   return variation_data
 end
 
-function parse_cff2(buf, i0, coords)
+local function parse_cff2(buf, i0, coords)
   local fontid = 1
   local major, minor, hdrSize, topSize = string.unpack(">BBBH", buf, i0)
   if major ~= 2 then error[[Unsupported CFF version]] end

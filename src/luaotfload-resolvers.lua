@@ -11,8 +11,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-resolvers",
-    version       = "3.21",       --TAGVERSION
-    date          = "2022-03-18", --TAGDATE
+    version       = "3.22",       --TAGVERSION
+    date          = "2022-06-15", --TAGDATE
     description   = "luaotfload submodule / resolvers",
     license       = "GPL v2.0"
 }
@@ -148,6 +148,10 @@ local function resolve_tex_format (specification)
     local name = specification.name
     for i=1, #tex_formats do
         local format = tex_formats [i]
+        local name = name
+        if name:sub(-#format-1) ~= '.' .. format then -- Add an explicit extension to avoid finding local fonts in other formats
+            name = name .. '.' .. format
+        end
         local resolved = resolvers_findfile(name, format)
         if resolved then
             return resolved, format
@@ -231,8 +235,8 @@ local function resolve_kpse (specification)
         local resolved = resolvers_findfile(name, suffix)
         if resolved then return resolved end
     end
-    for t, format in next, fonts.formats do --- brute force
-        local resolved = kpsefind_file (name, format)
+    for _, t in ipairs{'otf', 'ttf', 'pfb', 'lua', 'afm'} do --- brute force
+        local resolved = resolvers_findfile (name, t)
         if resolved then return resolved, t end
     end
 end

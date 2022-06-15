@@ -10,6 +10,7 @@ local next, type = next, type
 local P, R, S = lpeg.P, lpeg.R, lpeg.S
 local lpegmatch = lpeg.match
 local insert, remove, copy, unpack = table.insert, table.remove, table.copy, table.unpack
+local find = string.find
 
 local formatters           = string.formatters
 local sortedkeys           = table.sortedkeys
@@ -944,15 +945,18 @@ local function unifyglyphs(fontdata,usenames)
     return indices, names
 end
 
-local p_crappyname  do
+local stripredundant  do
+
 
     local p_hex   = R("af","AF","09")
     local p_digit = R("09")
     local p_done  = S("._-")^0 + P(-1)
+ -- local p_style = P(".ss") * p_digit * p_digit * P(-1)
+    local p_style = P(".")
     local p_alpha = R("az","AZ")
     local p_ALPHA = R("AZ")
 
-    p_crappyname = (
+    local p_crappyname = (
     -- (P("uni") + P("UNI") + P("Uni") + P("U") + P("u"))
         lpeg.utfchartabletopattern({ "uni", "u" },true)
       * S("Xx_")^0
@@ -980,56 +984,182 @@ local p_crappyname  do
       * P(1)^1
     ) * p_done
 
-end
+    -- In context we only keep glyph names because of tracing and access by name
+    -- so weird names make no sense.
 
--- In context we only keep glyph names because of tracing and access by name
--- so weird names make no sense.
+    if context then
 
-local forcekeep = false -- only for testing something
+        local forcekeep = false -- only for testing something
+--         local forcekeep = true
 
-directives.register("otf.keepnames",function(v)
-    report_cleanup("keeping weird glyph names, expect larger files and more memory usage")
-    forcekeep = v
-end)
+        directives.register("otf.keepnames",function(v)
+            report_cleanup("keeping weird glyph names, expect larger files and more memory usage")
+            forcekeep = v
+        end)
 
-local function stripredundant(fontdata)
-    local descriptions = fontdata.descriptions
-    if descriptions then
-        local n = 0
-        local c = 0
-        -- in context we always strip
-        if (not context and fonts.privateoffsets.keepnames) or forcekeep then
-            for unicode, d in next, descriptions do
-                if d.class == "base" then
-                    d.class = nil
-                    c = c + 1
-                end
-            end
-        else
-            for unicode, d in next, descriptions do
-                local name = d.name
-                if name and lpegmatch(p_crappyname,name) then
-                    d.name = nil
-                    n = n + 1
-                end
-                if d.class == "base" then
-                    d.class = nil
-                    c = c + 1
-                end
-            end
-        end
-        if trace_cleanup then
+     -- local p_lesscrappyname =
+     --     lpeg.utfchartabletopattern({ "uni", "u" },true)
+     --   * S("Xx")^0
+     --   * p_hex^1
+     --   * p_style
+
+        local function stripvariants(descriptions,list)
+            local n = list and #list or 0
             if n > 0 then
-                report_cleanup("%s bogus names removed (verbose unicode)",n)
+                for i=1,n do
+                    local g = list[i]
+                    if g then
+                        local d = descriptions[g]
+                        if d and d.name then
+                            d.name = nil
+                            n = n + 1
+                        end
+                    end
+                end
             end
-            if c > 0 then
-                report_cleanup("%s base class tags removed (default is base)",c)
+            return n
+        end
+
+        local function stripparts(descriptions,list)
+            local n = list and #list or 0
+            if n > 0 then
+                for i=1,n do
+                    local g = list[i].glyph
+                    if g then
+                        local d = descriptions[g]
+                        if d and d.name then
+                            d.name = nil
+                            n = n + 1
+                        end
+                    end
+                end
+            end
+            return n
+        end
+
+     -- local function collectsimple(fontdata)
+     --     local resources = fontdata.resources
+     --     local sequences = resources and resources.sequences
+     --     if sequences then
+     --         local keeplist = { }
+     --         for i=1,#sequences do
+     --             local s = sequences[i]
+     --             if s.type == "gsub_single" then
+     --                 -- only simple ones
+     --                 local features = s.features
+     --                 local steps    = s.steps
+     --                 if features and steps then
+     --                     local okay = false
+     --                     for k, v in next, features do
+     --                         if find(k,"^ss%d%d") then
+     --                             okay = true
+     --                             break
+     --                         end
+     --                     end
+     --                     if okay then
+     --                         for i=1,#steps do
+     --                             local coverage = steps[i].coverage
+     --                             if coverage then
+     --                                 for k, v in next, coverage do
+     --                                     keeplist[k] = v
+     --                                 end
+     --                             end
+     --                         end
+     --                     end
+     --                 end
+     --             end
+     --         end
+     --         return next(keeplist) and keeplist or nil
+     --     end
+     -- end
+
+        local function collectsimple(fontdata)
+            return nil
+        end
+
+        stripredundant = function(fontdata)
+            local descriptions = fontdata.descriptions
+            if descriptions then
+                local n = 0
+                local c = 0
+                for unicode, d in next, descriptions do
+                    local m = d.math
+                    if m then
+                        n = n + stripvariants(descriptions,m.vvariants)
+                        n = n + stripvariants(descriptions,m.hvariants)
+                        n = n + stripparts   (descriptions,m.vparts)
+                        n = n + stripparts   (descriptions,m.hparts)
+                    end
+                end
+                if forcekeep then
+                    for unicode, d in next, descriptions do
+                        if d.class == "base" then
+                            d.class = nil
+                            c = c + 1
+                        end
+                    end
+                else
+                    local keeplist = collectsimple(fontdata)
+                    for unicode, d in next, descriptions do
+                        local name = d.name
+                        if name then
+                         -- if lpegmatch(p_lesscrappyname,name) then
+                            if keeplist and keeplist[name] then
+                                -- keep name
+                            elseif lpegmatch(p_crappyname,name) then
+                                d.name = nil
+                                n = n + 1
+                            end
+                        end
+                        if d.class == "base" then
+                            d.class = nil
+                            c = c + 1
+                        end
+                    end
+                end
+                if trace_cleanup then
+                    if n > 0 then
+                        report_cleanup("%s bogus names removed (verbose unicode)",n)
+                    end
+                    if c > 0 then
+                        report_cleanup("%s base class tags removed (default is base)",c)
+                    end
+                end
             end
         end
-    end
-end
 
-readers.stripredundant = stripredundant
+    else
+
+        stripredundant = function(fontdata)
+            local descriptions = fontdata.descriptions
+            if descriptions then
+                if fonts.privateoffsets.keepnames then
+                    for unicode, d in next, descriptions do
+                        if d.class == "base" then
+                            d.class = nil
+                        end
+                    end
+                else
+                    for unicode, d in next, descriptions do
+                        local name = d.name
+                        if name then
+                            if lpegmatch(p_crappyname,name) then
+                                d.name = nil
+                            end
+                        end
+                        if d.class == "base" then
+                            d.class = nil
+                        end
+                    end
+                end
+            end
+        end
+
+    end
+
+    readers.stripredundant = stripredundant
+
+end
 
 function readers.getcomponents(fontdata) -- handy for resolving ligatures when names are missing
     local resources = fontdata.resources
@@ -1128,8 +1258,7 @@ readers.unifymissing = unifymissing
 function readers.rehash(fontdata,hashmethod) -- TODO: combine loops in one
     if not (fontdata and fontdata.glyphs) then
         return
-    end
-    if hashmethod == "indices" then
+    elseif hashmethod == "indices" then
         fontdata.hashmethod = "indices"
     elseif hashmethod == "names" then
         fontdata.hashmethod = "names"
@@ -1137,7 +1266,6 @@ function readers.rehash(fontdata,hashmethod) -- TODO: combine loops in one
         unifyresources(fontdata,indices)
         copyduplicates(fontdata)
         unifymissing(fontdata)
-     -- stripredundant(fontdata)
     else
         fontdata.hashmethod = "unicodes"
         local indices = unifyglyphs(fontdata)

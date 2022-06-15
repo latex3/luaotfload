@@ -7,8 +7,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-parsers",
-    version       = "3.21",       --TAGVERSION
-    date          = "2022-03-18", --TAGDATE
+    version       = "3.22",       --TAGVERSION
+    date          = "2022-06-15", --TAGDATE
     description   = "luaotfload submodule / parsers",
     license       = "GPL v2.0"
 }
@@ -498,27 +498,6 @@ local function handle_xetex_option (val)
   return tostring(1 + tonumber(val))
 end
 
---[[doc--
-
-    Dirty test if a file: request is actually a path: lookup; don’t
-    ask! Note this fails on Windows-style absolute paths. These will
-    *really* have to use the correct request.
-
---doc]]--
-
-local function check_garbage (_,i, garbage)
-  if stringfind(garbage, "/") then
-    logreport("log", 0, "load",  --- ffs use path!
-              "warning: path in file: lookups is deprecated; ")
-    logreport("log", 0, "load", "use bracket syntax instead!")
-    logreport("log", 0, "load",
-              "position: %d; full match: %q",
-              i, garbage)
-    return true
-  end
-  return false
-end
-
 local featuresep = comma + semicolon
 
 --- modifiers ---------------------------------------------------------
@@ -598,10 +577,12 @@ local combolist         = Ct(combodef1 * (comborowsep * combodef)^1)
 local subfont           = P"(" * Cg(R'09'^1 / function (s)
                             return tonumber(s) + 1
                           end + (1 - S"()")^1, "sub") * P")"
+-- An optional subfont shouldn't use subfont^-1 to ensure that parens
+-- at the subfont location are never interpreted in different ways.
+local maybe_subfont     = subfont + #(1 - P"(" + -1)
 
 --- lookups -----------------------------------------------------------
 local fontname          = C((1-S":(/")^1)  --- like luatex-fonts
-local unsupported       = Cmt((1-S":(")^1, check_garbage)
 local combo             = Cg(P"combo", "lookup") * colon * ws
                           * Cg(combolist, "name")
 --- initially we intended file: to emulate the behavior of
@@ -610,10 +591,10 @@ local combo             = Cg(P"combo", "lookup") * colon * ws
 --- turns out fontspec and other widely used packages rely on file:
 --- with paths already, so we’ll add a less strict rule here.  anyways,
 --- we’ll emit a warning.
-local prefixed          = P"file:" * ws * Cg(Cc"path", "lookup")
-                          * Cg(unsupported, "name")
-                        + Cg(P"name" + "file" + "kpse" + "my", "lookup")
+local prefixed          = Cg(P"name" + "file" + "kpse" + "my", "lookup")
                           * colon * ws * Cg(fontname, "name")
+                        + Cg(P"id", "lookup")
+                          * colon * ws * Cg(R'09'^1 / tonumber, "id")
 local unprefixed        = Cg(Cc"anon", "lookup") * Cg(fontname, "name")
 --- Bracketed “path” lookups: These may contain any character except
 --- for unbalanced brackets. A backslash escapes any following
@@ -628,7 +609,6 @@ local path_balanced     = { (path_content + V(2))^1
                           , lbrk * V(1)^-1 * rbrk }
 local path_lookup       = Cg(Cc"path", "lookup")
                           * lbrk * Cg(Cs(path_balanced), "name") * rbrk
-                          * subfont^-1
 
 --- features ----------------------------------------------------------
 local balanced_braces   = P{((1 - S'{}') + '{' * V(1) * '}')^0}
@@ -655,12 +635,11 @@ local feature_list      = Cf(Ct""
 --- top-level rules ---------------------------------------------------
 --- \font\foo=<specification>:<features>
 local features          = Cg(feature_list, "features")
-local specification     = (prefixed + unprefixed)
-                        * subfont^-1
+local specification     = (path_lookup + prefixed + unprefixed)
+                        * maybe_subfont
                         * modifier_list
-local font_request      = Ct(path_lookup   * (colon^-1 * features)^-1
-                           + combo --> TODO: feature list needed?
-                           + specification * (colon    * features)^-1)
+local font_request      = Ct(specification * (colon^-1 * features)^-1
+                           + combo) --> TODO: feature list needed?
 
 --  lpeg.print(font_request)
 --- v2.5 parser: 1065 rules

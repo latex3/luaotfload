@@ -5,8 +5,8 @@
 do -- block to avoid to many local variables error
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-harf-define",
-     version       = "3.21",       --TAGVERSION
-     date          = "2022-03-18", --TAGDATE
+     version       = "3.22",       --TAGVERSION
+     date          = "2022-06-15", --TAGDATE
      description   = "luaotfload submodule / HarfBuzz font loading",
      license       = "GPL v2.0",
      author        = "Khaled Hosny, Marcel Krüger",
@@ -87,7 +87,7 @@ local variable_pattern do
   local number = l.C(l.S'+-'^-1 * (l.R'09'^1 * ('.' * l.R'09'^0)^-1 + '.' * l.R'09'^1))
   local name_or_tag = l.C(l.R('AZ', 'az')^1)
   local pair = l.Ct(name_or_tag * white * '=' * white * (number + l.Cc(nil) * 'auto'))
-  variable_pattern = l.Ct(pair * (white * ',' * white * pair)^0)
+  variable_pattern = l.Ct(pair * (white * ',' * white * pair)^0) * -1
 end
 
 local function loadfont(spec)

@@ -17,7 +17,7 @@
 }
 
 \directlua{luaotfload.add_fallback("myfallback", {
-    "Noto Color Emoji:mode=harf","[DejaVuSans.ttf]:mode=harf","Siddhanta:mode=harf","Noto Serif Tibetan:mode=node"
+    "Noto Color Emoji:mode=harf","kpse:DejaVuSans.ttf:mode=harf","Siddhanta:mode=harf","kpse:NotoSansTibetan-Regular.ttf:mode=node"
   })}
 
 \begin{document}

@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2022-04-20 19:15
+-- merge date  : 2022-05-11 11:34
 
 do -- begin closure to overcome local limits and interference
 
@@ -31317,14 +31317,14 @@ local function addfeature(data,feature,specifications,prepareonly)
     local lookups=rule.lookups or false
     local subtype=nil
     if lookups and sublookups then
-if #lookups>0 then
- local ns=stop-start+1
- for i=1,ns do
-  if lookups[i]==nil then
-   lookups[i]=0
-  end
- end
-end
+     if #lookups>0 then
+      local ns=stop-start+1
+      for i=1,ns do
+       if lookups[i]==nil then
+        lookups[i]=0
+       end
+      end
+     end
      local l={}
      for k,v in sortedhash(lookups) do
       local t=type(v)
@@ -31620,7 +31620,7 @@ end
       order=featureorder,
       [stepkey]=steps,
       nofsteps=nofsteps,
-      type=types[featuretype],
+      type=specification.handler or types[featuretype],
      }
      if prepareonly then
       return sequence
@@ -37827,12 +37827,12 @@ local function blockligatures(str)
     before=before,
     current={ one,two },
     after=after,
-    lookups={ 1 },
+    lookups={ 1,false },
    }
    revert[new]={
     current={ one,zwj },
     after={ two },
-    lookups={ 1 },
+    lookups={ 1,false },
    }
   end
  end

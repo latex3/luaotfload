@@ -501,15 +501,15 @@ local function addfeature(data,feature,specifications,prepareonly)
                 local lookups = rule.lookups or false
                 local subtype = nil
                 if lookups and sublookups then
--- inspect(lookups)
-if #lookups > 0 then
-    local ns = stop - start + 1
-    for i=1,ns do
-        if lookups[i] == nil then
-            lookups[i] = 0
-        end
-    end
-end
+                    -- inspect(lookups)
+                    if #lookups > 0 then
+                        local ns = stop - start + 1
+                        for i=1,ns do
+                            if lookups[i] == nil then
+                                lookups[i] = 0
+                            end
+                        end
+                    end
                     local l = { }
                     for k, v in sortedhash(lookups) do
                         local t = type(v)
@@ -830,7 +830,7 @@ end
                         order     = featureorder,
                         [stepkey] = steps,
                         nofsteps  = nofsteps,
-                        type      = types[featuretype],
+                        type      = specification.handler or types[featuretype],
                     }
                     if prepareonly then
                         return sequence

@@ -32,8 +32,8 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/texlive
-          key: texlive-v1-${{ steps.get-id.outputs.id }}
-          restore-keys: texlive-v1-
+          key: texlive-v0-${{ steps.get-id.outputs.id }}
+          restore-keys: texlive-v0-
       # We need docutils for our documentation
       - run: sudo apt-get install python3-docutils
       - name: Install TeX Live

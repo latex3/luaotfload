@@ -43,7 +43,7 @@ lua-ul
 # some packages for the documentation
 caption fancyvrb hyperref inconsolata listings luatex85 mdwtools
 metalogo pdfpages pgf-blur standalone tikzducks tikzlings titlesec
-tocloft tools
+tocloft tools hypdoc
 #
 # Assuming a 'basic' font set up, metafont is required to avoid
 # warnings with some packages and errors with others

@@ -484,6 +484,7 @@ do
     local getaxisscale = helpers.getaxisscale
     local function search(table, term, key_field, value_field)
         if not table then return end
+        term = cleanname(term)
         for i=1, #table do
             local entry = table[i]
             if cleanname(entry[key_field]) == term then

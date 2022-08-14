@@ -17,11 +17,19 @@ assert(luaotfload_module, "This is a part of luaotfload and should not be loaded
 local getfont = font.getfont
 local setfont = node.direct.setfont
 local getdisc = node.direct.getdisc
+local getlist = node.direct.getlist
+local is_glyph = node.direct.is_glyph
+local todirect = node.direct.todirect
 local traverse_glyph = node.direct.traverse_glyph
+local traverse_list = node.direct.traverse_list
 local traverse_id = node.direct.traverse_id
+local traverse = node.direct.traverse
 local uses_font = node.direct.uses_font
 local define_font = font.define
+local hlist_t = node.id'hlist'
+local vlist_t = node.id'vlist'
 local disc_t = node.id'disc'
+local glyph_t = node.id'glyph'
 
 -- DVI output support
 --
@@ -40,10 +48,66 @@ local disc_t = node.id'disc'
 -- mapped_fonts maps fontids from the user to fontids used in the DVI file
 local mapped_fonts = setmetatable({}, {__index = function(t, fid)
   local font = getfont(fid)
-  local mapped = font.backend_font or false
+  print(fid, font and font.fullname)
+  local mapped = font and font.backend_font or false
   t[fid] = mapped
   return mapped
 end})
+
+local full_hprocess
+local function full_vprocess(head)
+  for _, id, _, list in traverse_list(head) do
+    if id == hlist_t then
+      full_hprocess(list)
+    elseif id == vlist_t then
+      full_vprocess(list)
+    else
+      assert(false)
+    end
+  end
+end
+
+function full_hprocess(head)
+  local last_f, last_mapping, last_mapped_font
+  for n, id in traverse(head) do
+    if id == hlist_t then
+      full_hprocess(getlist(n))
+    elseif id == vlist_t then
+      full_vprocess(getlist(n))
+    elseif id == disc_t then
+      local _, _, rep = getdisc(n)
+      for n, c, f in traverse_glyph(rep) do
+        if f ~= last_f then
+          last_f, last_mapping = f, mapped_fonts[f]
+          last_mapped_font = last_mapping and last_mapping.font
+        end
+        if last_mapping then
+          local mapped = last_mapping[c]
+          if mapped then setfont(n, mapped_font, mapped) end
+        end
+      end
+    elseif id == glyph_t then
+      local c, f = is_glyph(n)
+      if f ~= last_f then
+        last_f, last_mapping = f, mapped_fonts[f]
+        last_mapped_font = last_mapping and last_mapping.font
+      end
+      if last_mapping then
+        local mapped = last_mapping[c]
+        print(c, f, mapped)
+        if mapped then setfont(n, last_mapped_font, mapped) end
+      end
+    end
+  end
+end
+
+local function delayed_register_callback()
+  luatexbase.add_to_callback('pre_shipout_filter', function(list)
+    full_vprocess(todirect(list)) -- list should always be a single list node, so we can treat it as if it were a vlist with one node
+    return true
+  end, 'luaotfload.dvi')
+  delayed_register_callback = function() end
+end
 
 local function process(head, font)
   local mapping = mapped_fonts[font]
@@ -77,6 +141,7 @@ local function manipulate(tfmdata, _, dvi_kind)
   if 2 ~= (tfmdata.encodingbytes or ((tfmdata.format == 'truetype' or tfmdata.format == 'opentype') and 2 or 1)) then
     return
   end
+  delayed_register_callback()
   local newfont = {}
   for k,v in pairs(tfmdata) do
     newfont[k] = v

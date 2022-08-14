@@ -1130,7 +1130,7 @@ local function set_tounicode()
           if unicode then
             newcharacters[unicode] = character
           end
-          character.tounicode = glyph.tounicode or "FFFD"
+          character.tounicode = glyph.tounicode or unicode or "FFFD"
           character.used = true
         end
       end

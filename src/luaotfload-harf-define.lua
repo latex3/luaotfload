@@ -394,6 +394,7 @@ local function scalefont(data, spec)
   local unicodes = data.unicodes
   for uni, gid in next, unicodes do
     characters[uni] = characters[gid_offset + gid]
+    characters[uni].tounicode = uni
   end
 
   -- Select font palette, we support `palette=index` option, and load the first

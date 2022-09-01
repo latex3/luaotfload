@@ -638,8 +638,8 @@ local features          = Cg(feature_list, "features")
 local specification     = (path_lookup + prefixed + unprefixed)
                         * maybe_subfont
                         * modifier_list
-local font_request      = Ct(specification * (colon^-1 * features)^-1
-                           + combo) --> TODO: feature list needed?
+local font_request      = Ct(combo --> TODO: feature list needed?
+                           + specification * (colon^-1 * features)^-1)
 
 --  lpeg.print(font_request)
 --- v2.5 parser: 1065 rules

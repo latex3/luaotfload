@@ -877,6 +877,7 @@ fonts.constructors.features.otf.register {
         end,
     },
     processors = {
+      position = 1,
       node = function(head, f, _, _, _)
           return normalize_lookup[f](head)
       end,

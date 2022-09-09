@@ -284,7 +284,7 @@ Completed box being shipped out [1]
 ....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
-..\vbox(550.0+0.0)x345.0, glue set 306.74701fil, direction TLT
+..\vbox(550.0+0.0)x345.0, glue set 305.92209fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 6.15
 ...\hbox(3.85+0.05)x345.0, glue set 298.995fil, direction TLT
@@ -313,16 +313,16 @@ Completed box being shipped out [1]
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\lineskip) 1.0
-...\hbox(17.35254+14.85252)x345.0, glue set 46.91501fil, direction TLT
+...\hbox(17.76505+15.26503)x345.0, glue set 46.91501fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\hbox(17.35254+14.85252)x283.08499, direction TLT
+....\hbox(17.76505+15.26503)x283.08499, direction TLT
 .....\mathon
-.....\vbox(17.35254+14.85252)x283.08499, direction TLT
+.....\vbox(17.76505+15.26503)x283.08499, direction TLT
 ......\hbox(4.19998+1.80002)x283.08499, direction TLT
 .......\glue(\tabskip) 0.0
 .......\hbox(4.19998+1.80002)x55.59499, glue set 15.415fil, direction TLT
@@ -578,9 +578,9 @@ Completed box being shipped out [1]
 ........\glue 6.0
 .......\glue(\tabskip) 0.0
 ......\glue(\lineskip) 0.0
-......\hbox(4.95+1.80002)x283.08499, direction TLT
+......\hbox(5.77501+1.80002)x283.08499, direction TLT
 .......\glue(\tabskip) 0.0
-.......\hbox(4.95+1.80002)x55.59499, glue set 9.80247fil, direction TLT
+.......\hbox(5.77501+1.80002)x55.59499, glue set 9.80247fil, direction TLT
 ........\rule(4.19998+1.80002)x0.0
 ........\glue 6.0
 ........\glue 0.0 plus 1.0fil
@@ -603,7 +603,7 @@ Completed box being shipped out [1]
 ........\glue 0.0 plus 1.0fil
 ........\glue 6.0
 .......\glue(\tabskip) 0.0
-.......\hbox(4.95+1.80002)x51.135, glue set 7.57248fil, direction TLT
+.......\hbox(5.77501+1.80002)x51.135, glue set 7.57248fil, direction TLT
 ........\glue 6.0
 ........\glue 0.0 plus 1.0fil
 ........\glue 0.00002
@@ -625,7 +625,7 @@ Completed box being shipped out [1]
 ........\glue 0.0 plus 1.0fil
 ........\glue 6.0
 .......\glue(\tabskip) 0.0
-.......\hbox(4.95+1.80002)x51.135, glue set 7.57248fil, direction TLT
+.......\hbox(5.77501+1.80002)x51.135, glue set 7.57248fil, direction TLT
 ........\glue 6.0
 ........\glue 0.0 plus 1.0fil
 ........\glue 0.00002
@@ -647,7 +647,7 @@ Completed box being shipped out [1]
 ........\glue 0.0 plus 1.0fil
 ........\glue 6.0
 .......\glue(\tabskip) 0.0
-.......\hbox(4.95+1.80002)x63.565, glue set 11.33249fil, direction TLT
+.......\hbox(5.77501+1.80002)x63.565, glue set 11.33249fil, direction TLT
 ........\glue 6.0
 ........\glue 0.0 plus 1.0fil
 ........\glue 0.00002
@@ -670,7 +670,7 @@ Completed box being shipped out [1]
 ........\glue 0.0 plus 1.0fil
 ........\glue 6.0
 .......\glue(\tabskip) 0.0
-.......\hbox(4.95+1.80002)x61.65501, glue set 10.37749fil, direction TLT
+.......\hbox(5.77501+1.80002)x61.65501, glue set 10.37749fil, direction TLT
 ........\glue 6.0
 ........\glue 0.0 plus 1.0fil
 ........\glue 0.00002
@@ -3842,7 +3842,7 @@ Completed box being shipped out [1]
 ......\glue(\lineskip) 0.0
 ......\hbox(4.19998+1.80002)x329.4949, direction TLT
 .......\glue(\tabskip) 0.0
-.......\hbox(4.19998+1.80002)x63.52496, glue set 1.20749fil, direction TLT
+.......\hbox(4.19998+1.80002)x63.52496, glue set 1.13249fil, direction TLT
 ........\rule(4.19998+1.80002)x0.0
 ........\glue 6.0
 ........\glue 0.0 plus 1.0fil
@@ -3856,6 +3856,7 @@ Completed box being shipped out [1]
 ........\TU/kpse:NotoSerif-Regular(9)/m/n/5 Έ
 ........\TU/kpse:NotoSerif-Regular(9)/m/n/5 Γ
 ........\TU/kpse:NotoSerif-Regular(9)/m/n/5 Κ
+........\kern0.15 (font)
 ........\TU/kpse:NotoSerif-Regular(9)/m/n/5 Ή
 ........\TU/kpse:NotoSerif-Regular(9)/m/n/5 ͅ
 ........\TU/kpse:NotoSerif-Regular(9)/m/n/5 Σ

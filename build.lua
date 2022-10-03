@@ -1,7 +1,7 @@
 
-packageversion= "3.22-dev"
-packagedate   = "2022-03-18"
-fontloaderdate= "2022-06-15"
+packageversion= "3.23-dev"
+packagedate   = "2022-10-03"
+fontloaderdate= "2022-10-03"
 packagedesc   = ""
 
 module   = "luaotfload"

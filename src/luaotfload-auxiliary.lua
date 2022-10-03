@@ -4,7 +4,7 @@
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 -----------------------------------------------------------------------
 
-assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
     name          = "luaotfload-auxiliary",
     version       = "3.22-dev",       --TAGVERSION
     date          = "2022-03-18", --TAGDATE
@@ -596,7 +596,6 @@ function aux.provides_axis(font_id, asked_axis)
                tostring (font_id), tostring (asked_axis))
     return false
   end
-  -- asked_axis = stringlower(asked_axis)
   local tfmdata = identifiers[font_id]
   if not tfmdata then
     logreport ("log", 0, "aux", "no font with id %d", font_id)

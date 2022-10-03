@@ -5,8 +5,8 @@
 do -- block to avoid to many local variables error
  assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
      name          = "luaotfload-harf-define",
-     version       = "3.22",       --TAGVERSION
-     date          = "2022-06-15", --TAGDATE
+     version       = "3.23-dev",       --TAGVERSION
+     date          = "2022-10-03", --TAGDATE
      description   = "luaotfload submodule / HarfBuzz font loading",
      license       = "GPL v2.0",
      author        = "Khaled Hosny, Marcel Krüger",
@@ -394,6 +394,7 @@ local function scalefont(data, spec)
   local unicodes = data.unicodes
   for uni, gid in next, unicodes do
     characters[uni] = characters[gid_offset + gid]
+    characters[uni].tounicode = uni
   end
 
   -- Select font palette, we support `palette=index` option, and load the first

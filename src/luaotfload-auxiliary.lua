@@ -4,10 +4,10 @@
 --       AUTHOR:  Khaled Hosny, Élie Roux, Philipp Gesang
 -----------------------------------------------------------------------
 
-assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
+assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
     name          = "luaotfload-auxiliary",
-    version       = "3.22",       --TAGVERSION
-    date          = "2022-06-15", --TAGDATE
+    version       = "3.23-dev",       --TAGVERSION
+    date          = "2022-10-03", --TAGDATE
     description   = "luaotfload submodule / auxiliary functions",
     license       = "GPL v2.0"
 }
@@ -581,6 +581,61 @@ function aux.provides_language(font_id, asked_script, asked_language)
                font_id, fontname, asked_script, asked_language)
     return false
   end
+end
+
+--[[doc--
+A function to check if a font is a variabe font with a given axis.
+--doc]]--
+
+function aux.provides_axis(font_id, asked_axis)
+  if not font_id      or type (font_id)      ~= "number"
+  or not asked_axis or type (asked_axis) ~= "string"
+  then
+    logreport ("both", 0, "aux",
+               "invalid parameters to provides_axis(%s, %s)",
+               tostring (font_id), tostring (asked_axis))
+    return false
+  end
+  local tfmdata = identifiers[font_id]
+  if not tfmdata then
+    logreport ("log", 0, "aux", "no font with id %d", font_id)
+    return false
+  end
+  local hbface = get_hbface(tfmdata)
+  if hbface then
+    if not hbface:ot_var_has_data() then return false end
+
+    if #asked_axis <= 4 then
+      local tag = harf.Tag.new(asked_axis)
+      local info = hbface:ot_var_find_axis_info(tag)
+      if info then
+        return true -- TODO: More info?
+      end
+    end
+
+    asked_axis = stringlower(asked_axis)
+    local infos = hbface:ot_var_get_axis_infos()
+    for i=1, #infos do
+      local info = infos[i]
+      if hbface:get_name(info.name_id):lower() == asked_axis then
+        return true -- TODO: More info?
+      end
+    end
+  else
+    asked_axis = stringlower(asked_axis)
+    local resources = tfmdata.resources
+    local variabledata = resources and resources.variabledata
+    if not variabledata then return false end
+    local axes = variabledata.axis
+    if not axes then return false end -- Shouldn't happen
+    for i=1, #axes do
+      local axis = axes[i]
+      if axis.tag == asked_axis or axis.name == asked_axis then
+        return true -- TODO: More info?
+      end
+    end
+  end
+  return false
 end
 
 --[[doc--

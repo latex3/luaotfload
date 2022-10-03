@@ -1,5 +1,10 @@
 Change History
 --------------
+2022-10-03 luaotfload v3.23
+
+    *  More reliable ToUnicode mappings in Harf mode
+    *  Various bug fixes
+
 2022-06-15 luaotfload v3.22
 
     *  Tailored case mappings

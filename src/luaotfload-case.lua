@@ -1,4 +1,5 @@
 local unicode_data = require'luaotfload-unicode'
+local bcp47 = require'luaotfload-bcp47'
 
 local mapping_tables = unicode_data.casemapping
 local soft_dotted = unicode_data.soft_dotted
@@ -25,6 +26,8 @@ local free = direct.free
 local copy = direct.copy
 local insert_after = direct.insert_after
 local traverse = direct.traverse
+
+local report = luaotfload.log.report
 
 local disc = node.id'disc'
 
@@ -113,6 +116,15 @@ local function init_greek_data()
   for c = 0x2126, 0x2126 do handle_char(c) end
 end
 
+local relevant_languages = {
+  lt = true,
+  tr = true,
+  az = true,
+  hy = {_ = true, yiwn = true},
+  el = {_ = true, iota = true},
+  de = {_ = false, eszett = true},
+}
+
 local function font_lang(feature)
   return setmetatable({}, {__index = function(t, fid)
     local f = font.getfont(fid)
@@ -126,6 +138,35 @@ local function font_lang(feature)
           or lang == 'hye' and 'hy'
           or (lang == 'ell' or lang == 'pgr') and 'el'
           or false
+    end
+    if lang == 'de-alt' then
+      lang = 'de-x-eszett'
+    end
+    local parsed = lang and bcp47.parse(lang)
+    if lang and not parsed then
+      report('luaotfload-case', 0, 'Unable to parse passed language tag')
+    end
+    lang = parsed and parsed.language
+    local subtags = lang and relevant_languages[lang]
+    if subtags then
+      local private = parsed.private
+      if subtags ~= true and private then
+        local first = true
+        for _, ext in ipairs(private) do
+          if subtags[ext] then
+            if first then
+              lang = lang .. '-x'
+              first = nil
+            end
+            lang = lang .. '-' .. ext
+          end
+        end
+        if first then
+          lang = subtags._ and lang
+        end
+      end
+    else
+      lang = false
     end
     t[fid] = lang
     return lang

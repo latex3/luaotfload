@@ -14,9 +14,19 @@ end
 
 if not math.round then
 
-    local floor = math.floor
+    if xmath then
 
-    function math.round(x) return floor(x + 0.5) end
+        math.round = xmath.round
+
+    else
+
+        local floor = math.floor
+
+        function math.round(x)
+            return x < 0 and -floor(-x + 0.5) or floor(x + 0.5)
+        end
+
+    end
 
 end
 

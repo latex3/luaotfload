@@ -6,15 +6,15 @@ if not modules then modules = { } end modules ['font-osd'] = { -- script devanag
     license   = "see context related readme files"
 }
 
-local experiment1   = false
-local experiment2   = false
-local experiment2b1 = false
-local experiment2b2 = false
+-- local experiment1   = false
+-- local experiment2   = false
+-- local experiment2b1 = false
+-- local experiment2b2 = false
 
-experiments.register("fonts.indic.experiment1",   function(v) experiment1   = v end)
-experiments.register("fonts.indic.experiment2",   function(v) experiment2   = v end)
-experiments.register("fonts.indic.experiment2b1", function(v) experiment2b1 = v end)
-experiments.register("fonts.indic.experiment2b2", function(v) experiment2b2 = v end)
+-- experiments.register("fonts.indic.experiment1",   function(v) experiment1   = v end)
+-- experiments.register("fonts.indic.experiment2",   function(v) experiment2   = v end)
+-- experiments.register("fonts.indic.experiment2b1", function(v) experiment2b1 = v end)
+-- experiments.register("fonts.indic.experiment2b2", function(v) experiment2b2 = v end)
 
 -- we need to check nbsphash (context only)
 

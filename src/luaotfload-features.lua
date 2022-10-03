@@ -5,8 +5,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-features",
-    version       = "3.22",       --TAGVERSION
-    date          = "2022-06-15", --TAGDATE
+    version       = "3.23-dev",       --TAGVERSION
+    date          = "2022-10-03", --TAGDATE
     description   = "luaotfload submodule / features",
     license       = "GPL v2.0",
     author        = "Hans Hagen, Khaled Hosny, Elie Roux, Philipp Gesang, Marcel Krüger",
@@ -484,6 +484,7 @@ do
     local getaxisscale = helpers.getaxisscale
     local function search(table, term, key_field, value_field)
         if not table then return end
+        term = cleanname(term)
         for i=1, #table do
             local entry = table[i]
             if cleanname(entry[key_field]) == term then
@@ -876,6 +877,7 @@ fonts.constructors.features.otf.register {
         end,
     },
     processors = {
+      position = 1,
       node = function(head, f, _, _, _)
           return normalize_lookup[f](head)
       end,

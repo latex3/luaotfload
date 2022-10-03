@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2022-05-11 11:34
+-- merge date  : 2022-09-16 14:39
 
 do -- begin closure to overcome local limits and interference
 
@@ -3031,8 +3031,14 @@ if not math.ceiling then
  math.ceiling=math.ceil
 end
 if not math.round then
- local floor=math.floor
- function math.round(x) return floor(x+0.5) end
+ if xmath then
+  math.round=xmath.round
+ else
+  local floor=math.floor
+  function math.round(x)
+   return x<0 and -floor(-x+0.5) or floor(x+0.5)
+  end
+ end
 end
 if not math.div then
  local floor=math.floor
@@ -13696,8 +13702,13 @@ local result={}
  local justpass=false
  local seacs={}
  local procidx=nil
- local function showstate(where)
-  report("%w%-10s : [%s] n=%i",depth*2,where,concat(stack," ",1,top),top)
+ local function showstate(where,i,n)
+  if i then
+   local j=i+n-1
+   report("%w%-10s : [%s] step",depth*2+2,where,concat(stack," ",i,j<=top and j or top))
+  else
+   report("%w%-10s : [%s] n=%i",depth*2,where,concat(stack," ",1,top),top)
+  end
  end
  local function showvalue(where,value,showstack)
   if showstack then
@@ -13813,9 +13824,9 @@ local result={}
    ymin=y
   end
  end
- local function xycurveto(x1,y1,x2,y2,x3,y3) 
+ local function xycurveto(x1,y1,x2,y2,x3,y3,i,n) 
   if trace_charstrings then
-   showstate("curveto")
+   showstate("curveto",i,n)
   end
   if keepcurve then
    r=r+1
@@ -13952,6 +13963,15 @@ local result={}
   if trace_charstrings then
    showstate("rrcurveto")
   end
+if top==6 then
+ local ax=x+stack[1] 
+ local ay=y+stack[2] 
+ local bx=ax+stack[3] 
+ local by=ay+stack[4] 
+ x=bx+stack[5]  
+ y=by+stack[6]  
+ xycurveto(ax,ay,bx,by,x,y,1,6)
+else
   for i=1,top,6 do
    local ax=x+stack[i]   
    local ay=y+stack[i+1] 
@@ -13959,8 +13979,9 @@ local result={}
    local by=ay+stack[i+3] 
    x=bx+stack[i+4]  
    y=by+stack[i+5]  
-   xycurveto(ax,ay,bx,by,x,y)
+   xycurveto(ax,ay,bx,by,x,y,i,6)
   end
+end
   top=0
  end
  local function hhcurveto()
@@ -13972,6 +13993,15 @@ local result={}
    y=y+stack[1]     
    s=2
   end
+if top==4 then
+   local ax=x+stack[1]  
+   local ay=y
+   local bx=ax+stack[2] 
+   local by=ay+stack[3] 
+   x=bx+stack[4]  
+   y=by
+   xycurveto(ax,ay,bx,by,x,y,1,4)
+else
   for i=s,top,4 do
    local ax=x+stack[i] 
    local ay=y
@@ -13979,8 +14009,9 @@ local result={}
    local by=ay+stack[i+2] 
    x=bx+stack[i+3]  
    y=by
-   xycurveto(ax,ay,bx,by,x,y)
+   xycurveto(ax,ay,bx,by,x,y,i,4)
   end
+end
   top=0
  end
  local function vvcurveto()
@@ -13993,6 +14024,16 @@ local result={}
    d=stack[1]      
    s=2
   end
+if top==4 then
+ local ax=x+d
+ local ay=y+stack[1]  
+ local bx=ax+stack[2] 
+ local by=ay+stack[3] 
+ x=bx
+ y=by+stack[4]  
+ xycurveto(ax,ay,bx,by,x,y,1,4)
+ d=0
+else
   for i=s,top,4 do
    local ax=x+d
    local ay=y+stack[i] 
@@ -14000,9 +14041,10 @@ local result={}
    local by=ay+stack[i+2] 
    x=bx
    y=by+stack[i+3]  
-   xycurveto(ax,ay,bx,by,x,y)
+   xycurveto(ax,ay,bx,by,x,y,i,4)
    d=0
   end
+end
   top=0
  end
  local function xxcurveto(swap)
@@ -14010,6 +14052,33 @@ local result={}
   if last then
    top=top-1
   end
+if top==4 then
+  local ax,ay,bx,by
+  if swap then
+   ax=x+stack[1]
+   ay=y
+   bx=ax+stack[2]
+   by=ay+stack[3]
+   y=by+stack[4]
+   if last then
+    x=bx+last
+   else
+    x=bx
+   end
+  else
+   ax=x
+   ay=y+stack[1]
+   bx=ax+stack[2]
+   by=ay+stack[3]
+   x=bx+stack[4]
+   if last then
+    y=by+last
+   else
+    y=by
+   end
+  end
+  xycurveto(ax,ay,bx,by,x,y,1,4)
+else
   for i=1,top,4 do
    local ax,ay,bx,by
    if swap then
@@ -14037,8 +14106,9 @@ local result={}
     end
     swap=true
    end
-   xycurveto(ax,ay,bx,by,x,y)
+   xycurveto(ax,ay,bx,by,x,y,i,4)
   end
+end
   top=0
  end
  local function hvcurveto()
@@ -14064,7 +14134,7 @@ local result={}
    local by=ay+stack[i+3] 
    x=bx+stack[i+4] 
    y=by+stack[i+5] 
-   xycurveto(ax,ay,bx,by,x,y)
+   xycurveto(ax,ay,bx,by,x,y,i,6)
   end
   x=x+stack[top-1] 
   y=y+stack[top]   
@@ -15208,26 +15278,35 @@ local function readfdselect(f,fontdata,data,glyphs,doshapes,version,streams)
    end
   end
  else
+  report("unsupported fd index format %i",format)
  end
  if maxindex>=0 then
   local cidarray=cid.fdarray
   if cidarray then
    setposition(f,header.offset+cidarray)
    local dictionaries=readlengths(f,version=="cff2")
-   for i=1,#dictionaries do
-    dictionaries[i]=readstring(f,dictionaries[i])
+   if #dictionaries>0 then
+    for i=1,#dictionaries do
+     dictionaries[i]=readstring(f,dictionaries[i])
+    end
+    parsedictionaries(data,dictionaries)
+    cid.dictionaries=dictionaries
+    readcidprivates(f,data)
+    for i=1,#dictionaries do
+     readlocals(f,data,dictionaries[i],version)
+    end
+    startparsing(fontdata,data,streams)
+    for i=1,#charstrings do
+     local dictionary=dictionaries[fdindex[i]+1]
+     if dictionary then
+      parsecharstring(fontdata,data,dictionary,charstrings[i],glyphs,i,doshapes,version,streams)
+     else
+     end
+    end
+    stopparsing(fontdata,data)
+   else
+    report("no cid dictionaries")
    end
-   parsedictionaries(data,dictionaries)
-   cid.dictionaries=dictionaries
-   readcidprivates(f,data)
-   for i=1,#dictionaries do
-    readlocals(f,data,dictionaries[i],version)
-   end
-   startparsing(fontdata,data,streams)
-   for i=1,#charstrings do
-    parsecharstring(fontdata,data,dictionaries[fdindex[i]+1],charstrings[i],glyphs,i,doshapes,version,streams)
-   end
-   stopparsing(fontdata,data)
   else
    report("no cid array")
   end
@@ -18685,7 +18764,7 @@ do
    local scriptoffset=tableoffset+readushort(f)
    local featureoffset=tableoffset+readushort(f)
    local lookupoffset=tableoffset+readushort(f)
-   local variationsoffset=version>0x00010000 and (tableoffset+readulong(f)) or 0
+   local variationsoffset=version>0x00010000 and readulong(f) or 0
    if not scriptoffset then
     return
    end
@@ -18705,7 +18784,7 @@ do
     resolvelookups(f,lookupoffset,fontdata,lookups,lookuptypes,lookuphandlers,what,tableoffset)
    end
    if variationsoffset>0 then
-    loadvariations(f,fontdata,variationsoffset,lookuptypes,featurehash,featureorder)
+    loadvariations(f,fontdata,tableoffset+variationsoffset,lookuptypes,featurehash,featureorder)
    end
   end
  end
@@ -31706,14 +31785,6 @@ if not modules then modules={} end modules ['font-osd']={
  copyright="TAT Zetwerk / PRAGMA ADE / ConTeXt Development Team",
  license="see context related readme files"
 }
-local experiment1=false
-local experiment2=false
-local experiment2b1=false
-local experiment2b2=false
-experiments.register("fonts.indic.experiment1",function(v) experiment1=v end)
-experiments.register("fonts.indic.experiment2",function(v) experiment2=v end)
-experiments.register("fonts.indic.experiment2b1",function(v) experiment2b1=v end)
-experiments.register("fonts.indic.experiment2b2",function(v) experiment2b2=v end)
 local insert,remove,imerge,copy,tohash=table.insert,table.remove,table.imerge,table.copy,table.tohash
 local next,type,rawget=next,type,rawget
 local formatters=string.formatters

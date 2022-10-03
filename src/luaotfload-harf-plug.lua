@@ -4,8 +4,8 @@
 -----------------------------------------------------------------------
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
   name          = "luaotfload-harf-plug",
-  version       = "3.22",       --TAGVERSION
-  date          = "2022-06-15", --TAGDATE
+  version       = "3.23-dev",       --TAGVERSION
+  date          = "2022-10-03", --TAGDATE
   description   = "luaotfload submodule / HarfBuzz shaping",
   license       = "GPL v2.0",
   author        = "Khaled Hosny, Marcel Krüger",
@@ -1130,7 +1130,7 @@ local function set_tounicode()
           if unicode then
             newcharacters[unicode] = character
           end
-          character.tounicode = glyph.tounicode or "FFFD"
+          character.tounicode = glyph.tounicode or unicode or "FFFD"
           character.used = true
         end
       end

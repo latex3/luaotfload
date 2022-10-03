@@ -7,8 +7,8 @@
 
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") { 
     name          = "luaotfload-parsers",
-    version       = "3.22",       --TAGVERSION
-    date          = "2022-06-15", --TAGDATE
+    version       = "3.23-dev",       --TAGVERSION
+    date          = "2022-10-03", --TAGDATE
     description   = "luaotfload submodule / parsers",
     license       = "GPL v2.0"
 }
@@ -638,8 +638,8 @@ local features          = Cg(feature_list, "features")
 local specification     = (path_lookup + prefixed + unprefixed)
                         * maybe_subfont
                         * modifier_list
-local font_request      = Ct(specification * (colon^-1 * features)^-1
-                           + combo) --> TODO: feature list needed?
+local font_request      = Ct(combo --> TODO: feature list needed?
+                           + specification * (colon^-1 * features)^-1)
 
 --  lpeg.print(font_request)
 --- v2.5 parser: 1065 rules

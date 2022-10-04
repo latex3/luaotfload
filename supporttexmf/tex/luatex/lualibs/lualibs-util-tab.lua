@@ -417,9 +417,9 @@ if JITSUPPORTED then
 
 else
 
-    local f_v = formatters["[%q]=%q,"]
-    local f_t = formatters["[%q]="]
-    local f_q = formatters["%q,"]
+ -- local f_v = formatters["[%q]=%q,"]
+ -- local f_t = formatters["[%q]="]
+ -- local f_q = formatters["%q,"]
 
     function table.fastserialize(t,prefix) -- todo, move local function out
         local r = { type(prefix) == "string" and prefix or "return" }
@@ -720,6 +720,7 @@ local function serialize(root,name,specification)
 
     local t    -- = { }
     local n       = 1
+ -- local m       = 0 -- no gain
     local unknown = false
 
     local function do_serialize(root,name,depth,level,indexed)
@@ -850,6 +851,12 @@ local function serialize(root,name,specification)
                         n = n + 1 t[n] = f_key_str_value_str(depth,tostring(k),tostring(v))
                     end
                 end
+             -- if n > 100000 then -- no gain
+             --     local k = m + 1
+             --     t[k] = concat(t,"\n",k,n)
+             --     n = k
+             --     m = k
+             -- end
             end
         end
         if level > 0 then
@@ -898,6 +905,7 @@ local function serialize(root,name,specification)
     n = n + 1
     t[n] = f_table_finish()
     return concat(t,"\n")
+ -- return concat(t,"\n",1,n) -- no gain
 end
 
 table.serialize = serialize
@@ -969,4 +977,44 @@ end
 --     if n > 0 then
 --         return remove(t,random(1,n))
 --     end
+-- end
+
+function combine(target,source)
+    -- no copy so if that is needed one needs to deepcopy source first
+    if target then
+        for k, v in next, source do
+            if type(v) == "table" then
+               target[k] = combine(target[k],source[k])
+            else
+               target[k] = v
+            end
+        end
+        return target
+    else
+        return source
+    end
+end
+
+table.combine = combine
+
+-- If needed we can add something (some discussion on the list but I'm not sure if
+-- it makes sense because merging such mixed tables is quite unusual.
+--
+-- function table.himerged(...)
+--     local result = { }
+--     local r      = 0
+--     for i=1,select("#",...) do
+--         local s = select(i,...)
+--         if s then
+--             for k, v in next, s do
+--                 if type(k) == "number"  then
+--                     r = r + 1
+--                     result[r] = v
+--                 else
+--                     result[k] = v
+--                 end
+--             end
+--         end
+--     end
+--     return result
 -- end

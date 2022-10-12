@@ -82,9 +82,7 @@ local keyhash do
   local format = string.format
   local byte = string.byte
   keyhash = setmetatable({}, {__index = function(t, k)
-    print(t, k)
     local h = format(formatstring, byte(sha256(k), 1, -1))
-    print(t, k, h)
     t[k] = h
     return h
   end})

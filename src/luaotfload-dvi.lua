@@ -48,7 +48,6 @@ local glyph_t = node.id'glyph'
 -- mapped_fonts maps fontids from the user to fontids used in the DVI file
 local mapped_fonts = setmetatable({}, {__index = function(t, fid)
   local font = getfont(fid)
-  print(fid, font and font.fullname)
   local mapped = font and font.backend_font or false
   t[fid] = mapped
   return mapped
@@ -94,7 +93,6 @@ function full_hprocess(head)
       end
       if last_mapping then
         local mapped = last_mapping[c]
-        print(c, f, mapped)
         if mapped then setfont(n, last_mapped_font, mapped) end
       end
     end

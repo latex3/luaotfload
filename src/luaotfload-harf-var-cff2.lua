@@ -231,23 +231,19 @@ local function parse_charstring(buf, start, after, globalsubrs, subrs, result)
       for i = before + n + 1, #lastresult do
         lastresult[i] = nil
       end
-    elseif cmd == 12 then
-      start = start+1
-      cmd = buf:byte(start)
-      lastresult[1] = -cmd-1
-      lastresult = {false}
-      result[#result+1] = lastresult
-    elseif cmd == 19 or cmd == 20 then
-      if #result == 1 then
-        lastresult = {}
-        result[#result+1] = lastresult
-      end
-      lastresult[1] = cmd
-      local newi = start+(result.stemcount+7)//8
-      lastresult[2] = buf:sub(start+1, newi)
-      start = newi
     else
-      if cmd == 21 and #result == 1 then
+      if cmd == 12 then
+        start = start+1
+        cmd = -buf:byte(start)-1
+      elseif cmd == 19 or cmd == 20 then
+        if #result == 1 then
+          lastresult = {}
+          result[#result+1] = lastresult
+        end
+        local newi = start+(result.stemcount+7)//8
+        lastresult[2] = buf:sub(start+1, newi)
+        start = newi
+      elseif cmd == 21 and #result == 1 then
         table.insert(result, 1, {false})
         if #lastresult == 4 then
           result[1][2] = lastresult[2]

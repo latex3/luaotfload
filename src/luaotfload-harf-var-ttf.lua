@@ -350,7 +350,7 @@ local function read_points(gvar_data, offset)
     return true, offset
   end
   if point_count & 0x80 ~= 0 then
-    point_count = ((point_count & 0x7F) << 8) | sio.readcardinal1(gvar_data, suboffset)
+    point_count = ((point_count & 0x7F) << 8) | sio.readcardinal1(gvar_data, offset)
     offset = offset + 1
   end
   local points = lua.newtable(point_count, 0)

@@ -88,6 +88,8 @@ local ignorable_codepoints do
   end
 end
 
+ignorable_codepoints[0xAD] = nil
+
 local function setnotdef(tfmdata, factor)
   local desc = tfmdata.shared.rawdata.descriptions
   -- So we have to find the .notdef glyph. We only know that it has GID

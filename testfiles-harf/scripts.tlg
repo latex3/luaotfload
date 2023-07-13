@@ -108,25 +108,25 @@ Completed box being shipped out [1]
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
-...\glue(\baselineskip) 2.62502
-...\hbox(7.17+3.86)x345.0, glue set 317.84fil, direction TLT
+...\glue(\baselineskip) 2.77501
+...\hbox(7.02+1.46)x345.0, glue set 321.9fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(1)/m/n/10 "(" 0028 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 "(" 1219DC +0:+0
 ....\kern0.0 (italic)
 ....\TU/amiri-regular.ttf(1)/m/n/10 "f" 0066 +0:+0
 ....\kern0.0 (italic)
-....\TU/amiri-regular.ttf(1)/m/n/10 ")" 0029 +0:+0
+....\TU/amiri-regular.ttf(1)/m/n/10 ")" 1219DD +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
-...\glue(\baselineskip) 2.3
+...\glue(\baselineskip) 4.7
 ...\hbox(5.84+1.15)x345.0, glue set 271.49994fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
@@ -184,10 +184,10 @@ Completed box being shipped out [1]
 ....\TU/amiri-regular.ttf(3)/m/n/10 "۱" 06F1 +0:+0
 ....\TU/amiri-regular.ttf(3)/m/n/10 "۲" 06F2 +0:+0
 ....\TU/amiri-regular.ttf(3)/m/n/10 "۳" 06F3 +0:+0
-....\TU/amiri-regular.ttf(3)/m/n/10 "۴" 1207A1 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۴" 1205B7 +0:+0
 ....\TU/amiri-regular.ttf(3)/m/n/10 "۵" 06F5 +0:+0
-....\TU/amiri-regular.ttf(3)/m/n/10 "۶" 1207A2 +0:+0
-....\TU/amiri-regular.ttf(3)/m/n/10 "۷" 1207A3 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۶" 1205B8 +0:+0
+....\TU/amiri-regular.ttf(3)/m/n/10 "۷" 1205B9 +0:+0
 ....\TU/amiri-regular.ttf(3)/m/n/10 "۸" 06F8 +0:+0
 ....\TU/amiri-regular.ttf(3)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000
@@ -209,8 +209,8 @@ Completed box being shipped out [1]
 ....\TU/amiri-regular.ttf(4)/m/n/10 "۳" 06F3 +0:+0
 ....\TU/amiri-regular.ttf(4)/m/n/10 "۴" 06F4 +0:+0
 ....\TU/amiri-regular.ttf(4)/m/n/10 "۵" 06F5 +0:+0
-....\TU/amiri-regular.ttf(4)/m/n/10 "۶" 1207A2 +0:+0
-....\TU/amiri-regular.ttf(4)/m/n/10 "۷" 1207A3 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۶" 1205B8 +0:+0
+....\TU/amiri-regular.ttf(4)/m/n/10 "۷" 1205B9 +0:+0
 ....\TU/amiri-regular.ttf(4)/m/n/10 "۸" 06F8 +0:+0
 ....\TU/amiri-regular.ttf(4)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000
@@ -230,10 +230,10 @@ Completed box being shipped out [1]
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۱" 06F1 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۲" 06F2 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۳" 06F3 +0:+0
-....\TU/amiri-regular.ttf(5)/m/n/10 "۴" 1207A1 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۴" 1205B7 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۵" 06F5 +0:+0
-....\TU/amiri-regular.ttf(5)/m/n/10 "۶" 1207A2 +0:+0
-....\TU/amiri-regular.ttf(5)/m/n/10 "۷" 1207A3 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۶" 1205B8 +0:+0
+....\TU/amiri-regular.ttf(5)/m/n/10 "۷" 1205B9 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۸" 06F8 +0:+0
 ....\TU/amiri-regular.ttf(5)/m/n/10 "۹" 06F9 +0:+0
 ....\penalty 10000

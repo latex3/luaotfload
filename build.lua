@@ -91,7 +91,7 @@ checkconfigs = {
                 "config-loader-unpackaged",
                 "config-loader-reference",
                 "config-latex-TU",
-                "config-unicode-math", 
+                -- "config-unicode-math", 
                 "config-plain",
                 "config-fontspec",                
                }

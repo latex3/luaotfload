@@ -614,6 +614,13 @@ local tlig_specification = {
     },
 }
 
+-- "substitution" features allow to replace individual characters with other
+-- characters. This is often used inside of fonts to e.g. implement stylistic
+-- sets.
+-- As an example how such features can be added in the fontloader, we have a
+-- simple implementation of the ROT13 cipher as a font feature. It can be
+-- used by enabling the `rot13` font feature in a font, but we are not aware of
+-- any practical usecase for this.
 local rot13_specification = {
     type      = "substitution",
     features  = everywhere,

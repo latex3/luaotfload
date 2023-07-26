@@ -198,6 +198,7 @@ local default_config = {
   db = {
     formats         = "otf,ttf,ttc",
     scan_local      = false,
+    scan_system     = true,
     skip_read       = false,
     strip           = true,
     update_live     = true,
@@ -485,6 +486,7 @@ local option_spec = {
       end
     },
     scan_local   = { in_t = boolean_t, },
+    scan_system  = { in_t = boolean_t, },
     skip_read    = { in_t = boolean_t, },
     strip        = { in_t = boolean_t, },
     update_live  = { in_t = boolean_t, },
@@ -720,6 +722,7 @@ local formatters = {
     formats          = { false, format_string  },
     max_fonts        = { false, format_integer },
     scan_local       = { false, format_boolean },
+    scan_system      = { false, format_boolean },
     skip_read        = { false, format_boolean },
     strip            = { false, format_boolean },
     update_live      = { false, format_boolean },

@@ -3120,7 +3120,10 @@ local function collect_font_filenames ()
     local max_fonts = config.luaotfload.db.max_fonts --- XXX revisit for lua 5.3 wrt integers
 
     tableappend (filenames, collect_font_filenames_texmf  ())
-    tableappend (filenames, collect_font_filenames_system ())
+    local scan_system = config.luaotfload.db.scan_system
+    if scan_system == nil or scan_system == true then
+       tableappend (filenames, collect_font_filenames_system ())
+    end
     local scan_local = config.luaotfload.db.scan_local == true
     if scan_local then
         local localfonts, found = collect_font_filenames_local()

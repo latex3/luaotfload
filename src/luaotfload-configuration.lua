@@ -212,6 +212,7 @@ local default_config = {
     log_level      = 0,
     color_callback = "post_linebreak_filter",
     fontloader     = default_fontloader (),
+    dvi_driver     = "dvisvgm",
   },
   misc = {
     bisect         = false,
@@ -596,6 +597,11 @@ local option_spec = {
         return permissible_color_callbacks.default
       end,
     },
+    dvi_driver = {
+      in_t      = string_t,
+      out_t     = string_t,
+      transform = function (r) return r == "xdvipsk" and r or "dvisvgm" end,
+    },
   },
   misc = {
     bisect          = { in_t = boolean_t, }, --- doesn’t make sense in a config file
@@ -746,6 +752,7 @@ local formatters = {
     fontloader      = { true, format_string  },
     log_level       = { false, format_integer },
     resolver        = { false, format_string  },
+    dvi_driver      = { false, format_string  },
   },
 }
 

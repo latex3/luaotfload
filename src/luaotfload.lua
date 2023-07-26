@@ -352,7 +352,10 @@ luaotfload.main = function ()
     loadmodule "tounicode"
     loadmodule "case"
     if tex.outputmode == 0 then
-        loadmodule "dvi"          --- allow writing fonts to DVI files
+        local dvi_driver = config.luaotfload.run.dvi_driver or "dvisvgm"
+        if dvi_driver == "dvisvgm" then
+            loadmodule "dvi"          --- allow writing fonts to DVI files
+        end
     end
 
     luaotfload.aux.start_rewrite_fontname () --- to be migrated to fontspec

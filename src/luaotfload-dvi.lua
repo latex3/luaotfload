@@ -183,8 +183,9 @@ fonts.constructors.features.otf.register {
     node = manipulate,
     base = manipulate,
   },
-  processors = {
-    node = process,
-    base = process,
-  },
+  -- Processors are not needed since we are using pre_shipout_filter
+  -- processors = {
+  --   node = process,
+  --   base = process,
+  -- },
 }

@@ -31,6 +31,9 @@ local vlist_t = node.id'vlist'
 local disc_t = node.id'disc'
 local glyph_t = node.id'glyph'
 
+require'luaotfload-configuration'
+local configuration = config.luaotfload
+
 -- DVI output support
 --
 -- When writing DVI files, we can't assume that the DVI reader has access to our
@@ -132,7 +135,11 @@ local function process(head, font)
   end end
 end
 local function manipulate(tfmdata, _, dvi_kind)
-  if dvi_kind ~= 'dvisvgm' then
+  if dvi_kind == 'xdvipsk' then
+    -- xdvipsk wants to read tea leaves instead of using reasonable interfaces.
+    -- They will have to make sense of whatever output this produces.
+    return
+  elseif dvi_kind ~= 'dvisvgm' then
     texio.write_nl(string.format('WARNING (luaotfload): Unsupported DVI backend %q, falling back to dvisvgm.', dvi_kind))
   end
   -- Legacy fonts can be written to the DVI file directly
@@ -178,7 +185,7 @@ end
 
 fonts.constructors.features.otf.register {
   name = "dvifont",
-  default = "dvisvgm",
+  default = configuration.run.default_dvi_driver,
   manipulators = {
     node = manipulate,
     base = manipulate,

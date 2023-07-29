@@ -189,6 +189,10 @@ local permissible_color_callbacks = {
   pre_output_filter     = "pre_output_filter",
 }
 
+local known_dvi_drivers = {
+  xdvipsk = 'xdvipsk',
+  dvisvgm = 'dvisvgm',
+}
 
 -------------------------------------------------------------------------------
 ---                                DEFAULTS
@@ -206,12 +210,13 @@ local default_config = {
     designsize_dimen= "bp",
   },
   run = {
-    anon_sequence  = default_anon_sequence,
-    resolver       = "cached",
-    definer        = "patch",
-    log_level      = 0,
-    color_callback = "post_linebreak_filter",
-    fontloader     = default_fontloader (),
+    anon_sequence      = default_anon_sequence,
+    resolver           = "cached",
+    definer            = "patch",
+    log_level          = 0,
+    color_callback     = "post_linebreak_filter",
+    fontloader         = default_fontloader (),
+    default_dvi_driver = "dvisvgm"
   },
   misc = {
     bisect         = false,
@@ -596,6 +601,24 @@ local option_spec = {
         return permissible_color_callbacks.default
       end,
     },
+    default_dvi_driver = {
+      in_t      = string_t,
+      out_t     = string_t,
+      transform = function (driver)
+        local mapped = known_dvi_drivers[driver]
+        if mapped then
+          logreport ("log", 5, "conf",
+                     "Using default DVI driver %q if used in DVI mode.",
+                     mapped)
+          return mapped
+        end
+        logreport ("log", 0, "conf",
+                    "Requested default DVI driver %q invalid, "
+                    .. "falling back to dvisvgm.",
+                    driver)
+        return known_dvi_drivers.dvisvgm
+      end,
+    },
   },
   misc = {
     bisect          = { in_t = boolean_t, }, --- doesn’t make sense in a config file
@@ -740,12 +763,13 @@ local formatters = {
     lookups_file = { false, format_string },
   },
   run = {
-    anon_sequence   = { false, format_list    },
-    color_callback  = { false, format_string  },
-    definer         = { false, format_string  },
-    fontloader      = { true, format_string  },
-    log_level       = { false, format_integer },
-    resolver        = { false, format_string  },
+    anon_sequence      = { false, format_list    },
+    color_callback     = { false, format_string  },
+    definer            = { false, format_string  },
+    fontloader         = { true,  format_string  },
+    log_level          = { false, format_integer },
+    resolver           = { false, format_string  },
+    default_dvi_driver = { false, format_string  },
   },
 }
 

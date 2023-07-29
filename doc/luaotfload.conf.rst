@@ -277,21 +277,23 @@ version.
 Section ``run``
 -----------------------------------------------------------------------
 
-+------------------+--------+------------------------------+
-|  variable        |  type  |  default                     |
-+------------------+--------+------------------------------+
-|  anon-sequence   |   s    |  ``"tex,path,name"``         |
-+------------------+--------+------------------------------+
-|  color-callback  |   s    |  ``"post_linebreak_filter"`` |
-+------------------+--------+------------------------------+
-|  definer         |   s    |  ``"patch"``                 |
-+------------------+--------+------------------------------+
-|  log-level       |   n    |  ``0``                       |
-+------------------+--------+------------------------------+
-|  resolver        |   s    |  ``"cached"``                |
-+------------------+--------+------------------------------+
-|  fontloader      |   s    |  ``"default"``               |
-+------------------+--------+------------------------------+
++---------------------+--------+------------------------------+
+|  variable           |  type  |  default                     |
++---------------------+--------+------------------------------+
+|  anon-sequence      |   s    |  ``"tex,path,name"``         |
++---------------------+--------+------------------------------+
+|  color-callback     |   s    |  ``"post_linebreak_filter"`` |
++---------------------+--------+------------------------------+
+|  definer            |   s    |  ``"patch"``                 |
++---------------------+--------+------------------------------+
+|  log-level          |   n    |  ``0``                       |
++---------------------+--------+------------------------------+
+|  resolver           |   s    |  ``"cached"``                |
++---------------------+--------+------------------------------+
+|  fontloader         |   s    |  ``"default"``               |
++---------------------+--------+------------------------------+
+|  default_dvi_driver |   s    |  ``"dvisvgm"``               |
++---------------------+--------+------------------------------+
 
 Unqualified font lookups are treated with the flexible “anonymous”
 mechanism. This involves a chain of lookups applied successively until
@@ -365,6 +367,16 @@ and resolves every request individually. (Since to the restructuring of
 the font name index in Luaotfload 2.4 the performance difference
 between the cached and uncached lookups should be marginal.)
 
+When luaotfload is used in ``DVI`` mode, the ``default_dvi_driver`` option
+determines how OpenType fonts are represented in the DVI output. In most
+cases the default value ``dvisvgm`` should be set, it uses a format
+supported by multiple backends including ``dvipdfmx`` and ``dvisvgm``
+which uses GIDs to identify characters.
+Setting this to ``xdvipsk`` uses an unstable internal format instead
+which will change depending on the luaotfload, engine, or font version.
+No one should rely on the mapping between DVI character codes and font glyphs
+in this mode unless they tightly control all involved versions and are deeply
+familiar with the implementation.
 
 FILES
 =======================================================================

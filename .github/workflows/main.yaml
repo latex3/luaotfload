@@ -16,7 +16,7 @@ jobs:
   # The l3build job contains the actual work. We misuse the matrix mechanism to
   # create three jobs which only differ in minimal elements.
   l3build:
-    runs-on: ubuntu-20.04
+    runs-on: custom-runner
     strategy:
       matrix:
         # include indicates that we want to set explicitly these combinations

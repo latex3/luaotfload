@@ -91,6 +91,13 @@ local valid_formats = tabletohash {
   "otf", "ttc", "ttf", "afm", "pfb"
 }
 
+local default_location_precedence = {
+  "system", "texmf", "local"
+}
+local valid_locations = tabletohash {
+  "system", "texmf", "local"
+}
+
 local default_anon_sequence = {
   "tex", "path", "name"
 }
@@ -200,14 +207,15 @@ local known_dvi_drivers = {
 
 local default_config = {
   db = {
-    formats         = "otf,ttf,ttc",
-    scan_local      = false,
-    skip_read       = false,
-    strip           = true,
-    update_live     = true,
-    compress        = true,
-    max_fonts       = 2^51,
-    designsize_dimen= "bp",
+    location_precedence = default_location_precedence,
+    formats             = "otf,ttf,ttc",
+    scan_local          = false,
+    skip_read           = false,
+    strip               = true,
+    update_live         = true,
+    compress            = true,
+    max_fonts           = 2^51,
+    designsize_dimen    = "bp",
   },
   run = {
     anon_sequence      = default_anon_sequence,
@@ -318,6 +326,18 @@ local function set_font_filter ()
   return true
 end
 
+local function set_location_precedence_list ()
+  local names = fonts.names
+  if names and names.set_location_precedence then
+    local locations = config.luaotfload.db.location_precedence
+    if not locations or locations == "" then
+      locations = default_config.db.location_precedence
+    end
+    fonts.names.set_location_precedence (locations)
+  end
+  return true
+end
+
 local function set_size_dimension ()
   local names = fonts.names
   if names and names.set_size_dimension then
@@ -401,6 +421,7 @@ reconf_tasks = {
   { "Set design size dimension" , set_size_dimension   },
   { "Install font name resolver", set_name_resolver    },
   { "Set default features"      , set_default_features },
+  { "Set location precedence"   , set_location_precedence_list },
 }
 
 -------------------------------------------------------------------------------
@@ -487,6 +508,44 @@ local option_spec = {
           return nil
         end
         return tableconcat (result, ",")
+      end
+    },
+    location_precedence = {
+      in_t      = string_t,
+      out_t     = table_t,
+      transform = function (s)
+        local bits = { lpegmatch (commasplitter, s) }
+        if next (bits) then
+          local seq = { }
+          local done = { }
+          for i = 1, #bits do
+            local bit = bits [i]
+            if valid_locations [bit] then
+              if not done [bit] then
+                done [bit] = true
+                seq [#seq + 1] = bit
+              else
+                logreport ("both", 0, "conf",
+                           "ignoring duplicate location %s at position %d \z
+                            in precedence list",
+                           bit, i)
+              end
+            else
+              logreport ("both", 0, "conf",
+                         "location precedence list contains invalid item %s \z
+                          at position %d.",
+                         bit, i)
+            end
+          end
+          if next (seq) then
+            logreport ("both", 2, "conf",
+                       "overriding anon lookup sequence %s.",
+                       tableconcat (seq, ","))
+            return seq
+          end
+        end
+        logreport ("both", 0, "conf", "no lookup locations enabled, falling back to default precedence list")
+        return default_location_precedence
       end
     },
     scan_local   = { in_t = boolean_t, },

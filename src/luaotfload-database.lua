@@ -863,23 +863,25 @@ Also, the fields “resolved”, “sub”, “force” etc. influence the outco
 
 --doc]]--
 
-local concat_char = "#"
-local hash_fields = {
-    --- order is important
-    "specification", "style", "sub", "optsize", "size",
-}
-local n_hash_fields = #hash_fields
+local hash_request do
+    local concat_char = "#"
+    local hash_fields = {
+        --- order is important
+        "specification", "style", "sub", "optsize", "size",
+    }
+    local n_hash_fields = #hash_fields
 
---- spec -> string
-local function hash_request (specification)
-    local key = { } --- segments of the hash
-    for i=1, n_hash_fields do
-        local field = specification[hash_fields[i]]
-        if field then
-            key[#key+1] = field
+    --- spec -> string
+    function hash_request (specification)
+        local key = { } --- segments of the hash
+        for i=1, n_hash_fields do
+            local field = specification[hash_fields[i]]
+            if field then
+                key[#key+1] = field
+            end
         end
+        return tableconcat(key, concat_char)
     end
-    return tableconcat(key, concat_char)
 end
 
 --- 'a -> 'a -> table -> (string * int|boolean * boolean)
@@ -3427,7 +3429,7 @@ function update_names (currentnames, force, dry_run)
         read_blacklist ()
 
         --- pass 1: Collect the names of all fonts we are going to process.
-        local font_filenames, enabled_locations = collect_font_filenames ()
+        local font_filenames = collect_font_filenames ()
         if enabled_locations['local'] then
             targetnames.meta['local'] = true
         end

@@ -40,7 +40,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
       # We need docutils for our documentation
-      - run: sudo apt-get install python3-docutils
+      - run: sudo apt-get update && sudo apt-get -y install python3-docutils
       - name: Install TeX Live
         uses: zauguin/install-texlive@v2
         with:

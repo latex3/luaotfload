@@ -20,8 +20,8 @@ local authors = "\z
 -- version number is used below!
 local ProvidesLuaModule = { 
     name          = "luaotfload",
-    version       = "3.24-dev",       --TAGVERSION
-    date          = "2022-10-03", --TAGDATE
+    version       = "3.25",       --TAGVERSION
+    date          = "2023-08-19", --TAGDATE
     description   = "Lua based OpenType font support",
     author        = authors,
     copyright     = authors,

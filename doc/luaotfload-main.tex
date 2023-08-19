@@ -2290,6 +2290,27 @@ By inspecting the output you can get a first impression of how a font
 is structured in \LuaTeX’s memory, what elements it is composed of,
 and in what ways it can be rearranged.
 
+The \luaident{pre_shaping_filter} and \luaident{post_shaping_filter}
+callbacks is a pair of \identifier{(reverse)list} callbacks running
+immediately before and after \identifier{luaotfload} shapes the text.
+They both use the interface
+\beginlisting
+  function(head, groupcode, direction)
+\endlisting
+where \luaident{head} is the head of the to be shaped list,
+\luaident{groupcode} is the groupcode as documented for
+\luaident{pre_linebreak_filter} and \luaident{hpack_filter} and
+\luaident{direction} is the current direction.
+
+Since most font processing happens during shaping, \LuaTeX's
+\luaident{ligaturing} and \luaident{kerning} callbacks are not involved
+in most ligature generation and kerning decisions ans should therefore not be
+relied upon. Font processing for fonts loaded with \luaident{mode=base} might
+happen in any of these places.
+
+The specific time when extended features are applied is unspecified and might
+not be consistent.
+
 \beginsubsubsection {Compatibility with Earlier Versions}
 
 As has been touched on in the preface to this section, the structure

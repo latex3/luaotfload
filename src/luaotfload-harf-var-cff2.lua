@@ -51,9 +51,6 @@ local function parse_real(cs, offset)
 end
 
 local function get_number(result)
-  if #result ~= 1 then
-    print(require'inspect'(result))
-  end
   assert(#result == 1)
   local num = result[1]
   result[1] = nil

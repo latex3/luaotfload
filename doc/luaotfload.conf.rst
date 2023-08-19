@@ -125,25 +125,27 @@ the variable is unset.
 Section ``db``
 -----------------------------------------------------------------------
 
-+--------------------+--------+---------------------------+
-|  variable          |  type  |  default                  |
-+--------------------+--------+---------------------------+
-|  compress          |   b    |  ``true``                 |
-+--------------------+--------+---------------------------+
-|  designsize-dimen  |   b    |  ``bp``                   |
-+--------------------+--------+---------------------------+
-|  formats           |   s    |  ``"otf,ttf,ttc"``        |
-+--------------------+--------+---------------------------+
-|  max-fonts         |   n    |  ``2^51``                 |
-+--------------------+--------+---------------------------+
-|  scan-local        |   b    |  ``false``                |
-+--------------------+--------+---------------------------+
-|  skip-read         |   b    |  ``false``                |
-+--------------------+--------+---------------------------+
-|  strip             |   b    |  ``true``                 |
-+--------------------+--------+---------------------------+
-|  update-live       |   b    |  ``true``                 |
-+--------------------+--------+---------------------------+
++----------------------+--------+---------------------------+
+|  variable            |  type  |  default                  |
++----------------------+--------+---------------------------+
+|  compress            |   b    |  ``true``                 |
++----------------------+--------+---------------------------+
+|  designsize-dimen    |   b    |  ``bp``                   |
++----------------------+--------+---------------------------+
+|  formats             |   s    |  ``"otf,ttf,ttc"``        |
++----------------------+--------+---------------------------+
+|  location-precedence |   s    |  ``"system,texmf,local``  |
++----------------------+--------+---------------------------+
+|  max-fonts           |   n    |  ``2^51``                 |
++----------------------+--------+---------------------------+
+|  scan-local          |   b    |  ``false``                |
++----------------------+--------+---------------------------+
+|  skip-read           |   b    |  ``false``                |
++----------------------+--------+---------------------------+
+|  strip               |   b    |  ``true``                 |
++----------------------+--------+---------------------------+
+|  update-live         |   b    |  ``true``                 |
++----------------------+--------+---------------------------+
 
 The flag ``compress`` determines whether the font index (usually
 ``luaotfload-names.lua[.gz]`` will be stored in compressed forms.
@@ -171,6 +173,12 @@ It corresponds loosely to the ``--formats`` option to
 list does not contain any useful identifiers, the default list
 ``"otf,ttf,ttc"`` will be used.
 
+The variable ``location-precedence`` selects where and in which order
+luaotfload searches for fonts. Fonts in earlier locations are preferred.
+The three supported locations are ``system`` for system specific font
+directories, ``texmf`` for fonts which are part of the \TeX{} distribution
+and ``local`` for local fonts.
+
 The variable ``max-fonts`` determines after processing how many font
 files the font scanner will terminate the search. This is useful for
 debugging issues with the font index and has the same effect as the
@@ -180,7 +188,8 @@ The ``scan-local`` flag, if set, will incorporate the current working
 directory as a font search location. NB: This will potentially slow
 down document processing because a font index with local fonts will not
 be saved to disk, so these fonts will have to be re-indexed whenever
-the document is built.
+the document is built. Setting ``scan_local`` to ``false`` is the same
+as removing ``local`` from ``location-precedence``.
 
 The ``skip-read`` flag is only useful for debugging: It makes
 Luaotfload skip reading fonts. The font information for rebuilding the

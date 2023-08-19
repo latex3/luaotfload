@@ -2,6 +2,7 @@
 ;; defaults only, see luaotfload.conf(5) for more information.
 
 [db]
+    location-precedence = system, texmf, local
     compress        = true
     formats         = otf, ttf, ttc
     max-fonts       = 2.2517998136852e15
@@ -25,6 +26,7 @@
     definer         = patch
     log-level       = 0
     resolver        = cached
+    default-dvi-driver = dvisvgm
 
 ;; vim:ft=dosini:et:sw=4:ts=8
 

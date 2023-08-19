@@ -1,6 +1,5 @@
 return {
  ["hashes"]={
-  { "fontloader-2023-08-19.lua", "5e8a5e13801cd8eff23f5e8dc4cbbc10" },
   { "fontloader-util-fil.lua", "d0accf4180201efd567816a25ad5e037" },
   { "fontloader-util-str.lua", "9a601a851ef3595cddc01b40dc79e1d6" },
   { "fontloader-l-unicode.lua", "f368874f11f3c525de5864fd413e4b24" },
@@ -93,7 +92,7 @@ return {
   ["committer"]="Marcel Fabian Krüger <tex@2krueger.de>",
   ["description"]="v3.25/2023-08-19",
   ["loader"]="fontloader-2023-08-19.lua",
-  ["revision"]="a6a35b5ae5dd21317dfea425c77406cd7a6c5157",
-  ["timestamp"]="2023-08-19 21:03:26 +0200",
+  ["revision"]="dbc343acfb4e91160ed4aece38c7cd26aa5e02f0",
+  ["timestamp"]="2023-08-19 23:54:58 +0200",
  },
 }

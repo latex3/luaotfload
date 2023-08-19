@@ -1,4 +1,9 @@
-2022-10-03 luaotfload v3.23
+2023-08-19 luaotfload v3.24
 
-    *  More reliable ToUnicode mappings in Harf mode
+    *  Add experimental configuration option to change default font lookup location
+       precedence.
+    *  Support xdvipsk in DVI mode
+    *  Preserve soft-hyphens when dropping default ignorable characters
+    *  Hash cache keys to better support certain rather unflexible operating
+       systems
     *  Various bug fixes

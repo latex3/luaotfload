@@ -1,6 +1,6 @@
 --[[info-----------------------------------------------------------------------
   Luaotfload fontloader package
-  build 2023-08-19 21:04:24
+  build 2023-08-19 22:30:03
 -------------------------------------------------------------------------------
 
   © 2023 PRAGMA ADE / ConTeXt Development Team
@@ -13175,7 +13175,7 @@ end
 end --- [luaotfload, fontloader-2023-08-19.lua scope for “font-ttf”] ---
 
 
-do  --- [luaotfload, fontloader-2023-08-19.lua scope for “font-dsp” 7436253d6f4a8c044c516d452e675568] ---
+do  --- [luaotfload, fontloader-2023-08-19.lua scope for “font-dsp” 755beef1b31e9dfd050e9d221d4e9ae3] ---
 
 if not modules then modules={} end modules ['font-dsp']={
  version=1.001,
@@ -15745,7 +15745,7 @@ function readers.colr(f,fontdata,specification)
  local tableoffset=gotodatatable(f,fontdata,"colr",specification.glyphs)
  if tableoffset then
   local version=readushort(f)
-  if version==0 or version==1 then
+  if version~=0 and version~=1 then
    report("table version %a of %a is not supported (yet), maybe font %s is bad",version,"colr",fontdata.filename)
    return
   else

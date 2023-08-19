@@ -49,19 +49,19 @@ Completed box being shipped out [1]
 ....\testa i
 ....\glue(\spaceskip) 3.996 plus 1.998 minus 1.332
 ....\testc a
-....\testc ﬁ (ligature fi)
+....\testc ﬁ
 ....\glue(\spaceskip) 7.824 plus 3.912 minus 2.608
 ....\testc a
-....\testc ﬁ (ligature fi)
+....\testc ﬁ
 ....\glue(\spaceskip) 7.824 plus 3.912 minus 2.608
 ....\testd a
-....\testd ﬁ (ligature fi)
+....\testd ﬁ
 ....\glue(\spaceskip) 4.596 plus 2.298 minus 1.532
 ....\teste a
-....\teste ﬁ (ligature fi)
+....\teste ﬁ
 ....\glue(\spaceskip) 9.78 plus 4.89 minus 3.26
 ....\testf a
-....\testf ﬁ (ligature fi)
+....\testf ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -76,13 +76,13 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\testg a
-....\testg ﬁ (ligature fi)
+....\testg ﬁ
 ....\glue(\spaceskip) 5.868 plus 2.934 minus 1.956
 ....\testh a
-....\testh ﬁ (ligature fi)
+....\testh ﬁ
 ....\glue(\spaceskip) 3.912 plus 1.956 minus 1.304
 ....\testf a
-....\testf ﬁ (ligature fi)
+....\testf ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

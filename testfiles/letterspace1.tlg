@@ -66,9 +66,9 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(0)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(0)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(0)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -88,7 +88,7 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
 ....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
 ....\kern5.0 (font)
@@ -116,10 +116,10 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
 ....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
 ....\kern5.5
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
 ....\kern0.5
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
 ....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
@@ -150,13 +150,13 @@ Completed box being shipped out [1]
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(0)/m/n/10 t
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(1)/m/n/10 ﬆ (ligature st)
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬆ
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(1)/m/n/10 r
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(1)/m/n/10 i
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(1)/m/n/10  (ligature ct)
+....\TU/LinLibertine_R.otf(1)/m/n/10 
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(1)/m/n/10 a
 ....\kern5.0 (font)
@@ -164,9 +164,9 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(1)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(1)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(1)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(1)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -202,7 +202,7 @@ Completed box being shipped out [1]
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(2)/m/n/10 r
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(2)/m/n/10  (ligature tz)
+....\TU/LinLibertine_R.otf(2)/m/n/10 
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(2)/m/n/10 i
 ....\kern5.0 (font)
@@ -216,9 +216,9 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(2)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(2)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(2)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(2)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(2)/m/n/10 ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -232,7 +232,7 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(0)/m/n/10 r
 ....\kern4.92
@@ -241,11 +241,11 @@ Completed box being shipped out [1]
 .....< \kern5.0 (font)
 .....< \TU/LinLibertine_R.otf(0)/m/n/10 -
 .....= \kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬂ (ligature fl)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬂ
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(0)/m/n/10 y
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬀ (ligature ff)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬀ
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(3)/m/n/10 f
 ....\kern5.0 (font)
@@ -270,13 +270,13 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(3)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(3)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(3)/m/n/10 f
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(3)/m/n/10 i
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(3)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(3)/m/n/10 f
 ....\kern5.0 (font)
@@ -568,9 +568,9 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(0)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(0)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(0)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -590,11 +590,11 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬁ
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ (ligature ff)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -614,13 +614,13 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls – (ligature --)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
 ....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
 ....\kern5.5
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
 ....\kern0.5
 ....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ (ligature ff)
+....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -646,13 +646,13 @@ Completed box being shipped out [1]
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(0)/m/n/10 t
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(1)/m/n/10 ﬆ (ligature st)
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬆ
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(1)/m/n/10 r
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(1)/m/n/10 i
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(1)/m/n/10  (ligature ct)
+....\TU/LinLibertine_R.otf(1)/m/n/10 
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(1)/m/n/10 a
 ....\kern5.0 (font)
@@ -660,9 +660,9 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(1)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(1)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(1)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(1)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(1)/m/n/10 ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -698,7 +698,7 @@ Completed box being shipped out [1]
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(2)/m/n/10 r
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(2)/m/n/10  (ligature tz)
+....\TU/LinLibertine_R.otf(2)/m/n/10 
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(2)/m/n/10 i
 ....\kern5.0 (font)
@@ -712,9 +712,9 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(2)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(2)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(2)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(2)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(2)/m/n/10 ﬁ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -728,7 +728,7 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ (ligature fi)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(0)/m/n/10 r
 ....\kern4.92
@@ -737,11 +737,11 @@ Completed box being shipped out [1]
 .....< \kern5.0 (font)
 .....< \TU/LinLibertine_R.otf(0)/m/n/10 -
 .....= \kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬂ (ligature fl)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬂ
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(0)/m/n/10 y
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(0)/m/n/10 ﬀ (ligature ff)
+....\TU/LinLibertine_R.otf(0)/m/n/10 ﬀ
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(3)/m/n/10 f
 ....\kern5.0 (font)
@@ -766,13 +766,13 @@ Completed box being shipped out [1]
 ....\kern5.1
 ....\TU/LinLibertine_R.otf(3)/m/n/10 c
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(3)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(3)/m/n/10 f
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(3)/m/n/10 i
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
-....\TU/LinLibertine_R.otf(3)/m/n/10 – (ligature --)
+....\TU/LinLibertine_R.otf(3)/m/n/10 –
 ....\glue(\spaceskip) 7.5 plus 3.75 minus 2.49998
 ....\TU/LinLibertine_R.otf(3)/m/n/10 f
 ....\kern5.0 (font)

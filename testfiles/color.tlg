@@ -115,20 +115,20 @@ Completed box being shipped out [1]
 ...\penalty 10000
 ...\glue(\abovedisplayshortskip) 0.0 plus 3.0
 ...\glue(\baselineskip) 5.07
-...\hbox(6.78+1.6)x39.24892, shifted 152.87555, direction TLT
+...\hbox(6.78+1.6)x39.24974, shifted 152.87514, direction TLT
 ....\pdfcolorstack 0 push {1 0 1 rg}
 ....\TU/STIXTwoMath(1)/m/n/10 1
-....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+....\glue(\medmuskip) 2.22217 plus 1.11108 minus 2.22217
 ....\pdfcolorstack 0 set {0.0706 0.204 0.337 rg}
 ....\pdfcolorstack 1 push {/TransGs0.471 gs}
 ....\TU/STIXTwoMath(1)/m/n/10 +
-....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+....\glue(\medmuskip) 2.22217 plus 1.11108 minus 2.22217
 ....\pdfcolorstack 0 set {0 0 1 rg}
 ....\pdfcolorstack 1 pop
 ....\TU/STIXTwoMath(1)/m/n/10 2
-....\glue(\thickmuskip) 2.77748 plus 2.77748
+....\glue(\thickmuskip) 2.77771 plus 2.77771
 ....\TU/STIXTwoMath(1)/m/n/10 ≠
-....\glue(\thickmuskip) 2.77748 plus 2.77748
+....\glue(\thickmuskip) 2.77771 plus 2.77771
 ....\pdfcolorstack 0 set {1 0 1 rg}
 ....\TU/STIXTwoMath(1)/m/n/10 3
 ....\pdfcolorstack 0 pop
@@ -220,20 +220,20 @@ Completed box being shipped out [1]
 ....\penalty 10000
 ....\glue(\abovedisplayshortskip) 0.0 plus 3.0
 ....\glue(\baselineskip) 5.07
-....\hbox(6.78+1.6)x39.24892, shifted 152.87555, direction TLT
+....\hbox(6.78+1.6)x39.24974, shifted 152.87514, direction TLT
 .....\pdfcolorstack 0 push {1 0 1 rg}
 .....\TU/STIXTwoMath(1)/m/n/10 1
-.....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+.....\glue(\medmuskip) 2.22217 plus 1.11108 minus 2.22217
 .....\pdfcolorstack 0 set {0.0706 0.204 0.337 rg}
 .....\pdfcolorstack 1 push {/TransGs0.471 gs}
 .....\TU/STIXTwoMath(1)/m/n/10 +
-.....\glue(\medmuskip) 2.22198 plus 1.111 minus 2.22198
+.....\glue(\medmuskip) 2.22217 plus 1.11108 minus 2.22217
 .....\pdfcolorstack 0 set {0 0 1 rg}
 .....\pdfcolorstack 1 pop
 .....\TU/STIXTwoMath(1)/m/n/10 2
-.....\glue(\thickmuskip) 2.77748 plus 2.77748
+.....\glue(\thickmuskip) 2.77771 plus 2.77771
 .....\TU/STIXTwoMath(1)/m/n/10 ≠
-.....\glue(\thickmuskip) 2.77748 plus 2.77748
+.....\glue(\thickmuskip) 2.77771 plus 2.77771
 .....\pdfcolorstack 0 set {1 0 1 rg}
 .....\TU/STIXTwoMath(1)/m/n/10 3
 .....\pdfcolorstack 0 pop

@@ -28,11 +28,11 @@ Completed box being shipped out [1]
 ....\kern1.25 (font)
 ....\testA c
 ....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA – (ligature --)
+....\testA –
 ....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA ﬁ (ligature fi)
+....\testA ﬁ
 ....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA ﬀ (ligature ff)
+....\testA ﬀ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -52,11 +52,11 @@ Completed box being shipped out [1]
 ....\kern1.25 (font)
 ....\testA c
 ....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA – (ligature --)
+....\testA –
 ....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA ﬁ (ligature fi)
+....\testA ﬁ
 ....\glue(\spaceskip) 4.58 plus 2.29 minus 1.52667
-....\testA ﬀ (ligature ff)
+....\testA ﬀ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

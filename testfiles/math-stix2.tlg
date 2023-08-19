@@ -26,17 +26,17 @@ Completed box being shipped out [1]
 ...\penalty 10000
 ...\glue(\abovedisplayshortskip) 0.0 plus 3.0
 ...\glue(\lineskip) 1.0
-...\hbox(14.30972+9.15027)x45.05948, shifted 149.97026, direction TLT
-....\hbox(14.28+9.18)x6.32, shifted -0.02972, direction TLT
+...\hbox(14.31+9.15)x45.05989, shifted 149.97006, direction TLT
+....\hbox(14.28+9.18)x6.32, shifted -0.03, direction TLT
 .....\TU/STIXTwoMath(1)/m/n/10 󰄻
-....\glue(\thinmuskip) 1.66649
-....\hbox(14.28+9.18)x9.99, shifted -0.02972, direction TLT
+....\glue(\thinmuskip) 1.66663
+....\hbox(14.28+9.18)x9.99, shifted -0.03, direction TLT
 .....\TU/STIXTwoMath(1)/m/n/10 󰅀
-....\glue(\thinmuskip) 1.66649
-....\hbox(14.28+9.18)x13.66, shifted -0.02972, direction TLT
+....\glue(\thinmuskip) 1.66663
+....\hbox(14.28+9.18)x13.66, shifted -0.03, direction TLT
 .....\TU/STIXTwoMath(1)/m/n/10 󰅅
-....\glue(\thinmuskip) 1.66649
-....\hbox(14.28+9.18)x10.09, shifted -0.02972, direction TLT
+....\glue(\thinmuskip) 1.66663
+....\hbox(14.28+9.18)x10.09, shifted -0.03, direction TLT
 .....\TU/STIXTwoMath(1)/m/n/10 󰅊
 ...\penalty 0
 ...\glue(\belowdisplayshortskip) 6.0 plus 3.0 minus 3.0

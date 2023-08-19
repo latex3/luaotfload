@@ -6,6 +6,9 @@ if not modules then modules = { } end modules ['font-oto'] = { -- original tex
     license   = "see context related readme files"
 }
 
+-- Todo: Enable fixes from the lmt to here. Also in font-con.lua wrt the changed
+-- assignments. (Around texlive 2024 in order not to disturb generic.)
+
 local concat, unpack = table.concat, table.unpack
 local insert, remove = table.insert, table.remove
 local format, gmatch, gsub, find, match, lower, strip = string.format, string.gmatch, string.gsub, string.find, string.match, string.lower, string.strip
@@ -260,7 +263,9 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
             for i=1,#steps do
                 for unicode, data in next, steps[i].coverage do
                     if unicode ~= data then
+-- if not changed[unicode] then
                         changed[unicode] = data
+-- end
                     end
                     if trace_singles then
                         report_substitution(feature,sequence,descriptions,unicode,data)
@@ -273,7 +278,9 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
                     local replacement = data[alternate]
                     if replacement then
                         if unicode ~= replacement then
+-- if not changed[unicode] then
                             changed[unicode] = replacement
+-- end
                         end
                         if trace_alternatives then
                             report_alternate(feature,sequence,descriptions,unicode,replacement,value,"normal")
@@ -281,7 +288,9 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
                     elseif defaultalt == "first" then
                         replacement = data[1]
                         if unicode ~= replacement then
+-- if not changed[unicode] then
                             changed[unicode] = replacement
+-- end
                         end
                         if trace_alternatives then
                             report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
@@ -289,7 +298,9 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
                     elseif defaultalt == "last" then
                         replacement = data[#data]
                         if unicode ~= replacement then
+-- if not changed[unicode] then
                             changed[unicode] = replacement
+-- end
                         end
                         if trace_alternatives then
                             report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
@@ -504,6 +515,9 @@ local function featuresinitializer(tfmdata,value)
                                 local value = features[feature]
                                 if value then
                                     local validlookups, lookuplist = collectlookups(rawdata,feature,script,language)
+-- if not validlookups and not lookuplist and script == "math" then
+--     validlookups, lookuplist = collectlookups(rawdata,feature,"dflt","dflt")
+-- end
                                     if not validlookups then
                                         -- skip
                                     elseif basesubstitutions and basesubstitutions[feature] then

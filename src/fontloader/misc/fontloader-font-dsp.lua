@@ -234,6 +234,24 @@ local read_integer = {
     streamreader.readinteger4,
 }
 
+directives.register("fonts.streamreader",function()
+
+    read_cardinal = {
+        streamreader.readcardinal1,
+        streamreader.readcardinal2,
+        streamreader.readcardinal3,
+        streamreader.readcardinal4,
+    }
+
+    read_integer = {
+        streamreader.readinteger1,
+        streamreader.readinteger2,
+        streamreader.readinteger3,
+        streamreader.readinteger4,
+    }
+
+end)
+
 -- Traditionally we use these unique names (so that we can flatten the lookup list
 -- (we create subsets runtime) but I will adapt the old code to newer names.
 
@@ -360,7 +378,7 @@ local function getaxisscale(segments,minimum,default,maximum,user)
     for i=1,#segments do
         local s = segments[i]
         if type(s) ~= "number" then
-            report("using default axis scale")
+         -- report("using default axis scale")
             return default
         elseif s[1] >= default then
             if s[2] == default then
@@ -2177,6 +2195,8 @@ do
         --
         local usedlookups    = false -- setmetatableindex("number")
         --
+        local allsteps = { } -- new per 2022-09-25
+
         for lookupid=1,noflookups do
             local lookup     = lookups[lookupid]
             local lookuptype = lookup.type
@@ -2214,6 +2234,7 @@ do
                             steps[nofsteps] = step
                             local rules = step.rules
                             if rules then
+                                allsteps[#allsteps+1] = step -- new per 2022-09-25
                                 for i=1,#rules do
                                     local rule         = rules[i]
                                     local before       = rule.before
@@ -2329,29 +2350,31 @@ do
 
         local reported = { }
 
-        local function report_issue(i,what,sequence,kind)
-            local name = sequence.name
-            if not reported[name] then
-                report("rule %i in %s lookup %a has %s lookups",i,what,name,kind)
-                reported[name] = true
-            end
+        local function report_issue(i,what,step,kind)
+--             if not reported[step] then
+                report("rule %i in step %i of %s has %s lookups",i,step,what,kind)
+--                 reported[name] = true
+--             end
         end
 
-        for i=lastsequence+1,nofsequences do
-            local sequence = sequences[i]
-            local steps    = sequence.steps
-            for i=1,#steps do
-                local step  = steps[i]
+     -- for i=lastsequence+1,nofsequences do
+     --     local sequence = sequences[i]
+     --     local steps    = sequence.steps
+     --     for i=1,#steps do
+     --         local step  = steps[i]
+
+            for s=1,#allsteps do          -- new per 2022-09-25
+                local step  = allsteps[s] -- new per 2022-09-25
                 local rules = step.rules
                 if rules then
                     for i=1,#rules do
                         local rule     = rules[i]
                         local rlookups = rule.lookups
                         if not rlookups then
-                            report_issue(i,what,sequence,"no")
+                            report_issue(i,what,s,"no")
                         elseif not next(rlookups) then
                             -- can be ok as it aborts a chain sequence
-                         -- report_issue(i,what,sequence,"empty")
+                         -- report_issue(i,what,s,"empty")
                             rule.lookups = nil
                         else
                             -- we can have holes in rlookups flagged false and we can have multiple lookups
@@ -2392,12 +2415,12 @@ do
                                                         sublookupcheck[lookupid] = 1
                                                         h = nofsublookups
                                                     else
-                                                        report_issue(i,what,sequence,"missing")
+                                                        report_issue(i,what,s,"missing")
                                                         rule.lookups = nil
                                                         break
                                                     end
                                                 else
-                                                    report_issue(i,what,sequence,"bad")
+                                                    report_issue(i,what,s,"bad")
                                                     rule.lookups = nil
                                                     break
                                                 end
@@ -2419,7 +2442,7 @@ do
                     end
                 end
             end
-        end
+     -- end -- new per 2022-09-25
 
         for i, n in sortedhash(sublookupcheck) do
             local l = lookups[i]
@@ -2881,7 +2904,7 @@ local function readmathglyphinfo(f,fontdata,offset)
                 if not math then
                     glyph.math = { accent = accent }
                 else
-                    math.accent = accent
+                    math.accent = accent -- will become math.topanchor
                 end
             end
         end
@@ -2971,7 +2994,7 @@ local function readmathvariants(f,fontdata,offset)
     --     advance = readushort(f),
     -- }
 
-    local function get(offset,coverage,nofglyphs,construction,kvariants,kparts,kitalic)
+    local function get(offset,coverage,nofglyphs,construction,kvariants,kparts,kitalic,korientation,orientation)
         if coverage ~= 0 and nofglyphs > 0 then
             local coverage = readcoverage(f,offset+coverage,true)
             for i=1,nofglyphs do
@@ -3036,14 +3059,23 @@ local function readmathvariants(f,fontdata,offset)
                         if italic and italic ~= 0 then
                             math[kitalic] = italic
                         end
+                        if orientation then
+                            math[korientation] = orientation
+                        end
                     end
                 end
             end
         end
     end
 
-    get(offset,vcoverage,vnofglyphs,vconstruction,"vvariants","vparts","vitalic")
-    get(offset,hcoverage,hnofglyphs,hconstruction,"hvariants","hparts","hitalic")
+ -- if LUATEXENGINE == "luametatex" then
+    if CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 then
+        get(offset,hcoverage,hnofglyphs,hconstruction,"variants","parts","partsitalic","partsorientation","horizontal")
+        get(offset,vcoverage,vnofglyphs,vconstruction,"variants","parts","partsitalic","partsorientation","vertical")
+    else
+        get(offset,vcoverage,vnofglyphs,vconstruction,"vvariants","vparts","vitalic")
+        get(offset,hcoverage,hnofglyphs,hconstruction,"hvariants","hparts","hitalic")
+    end
 end
 
 function readers.math(f,fontdata,specification)
@@ -3075,9 +3107,11 @@ function readers.colr(f,fontdata,specification)
     local tableoffset = gotodatatable(f,fontdata,"colr",specification.glyphs)
     if tableoffset then
         local version = readushort(f)
-        if version ~= 0 then
+        if version == 0 or version == 1 then
             report("table version %a of %a is not supported (yet), maybe font %s is bad",version,"colr",fontdata.filename)
             return
+        else
+            -- both versions have this in common
         end
         if not fontdata.tables.cpal then
             report("color table %a in font %a has no mandate %a table","colr",fontdata.filename,"cpal")
@@ -3809,7 +3843,7 @@ function readers.hvar(f,fontdata,specification)
     end
     local tableoffset = gotodatatable(f,fontdata,"hvar",specification.variable)
     if not tableoffset then
-        report("no hvar table, expect problems due to messy widths")
+     -- report("no hvar table, expect problems due to messy widths")
         return
     end
 

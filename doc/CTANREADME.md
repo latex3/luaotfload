@@ -1,6 +1,6 @@
 # The Luaotfload Package
 
-VERSION: 3.25
+VERSION: 3.24
 
 DATE: 2023-08-19
 

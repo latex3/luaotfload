@@ -2291,7 +2291,7 @@ is structured in \LuaTeX’s memory, what elements it is composed of,
 and in what ways it can be rearranged.
 
 The \luaident{pre_shaping_filter} and \luaident{post_shaping_filter}
-callbacks is a pair of \identifier{(reverse)list} callbacks running
+callbacks are a pair of \identifier{(reverse)list} callbacks running
 immediately before and after \identifier{luaotfload} shapes the text.
 They both use the interface
 \beginlisting
@@ -2304,7 +2304,7 @@ where \luaident{head} is the head of the to be shaped list,
 
 Since most font processing happens during shaping, \LuaTeX's
 \luaident{ligaturing} and \luaident{kerning} callbacks are not involved
-in most ligature generation and kerning decisions ans should therefore not be
+in most ligature generation and kerning decisions and should therefore not be
 relied upon. Font processing for fonts loaded with \luaident{mode=base} might
 happen in any of these places.
 

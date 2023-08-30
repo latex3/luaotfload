@@ -891,6 +891,40 @@ fonts.constructors.features.otf.register {
     },
 }
 
+-- mathsize feature for compatibility with older fontloader versions
+-- Not all that useful in most cases since it leads to messy font sizes,
+-- especially reloading a font using this feature based on it's \fontname
+-- will load a wrong size.
+-- Only supported for base mode since the other modes don't make sense for
+-- math fonts.
+local calculatescale = fonts.constructors.calculatescale
+function fonts.constructors.calculatescale(tfmdata, size, _, spec)
+    local parameters = tfmdata.parameters
+    local sizepercentage = parameters and parameters.sizepercentage
+    if sizepercentage then
+        size = size * sizepercentage / 100
+    end
+    return calculatescale(tfmdata, size, _, spec)
+end
+
+fonts.constructors.features.otf.register {
+    name = 'mathsize',
+    description = 'Scale math fonts based on their scriptpercentage parameters',
+    initializers = {
+        base = function(tfmdata, mathsize)
+            local mathdata = tfmdata.shared.rawdata.metadata.math
+            if not mathdata then return end
+
+            if mathsize == 1 then
+                tfmdata.parameters.sizepercentage = 100
+            elseif mathsize == 2 then
+                tfmdata.parameters.sizepercentage = mathdata.ScriptPercentScaleDown
+            elseif mathsize == 3 then
+                tfmdata.parameters.sizepercentage = mathdata.ScriptScriptPercentScaleDown
+            end
+        end,
+    },
+}
 
 return function ()
     if not fonts and fonts.handlers then

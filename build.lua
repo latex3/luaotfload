@@ -1,4 +1,4 @@
-packageversion= "3.24"
+packageversion= "3.26-dev" -- Skipping 3.25 due to mess up when uploading 3.24
 packagedate   = "2023-08-19"
 fontloaderdate= "2023-08-19"
 packagedesc   = ""

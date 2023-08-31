@@ -4,8 +4,8 @@
 -----------------------------------------------------------------------
 assert(luaotfload_module, "This is a part of luaotfload and should not be loaded independently") {
   name          = "luaotfload-harf-plug",
-  version       = "3.26-dev",       --TAGVERSION
-  date          = "2023-08-19", --TAGDATE
+  version       = "3.26",       --TAGVERSION
+  date          = "2023-08-31", --TAGDATE
   description   = "luaotfload submodule / HarfBuzz shaping",
   license       = "GPL v2.0",
   author        = "Khaled Hosny, Marcel Krüger",

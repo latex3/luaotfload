@@ -1,5 +1,11 @@
 Change History
 --------------
+2023-08-31 luaotfload v3.26
+
+    *  Reimplement mathsize feature recently dropped from fontloader
+
+luaotfload v3.25 has been skipped
+
 2023-08-19 luaotfload v3.24
 
     *  Add experimental configuration option to change default font lookup location

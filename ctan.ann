@@ -1,9 +1,3 @@
-2023-08-19 luaotfload v3.24
+2023-08-31 luaotfload v3.26
 
-    *  Add experimental configuration option to change default font lookup location
-       precedence.
-    *  Support xdvipsk in DVI mode
-    *  Preserve soft-hyphens when dropping default ignorable characters
-    *  Hash cache keys to better support certain rather unflexible operating
-       systems
-    *  Various bug fixes
+    *  Reimplement mathsize feature recently dropped from fontloader

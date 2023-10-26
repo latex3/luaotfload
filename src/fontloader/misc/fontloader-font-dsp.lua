@@ -2134,7 +2134,7 @@ do
         return features
     end
 
-    local function readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder)
+    local function readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder,nofmarkclasses)
         setposition(f,lookupoffset)
         local noflookups = readushort(f)
         local lookups    = readcardinaltable(f,noflookups,ushort)
@@ -2152,12 +2152,12 @@ do
             end
             -- which one wins?
             local markclass = band(flagbits,0x0010) ~= 0 -- usemarkfilteringset
+            local markset   = rshift(flagbits,8)
             if markclass then
                 markclass = readushort(f) -- + 1
             end
-            local markset = rshift(flagbits,8)
             if markset > 0 then
-                markclass = markset -- + 1
+                markclass = nofmarkclasses + markset
             end
             lookups[lookupid] = {
                 type      = lookuptype,
@@ -2559,7 +2559,8 @@ do
                 return
             end
             --
-            local lookups = readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder)
+            local nofmarkclasses = (fontdata.markclasses and #fontdata.markclasses or 0) - (fontdata.marksets and #fontdata.marksets or 0)
+            local lookups = readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder,nofmarkclasses)
             --
             if lookups then
                 resolvelookups(f,lookupoffset,fontdata,lookups,lookuptypes,lookuphandlers,what,tableoffset)
@@ -2740,8 +2741,9 @@ function readers.gdef(f,fontdata,specification)
                 end
             end
         end
-        -- mark sets : todo: just make the same as class sets above
+        -- mark sets
         if marksetsoffset ~= 0 then
+            local nofmarkclasses = fontdata.markclasses and #fontdata.markclasses or 0
             marksetsoffset = tableoffset + marksetsoffset
             setposition(f,marksetsoffset)
             local format = readushort(f)
@@ -2751,7 +2753,8 @@ function readers.gdef(f,fontdata,specification)
                 for i=1,nofsets do
                     local offset = sets[i]
                     if offset ~= 0 then
-                        marksets[i] = readcoverage(f,marksetsoffset+offset)
+                        markclasses[nofmarkclasses + i] = readcoverage(f,marksetsoffset+offset)
+                        marksets[i] = { }
                     end
                 end
             end

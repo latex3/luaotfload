@@ -1,6 +1,6 @@
 -- merged file : c:/data/develop/context/sources/luatex-fonts-merged.lua
 -- parent file : c:/data/develop/context/sources/luatex-fonts.lua
--- merge date  : 2023-08-16 19:31
+-- merge date  : 2023-09-26 18:19
 
 do -- begin closure to overcome local limits and interference
 
@@ -1578,7 +1578,7 @@ local function do_serialize(root,name,depth,level,indexed)
       if accurate then
        handle(format("%s %s=%q,",depth,k,v))
       else
-       handle(format("%s %s=%s,",depth,k,v))
+       handle(format("%s %s=0x%X,",depth,k,v))
       end
      elseif accurate then
       handle(format("%s %s=%q,",depth,k,v))
@@ -1590,7 +1590,7 @@ local function do_serialize(root,name,depth,level,indexed)
       if accurate then
        handle(format("%s [%q]=%q,",depth,k,v))
       else
-       handle(format("%s [%q]=%s,",depth,k,v))
+       handle(format("%s [%q]=0x%X,",depth,k,v))
       end
      elseif accurate then
       handle(format("%s [%q]=%q,",depth,k,v))
@@ -4101,6 +4101,20 @@ do
  end })
  function string.wordsplitter(s)
   return cache[s]
+ end
+end
+if CONTEXTLMTXMODE and CONTEXTLMTXMODE>0 then
+ local t={
+  ["#"]="#H",
+  ["\n"]="#L",
+  ['"']="#Q",
+  ["\r"]="#R",
+  [" "]="#S",
+  ["\t"]="#T",
+  ["\\"]="#X",
+ }
+ function string.texhashed(s)
+  return (gsub(s,".",t))
  end
 end
 
@@ -10814,7 +10828,7 @@ local function tounicode16(unicode)
   return s_unknown
  else
   unicode=unicode-0x10000
-  return f_double(idiv(k,0x400)+0xD800,unicode%0x400+0xDC00)
+  return f_double(idiv(unicode,0x400)+0xD800,unicode%0x400+0xDC00)
  end
 end
 local function tounicode16sequence(unicodes)
@@ -10833,7 +10847,7 @@ local function tounicode16sequence(unicodes)
    t[l]=s_unknown
   else
    u=u-0x10000
-   t[l]=f_double(idiv(k,0x400)+0xD800,u%0x400+0xDC00)
+   t[l]=f_double(idiv(u,0x400)+0xD800,u%0x400+0xDC00)
   end
  end
  return concat(t)
@@ -18425,7 +18439,7 @@ do
   end
   return features
  end
- local function readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder)
+ local function readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder,nofmarkclasses)
   setposition(f,lookupoffset)
   local noflookups=readushort(f)
   local lookups=readcardinaltable(f,noflookups,ushort)
@@ -18442,12 +18456,12 @@ do
     subtables[j]=offset+readushort(f) 
    end
    local markclass=band(flagbits,0x0010)~=0 
+   local markset=rshift(flagbits,8)
    if markclass then
     markclass=readushort(f) 
    end
-   local markset=rshift(flagbits,8)
    if markset>0 then
-    markclass=markset 
+    markclass=nofmarkclasses+markset
    end
    lookups[lookupid]={
     type=lookuptype,
@@ -18791,7 +18805,8 @@ do
    if not lookupstoo then
     return
    end
-   local lookups=readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder)
+   local nofmarkclasses=(fontdata.markclasses and #fontdata.markclasses or 0)-(fontdata.marksets and #fontdata.marksets or 0)
+   local lookups=readlookups(f,lookupoffset,lookuptypes,featurehash,featureorder,nofmarkclasses)
    if lookups then
     resolvelookups(f,lookupoffset,fontdata,lookups,lookuptypes,lookuphandlers,what,tableoffset)
    end
@@ -18960,6 +18975,7 @@ function readers.gdef(f,fontdata,specification)
    end
   end
   if marksetsoffset~=0 then
+   local nofmarkclasses=fontdata.markclasses and #fontdata.markclasses or 0
    marksetsoffset=tableoffset+marksetsoffset
    setposition(f,marksetsoffset)
    local format=readushort(f)
@@ -18969,7 +18985,8 @@ function readers.gdef(f,fontdata,specification)
     for i=1,nofsets do
      local offset=sets[i]
      if offset~=0 then
-      marksets[i]=readcoverage(f,marksetsoffset+offset)
+      markclasses[nofmarkclasses+i]=readcoverage(f,marksetsoffset+offset)
+      marksets[i]={}
      end
     end
    end
@@ -21352,7 +21369,7 @@ local trace_defining=false  registertracker("fonts.defining",function(v) trace_d
 local report_otf=logs.reporter("fonts","otf loading")
 local fonts=fonts
 local otf=fonts.handlers.otf
-otf.version=3.133 
+otf.version=3.134 
 otf.cache=containers.define("fonts","otl",otf.version,true)
 otf.svgcache=containers.define("fonts","svg",otf.version,true)
 otf.pngcache=containers.define("fonts","png",otf.version,true)
@@ -29402,17 +29419,17 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
      if last then
       local char,id=ischar(last,currentfont)
       if char then
-       if skiphash and skiphash[char] then
+       if seq[n][char] then
+        if n<l then
+         last=getnext(last)
+        end
+        n=n+1
+       elseif skiphash and skiphash[char] then
         skipped=true
         if trace_skips then
          show_skip(dataset,sequence,char,ck,classes[char])
         end
         last=getnext(last)
-       elseif seq[n][char] then
-        if n<l then
-         last=getnext(last)
-        end
-        n=n+1
        elseif discfound then
         notmatchreplace[discfound]=true
         if notmatchpre[discfound] then
@@ -29503,17 +29520,17 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
        if prev then
         local char,id=ischar(prev,currentfont)
         if char then
-         if skiphash and skiphash[char] then
+         if seq[n][char] then
+          if n>1 then
+           prev=getprev(prev)
+          end
+          n=n-1
+         elseif skiphash and skiphash[char] then
           skipped=true
           if trace_skips then
            show_skip(dataset,sequence,char,ck,classes[char])
           end
           prev=getprev(prev)
-         elseif seq[n][char] then
-          if n>1 then
-           prev=getprev(prev)
-          end
-          n=n-1
          elseif discfound then
           notmatchreplace[discfound]=true
           if notmatchpost[discfound] then
@@ -29619,17 +29636,17 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
       if current then
        local char,id=ischar(current,currentfont)
        if char then
-        if skiphash and skiphash[char] then
+        if seq[n][char] then
+         if n<s then
+          current=getnext(current)
+         end
+         n=n+1
+        elseif skiphash and skiphash[char] then
          skipped=true
          if trace_skips then
           show_skip(dataset,sequence,char,ck,classes[char])
          end
-         current=getnext(current) 
-        elseif seq[n][char] then
-         if n<s then 
-          current=getnext(current) 
-         end
-         n=n+1
+         current=getnext(current)
         elseif discfound then
          notmatchreplace[discfound]=true
          if notmatchpre[discfound] then
@@ -30574,32 +30591,28 @@ do
      while start do
       local char,id=ischar(start,font)
       if char then
-       if skiphash and skiphash[char] then 
-        start=getnext(start)
-       else
-        local lookupmatch=lookupcache[char]
-        if lookupmatch then
-         local a 
-         if attr then
-          if getglyphdata(start)==attr and (not attribute or getstate(start,attribute)) then
-           a=true
-          end
-         elseif not attribute or getstate(start,attribute) then
+       local lookupmatch=lookupcache[char]
+       if lookupmatch then
+        local a 
+        if attr then
+         if getglyphdata(start)==attr and (not attribute or getstate(start,attribute)) then
           a=true
          end
-         if a then
-          local ok,df
-          head,start,ok,df=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-          if df then
-          elseif start then
-           start=getnext(start)
-          end
-         else
+        elseif not attribute or getstate(start,attribute) then
+         a=true
+        end
+        if a then
+         local ok,df
+         head,start,ok,df=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+         if df then
+         elseif start then
           start=getnext(start)
          end
         else
-           start=getnext(start)
+         start=getnext(start)
         end
+       else
+          start=getnext(start)
        end
       elseif char==false or id==glue_code then
        start=getnext(start)
@@ -30629,46 +30642,42 @@ do
      while start do
       local char,id=ischar(start,font)
       if char then
-       if skiphash and skiphash[char] then 
-        start=getnext(start)
-       else
-        local m=merged[char]
-        if m then
-         local a 
-         if attr then
-          if getglyphdata(start)==attr and (not attribute or getstate(start,attribute)) then
-           a=true
-          end
-         elseif not attribute or getstate(start,attribute) then
+       local m=merged[char]
+       if m then
+        local a 
+        if attr then
+         if getglyphdata(start)==attr and (not attribute or getstate(start,attribute)) then
           a=true
          end
-         if a then
-          local ok,df
-          for i=m[1],m[2] do
-           local step=steps[i]
-           local lookupcache=step.coverage
-           local lookupmatch=lookupcache[char]
-           if lookupmatch then
-            head,start,ok,df=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-            if df then
-             break
-            elseif ok then
-             break
-            elseif not start then
-             break
-            end
+        elseif not attribute or getstate(start,attribute) then
+         a=true
+        end
+        if a then
+         local ok,df
+         for i=m[1],m[2] do
+          local step=steps[i]
+          local lookupcache=step.coverage
+          local lookupmatch=lookupcache[char]
+          if lookupmatch then
+           head,start,ok,df=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+           if df then
+            break
+           elseif ok then
+            break
+           elseif not start then
+            break
            end
           end
-          if df then
-          elseif start then
-           start=getnext(start)
-          end
-         else
+         end
+         if df then
+         elseif start then
           start=getnext(start)
          end
         else
          start=getnext(start)
         end
+       else
+        start=getnext(start)
        end
       elseif char==false or id==glue_code then
        start=getnext(start)
@@ -30736,26 +30745,22 @@ do
     position=position+1
     local m=merged[char]
     if m then
-     if skiphash and skiphash[char] then 
-      start=getnext(start)
-     else
-      for i=m[1],m[2] do
-       local step=steps[i]
-       local lookupcache=step.coverage
-       local lookupmatch=lookupcache[char]
-       if lookupmatch then
-        local ok
-        head,start,ok=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-        if ok then
-         break
-        elseif not start then
-         break
-        end
+     for i=m[1],m[2] do
+      local step=steps[i]
+      local lookupcache=step.coverage
+      local lookupmatch=lookupcache[char]
+      if lookupmatch then
+       local ok
+       head,start,ok=handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+       if ok then
+        break
+       elseif not start then
+        break
        end
       end
-      if start then
-       start=getnext(start)
-      end
+     end
+     if start then
+      start=getnext(start)
      end
     else
      start=getnext(start)

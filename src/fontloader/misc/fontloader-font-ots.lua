@@ -2552,17 +2552,17 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                     if last then
                         local char, id = ischar(last,currentfont)
                         if char then
-                            if skiphash and skiphash[char] then
+                            if seq[n][char] then
+                                if n < l then
+                                    last = getnext(last)
+                                end
+                                n = n + 1
+                            elseif skiphash and skiphash[char] then
                                 skipped = true
                                 if trace_skips then
                                     show_skip(dataset,sequence,char,ck,classes[char])
                                 end
                                 last = getnext(last)
-                            elseif seq[n][char] then
-                                if n < l then
-                                    last = getnext(last)
-                                end
-                                n = n + 1
                             elseif discfound then
                                 notmatchreplace[discfound] = true
                                 if notmatchpre[discfound] then
@@ -2661,17 +2661,17 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                             if prev then
                                 local char, id = ischar(prev,currentfont)
                                 if char then
-                                    if skiphash and skiphash[char] then
+                                    if seq[n][char] then
+                                        if n > 1 then
+                                            prev = getprev(prev)
+                                        end
+                                        n = n - 1
+                                    elseif skiphash and skiphash[char] then
                                         skipped = true
                                         if trace_skips then
                                             show_skip(dataset,sequence,char,ck,classes[char])
                                         end
                                         prev = getprev(prev)
-                                    elseif seq[n][char] then
-                                        if n > 1 then
-                                            prev = getprev(prev)
-                                        end
-                                        n = n - 1
                                     elseif discfound then
                                         notmatchreplace[discfound] = true
                                         if notmatchpost[discfound] then
@@ -2792,17 +2792,17 @@ local function handle_contextchain(head,start,dataset,sequence,contexts,rlmode,s
                         if current then
                             local char, id = ischar(current,currentfont)
                             if char then
-                                if skiphash and skiphash[char] then
+                                if seq[n][char] then
+                                    if n < s then
+                                        current = getnext(current)
+                                    end
+                                    n = n + 1
+                                elseif skiphash and skiphash[char] then
                                     skipped = true
                                     if trace_skips then
                                         show_skip(dataset,sequence,char,ck,classes[char])
                                     end
-                                    current = getnext(current) -- was absent
-                                elseif seq[n][char] then
-                                    if n < s then -- new test
-                                        current = getnext(current) -- was absent
-                                    end
-                                    n = n + 1
+                                    current = getnext(current)
                                 elseif discfound then
                                     notmatchreplace[discfound] = true
                                     if notmatchpre[discfound] then
@@ -3978,36 +3978,32 @@ do
                     while start do
                         local char, id = ischar(start,font)
                         if char then
-                            if skiphash and skiphash[char] then -- we never needed it here but let's try
-                                start = getnext(start)
-                            else
-                                local lookupmatch = lookupcache[char]
-                                if lookupmatch then
-                                    local a -- happens often so no assignment is faster
-                                    if attr then
-                                        if getglyphdata(start) == attr and (not attribute or getstate(start,attribute)) then
-                                            a = true
-                                        end
-                                    elseif not attribute or getstate(start,attribute) then
+                            local lookupmatch = lookupcache[char]
+                            if lookupmatch then
+                                local a -- happens often so no assignment is faster
+                                if attr then
+                                    if getglyphdata(start) == attr and (not attribute or getstate(start,attribute)) then
                                         a = true
                                     end
-                                    if a then
-                                        local ok, df
-                                        head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-                                     -- if ok then
-                                     --     done = true
-                                     -- end
-                                        if df then
+                                elseif not attribute or getstate(start,attribute) then
+                                    a = true
+                                end
+                                if a then
+                                    local ok, df
+                                    head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                                 -- if ok then
+                                 --     done = true
+                                 -- end
+                                    if df then
 -- print("restart 1",typ)
-                                        elseif start then
-                                            start = getnext(start)
-                                        end
-                                    else
+                                    elseif start then
                                         start = getnext(start)
                                     end
                                 else
-                                   start = getnext(start)
+                                    start = getnext(start)
                                 end
+                            else
+                               start = getnext(start)
                             end
                         elseif char == false or id == glue_code then
                             -- a different font|state or glue (happens often)
@@ -4041,53 +4037,49 @@ do
                     while start do
                         local char, id = ischar(start,font)
                         if char then
-                            if skiphash and skiphash[char] then -- we never needed it here but let's try
-                                start = getnext(start)
-                            else
-                                local m = merged[char]
-                                if m then
-                                    local a -- happens often so no assignment is faster
-                                    if attr then
-                                        if getglyphdata(start) == attr and (not attribute or getstate(start,attribute)) then
-                                            a = true
-                                        end
-                                    elseif not attribute or getstate(start,attribute) then
+                            local m = merged[char]
+                            if m then
+                                local a -- happens often so no assignment is faster
+                                if attr then
+                                    if getglyphdata(start) == attr and (not attribute or getstate(start,attribute)) then
                                         a = true
                                     end
-                                    if a then
-                                        local ok, df
-                                        for i=m[1],m[2] do
-                                            local step = steps[i]
-                                     -- for i=1,#m do
-                                     --     local step = m[i]
-                                            local lookupcache = step.coverage
-                                            local lookupmatch = lookupcache[char]
-                                            if lookupmatch then
-                                                -- we could move all code inline but that makes things even more unreadable
+                                elseif not attribute or getstate(start,attribute) then
+                                    a = true
+                                end
+                                if a then
+                                    local ok, df
+                                    for i=m[1],m[2] do
+                                        local step = steps[i]
+                                 -- for i=1,#m do
+                                 --     local step = m[i]
+                                        local lookupcache = step.coverage
+                                        local lookupmatch = lookupcache[char]
+                                        if lookupmatch then
+                                            -- we could move all code inline but that makes things even more unreadable
 --                                                 local ok, df
-                                                head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-                                                if df then
-                                                    break
-                                                elseif ok then
-                                                 -- done = true
-                                                    break
-                                                elseif not start then
-                                                    -- don't ask why ... shouldn't happen
-                                                    break
-                                                end
+                                            head, start, ok, df = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                                            if df then
+                                                break
+                                            elseif ok then
+                                             -- done = true
+                                                break
+                                            elseif not start then
+                                                -- don't ask why ... shouldn't happen
+                                                break
                                             end
                                         end
-                                        if df then
+                                    end
+                                    if df then
 -- print("restart 2",typ)
-                                        elseif start then
-                                            start = getnext(start)
-                                        end
-                                    else
+                                    elseif start then
                                         start = getnext(start)
                                     end
                                 else
                                     start = getnext(start)
                                 end
+                            else
+                                start = getnext(start)
                             end
                         elseif char == false or id == glue_code then
                             -- a different font|state or glue (happens often)
@@ -4183,31 +4175,27 @@ do
                 position = position + 1
                 local m = merged[char]
                 if m then
-                    if skiphash and skiphash[char] then -- we never needed it here but let's try
-                        start = getnext(start)
-                    else
-                        for i=m[1],m[2] do
-                            local step = steps[i]
-                            local lookupcache = step.coverage
-                            local lookupmatch = lookupcache[char]
-                            if lookupmatch then
-                                local ok
-                                head, start, ok = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
-                                if ok then
-                                 -- if matches then
-                                 --     matches[position] = i
-                                 -- else
-                                 --     matches = { [position] = i }
-                                 -- end
-                                    break
-                                elseif not start then
-                                    break
-                                end
+                    for i=m[1],m[2] do
+                        local step = steps[i]
+                        local lookupcache = step.coverage
+                        local lookupmatch = lookupcache[char]
+                        if lookupmatch then
+                            local ok
+                            head, start, ok = handler(head,start,dataset,sequence,lookupmatch,rlmode,skiphash,step)
+                            if ok then
+                             -- if matches then
+                             --     matches[position] = i
+                             -- else
+                             --     matches = { [position] = i }
+                             -- end
+                                break
+                            elseif not start then
+                                break
                             end
                         end
-                        if start then
-                            start = getnext(start)
-                        end
+                    end
+                    if start then
+                        start = getnext(start)
                     end
                 else
                     start = getnext(start)

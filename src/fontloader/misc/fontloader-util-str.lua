@@ -315,7 +315,8 @@ function strings.collapse(str) -- maybe also in strings
     return str and lpegmatch(p_prune_intospace,str) or str
 end
 
--- local s = "\naa\n\naa\na   a\n\n"
+-- local s = " \naa\n\naa\na   a\n\n "
+-- local s = [[ \naa\n\naa\na   a\n\n]]
 -- print("["..strings.striplines(s,"collapse all").."]")
 
 -- also see: string.collapsespaces
@@ -1557,3 +1558,20 @@ do
 
 end
 
+if CONTEXTLMTXMODE and CONTEXTLMTXMODE > 0 then
+
+    local t = {
+        ["#"]  = "#H",
+        ["\n"] = "#L",
+        ['"']  = "#Q",
+        ["\r"] = "#R",
+        [" "]  = "#S",
+        ["\t"] = "#T",
+        ["\\"] = "#X",
+    }
+
+    function string.texhashed(s)
+        return (gsub(s,".",t))
+    end
+
+end

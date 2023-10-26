@@ -740,7 +740,8 @@ local function do_serialize(root,name,depth,level,indexed)
                         if accurate then
                             handle(format("%s %s=%q,",depth,k,v))
                         else
-                            handle(format("%s %s=%s,",depth,k,v))
+--                             handle(format("%s %s=%s,",depth,k,v))
+                            handle(format("%s %s=0x%X,",depth,k,v))
                         end
                     elseif accurate then
                         handle(format("%s %s=%q,",depth,k,v))
@@ -752,7 +753,8 @@ local function do_serialize(root,name,depth,level,indexed)
                         if accurate then
                             handle(format("%s [%q]=%q,",depth,k,v))
                         else
-                            handle(format("%s [%q]=%s,",depth,k,v))
+--                             handle(format("%s [%q]=%s,",depth,k,v))
+                            handle(format("%s [%q]=0x%X,",depth,k,v))
                         end
                     elseif accurate then
                         handle(format("%s [%q]=%q,",depth,k,v))

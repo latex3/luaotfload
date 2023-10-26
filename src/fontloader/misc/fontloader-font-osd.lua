@@ -220,6 +220,9 @@ end
 -- we might need to have consonants etc per script and initialize a local table
 -- pointing to the right one. But not now.
 
+-- We have additional data in char-def that provides information not present (at
+-- least when this was written) in Unicode.
+
 local indicgroups = characters and characters.indicgroups
 
 if not indicgroups and characters then

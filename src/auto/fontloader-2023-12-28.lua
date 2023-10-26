@@ -1,6 +1,6 @@
 --[[info-----------------------------------------------------------------------
   Luaotfload fontloader package
-  build 2023-12-28 12:17:25
+  build 2023-12-28 15:52:34
 -------------------------------------------------------------------------------
 
   © 2023 PRAGMA ADE / ConTeXt Development Team
@@ -4375,7 +4375,7 @@ end
 end --- [luaotfload, fontloader-2023-12-28.lua scope for “fonts-mis”] ---
 
 
-do  --- [luaotfload, fontloader-2023-12-28.lua scope for “font-con” bdbaaa361308c9ccc0a7dac0bf6c17ec] ---
+do  --- [luaotfload, fontloader-2023-12-28.lua scope for “font-con” ebdd0ca857deafdc0152c7a4f1ed2490] ---
 
 if not modules then modules={} end modules ['font-con']={
  version=1.001,
@@ -4858,6 +4858,13 @@ function constructors.scale(tfmdata,specification)
   if changed then
    local c=changed[unicode]
    if c and c~=unicode then
+    local cc=changed[c]
+    if cc then
+     while cc do
+      c=cc
+      cc=changed[c]
+     end
+    end
     if c then
      description=descriptions[c] or descriptions[unicode] or character
      character=characters[c] or character
@@ -20046,7 +20053,7 @@ otf.coverup={
 end --- [luaotfload, fontloader-2023-12-28.lua scope for “font-otl”] ---
 
 
-do  --- [luaotfload, fontloader-2023-12-28.lua scope for “font-oto” 1cc20f34606fb55d4646a0dd323499ef] ---
+do  --- [luaotfload, fontloader-2023-12-28.lua scope for “font-oto” b148d66f642aaa3d0ddc427f71d6e02d] ---
 
 if not modules then modules={} end modules ['font-oto']={ 
  version=1.001,
@@ -20247,7 +20254,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
    for i=1,#steps do
     for unicode,data in next,steps[i].coverage do
      if unicode~=data then
-      changed[unicode]=data
+      changed[unicode]=changed[unicode] or data
      end
      if trace_singles then
       report_substitution(feature,sequence,descriptions,unicode,data)
@@ -20260,7 +20267,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
      local replacement=data[alternate]
      if replacement then
       if unicode~=replacement then
-       changed[unicode]=replacement
+       changed[unicode]=changed[unicode] or replacement
       end
       if trace_alternatives then
        report_alternate(feature,sequence,descriptions,unicode,replacement,value,"normal")
@@ -20268,7 +20275,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
      elseif defaultalt=="first" then
       replacement=data[1]
       if unicode~=replacement then
-       changed[unicode]=replacement
+       changed[unicode]=changed[unicode] or replacement
       end
       if trace_alternatives then
        report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
@@ -20276,7 +20283,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
      elseif defaultalt=="last" then
       replacement=data[#data]
       if unicode~=replacement then
-       changed[unicode]=replacement
+       changed[unicode]=changed[unicode] or replacement
       end
       if trace_alternatives then
        report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)

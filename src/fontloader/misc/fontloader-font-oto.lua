@@ -263,9 +263,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
             for i=1,#steps do
                 for unicode, data in next, steps[i].coverage do
                     if unicode ~= data then
--- if not changed[unicode] then
-                        changed[unicode] = data
--- end
+                        changed[unicode] = changed[unicode] or data
                     end
                     if trace_singles then
                         report_substitution(feature,sequence,descriptions,unicode,data)
@@ -278,9 +276,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
                     local replacement = data[alternate]
                     if replacement then
                         if unicode ~= replacement then
--- if not changed[unicode] then
-                            changed[unicode] = replacement
--- end
+                            changed[unicode] = changed[unicode] or replacement
                         end
                         if trace_alternatives then
                             report_alternate(feature,sequence,descriptions,unicode,replacement,value,"normal")
@@ -288,9 +284,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
                     elseif defaultalt == "first" then
                         replacement = data[1]
                         if unicode ~= replacement then
--- if not changed[unicode] then
-                            changed[unicode] = replacement
--- end
+                            changed[unicode] = changed[unicode] or replacement
                         end
                         if trace_alternatives then
                             report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)
@@ -298,9 +292,7 @@ local function preparesubstitutions(tfmdata,feature,value,validlookups,lookuplis
                     elseif defaultalt == "last" then
                         replacement = data[#data]
                         if unicode ~= replacement then
--- if not changed[unicode] then
-                            changed[unicode] = replacement
--- end
+                            changed[unicode] = changed[unicode] or replacement
                         end
                         if trace_alternatives then
                             report_alternate(feature,sequence,descriptions,unicode,replacement,value,defaultalt)

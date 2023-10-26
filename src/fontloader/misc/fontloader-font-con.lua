@@ -651,13 +651,13 @@ function constructors.scale(tfmdata,specification)
         if changed then
             local c = changed[unicode]
             if c and c ~= unicode then
-             -- local cc = changed[c]
-             -- if cc then
-             --     while cc do
-             --         c = cc
-             --         cc = changed[c]
-             --     end
-             -- end
+                local cc = changed[c]
+                if cc then
+                    while cc do
+                        c = cc
+                        cc = changed[c]
+                    end
+                end
                 -- check not needed:
                 if c then
                     description = descriptions[c] or descriptions[unicode] or character

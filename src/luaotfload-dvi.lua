@@ -85,7 +85,7 @@ function full_hprocess(head)
         end
         if last_mapping then
           local mapped = last_mapping[c]
-          if mapped then setfont(n, mapped_font, mapped) end
+          if mapped then setfont(n, last_mapped_font, mapped) end
         end
       end
     elseif id == glyph_t then

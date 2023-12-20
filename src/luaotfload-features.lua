@@ -890,6 +890,7 @@ fonts.constructors.features.otf.register {
       end,
     },
 }
+require'luaotfload-arabic'
 
 -- mathsize feature for compatibility with older fontloader versions
 -- Not all that useful in most cases since it leads to messy font sizes,

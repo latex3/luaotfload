@@ -25,7 +25,7 @@ fontspec microtype unicode-math ttfutils
 #
 # fonts
 sourcecodepro asana-math ebgaramond tex-gyre amsfonts gnu-freefont
-opensans fira tex-gyre-math junicode lm  lm-math amiri ipaex xits
+opensans fira tex-gyre-math lm lm-math amiri ipaex xits
 libertine coelacanth fontawesome stix2-otf dejavu luatexko
 unfonts-core cjk-ko iwona libertinus-fonts fandol cm-unicode noto
 cuprum gentium-tug

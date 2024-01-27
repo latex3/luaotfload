@@ -38,7 +38,7 @@ jobs:
     steps:
       # Boilerplate
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       # We need docutils for our documentation
       - run: sudo apt-get install python3-docutils
       - name: Install TeX Live
@@ -62,7 +62,7 @@ jobs:
       # 2. If we succeed building documentation
       - name: Archive documentation
         if: ${{ matrix.artifact_name == 'Documentation' && success() }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
           path: "**/*.pdf"

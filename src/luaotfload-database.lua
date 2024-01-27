@@ -318,36 +318,44 @@ local function sanitize_fontnames (rawnames)
     return result
 end
 
+local list_dir_or_empty do
+    local function inner_list_dir_or_empty (dir, success, ...)
+        if success then
+            return ...
+        else
+            -- Skipping unreadable directory.
+            -- TODO: Print warning
+            return next, {}
+        end
+    end
+    function list_dir_or_empty (dir)
+        return inner_list_dir_or_empty(dir, pcall(lfsdir, dir))
+    end
+end
+
 local function find_files_indeed (acc, dirs, filter)
     if not next (dirs) then --- done
         return acc
     end
 
-    local pwd   = lfscurrentdir ()
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    if lfschdir (dir) then
-        lfschdir (pwd)
-
-        local newfiles = { }
-        for ent in lfsdir (dir) do
-            if ent ~= "." and ent ~= ".." then
-                local fullpath = dir .. "/" .. ent
-                if filter (fullpath) == true then
-                    if lfsisdir (fullpath) then
-                        dirs[#dirs+1] = fullpath
-                    elseif lfsisfile (fullpath) then
-                        newfiles[#newfiles+1] = fullpath
-                    end
+    local newfiles = { }
+    for ent in list_dir_or_empty (dir) do
+        if ent ~= "." and ent ~= ".." then
+            local fullpath = dir .. "/" .. ent
+            if filter (fullpath) == true then
+                if lfsisdir (fullpath) then
+                    dirs[#dirs+1] = fullpath
+                elseif lfsisfile (fullpath) then
+                    newfiles[#newfiles+1] = fullpath
                 end
             end
         end
-        return find_files_indeed (tableappend (acc, newfiles),
-                                  dirs, filter)
     end
-    --- could not cd into, so we skip it
-    return find_files_indeed (acc, dirs, filter)
+    return find_files_indeed (tableappend (acc, newfiles),
+                              dirs, filter)
 end
 
 local function dummyfilter () return true end

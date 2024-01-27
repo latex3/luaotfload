@@ -333,31 +333,6 @@ local list_dir_or_empty do
     end
 end
 
-local function find_files_indeed (acc, dirs, filter)
-    if not next (dirs) then --- done
-        return acc
-    end
-
-    local dir   = dirs[#dirs]
-    dirs[#dirs] = nil
-
-    local newfiles = { }
-    for ent in list_dir_or_empty (dir) do
-        if ent ~= "." and ent ~= ".." then
-            local fullpath = dir .. "/" .. ent
-            if filter (fullpath) == true then
-                if lfsisdir (fullpath) then
-                    dirs[#dirs+1] = fullpath
-                elseif lfsisfile (fullpath) then
-                    newfiles[#newfiles+1] = fullpath
-                end
-            end
-        end
-    end
-    return find_files_indeed (tableappend (acc, newfiles),
-                              dirs, filter)
-end
-
 local function dummyfilter () return true end
 
 --- the optional filter function receives the full path of a file
@@ -366,9 +341,30 @@ local function dummyfilter () return true end
 
 --- string -> function? -> string list
 local function find_files (root, filter)
-    if lfsisdir (root) then
-        return find_files_indeed ({}, { root }, filter or dummyfilter)
+    if not lfsisdir (root) then return end
+
+    local files = {}
+    local dirs = { root }
+    filter = filter or dummyfilter
+
+    while dirs[1] do
+        local dir   = dirs[#dirs]
+        dirs[#dirs] = nil
+
+        for ent in list_dir_or_empty (dir) do
+            if ent ~= "." and ent ~= ".." then
+                local fullpath = dir .. "/" .. ent
+                if filter (fullpath) == true then
+                    if lfsisdir (fullpath) then
+                        dirs[#dirs+1] = fullpath
+                    elseif lfsisfile (fullpath) then
+                        files[#files+1] = fullpath
+                    end
+                end
+            end
+        end
     end
+    return files
 end
 
 

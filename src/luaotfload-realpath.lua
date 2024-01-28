@@ -29,7 +29,11 @@ local function lookup_split_path_in_tree(components, tree)
     tree = tree_root
   end
   for i=1, #components do
-    tree = tree[components[i]]
+    local next_tree = tree[components[i]]
+    if not next_tree then
+      return nil, string.format("Unable to find %q in %q", components[i], concat(tree[path_components], '/'))
+    end
+    tree = next_tree
   end
   return tree
 end
@@ -44,22 +48,27 @@ tree_meta = {
     local path = concat(components, '/')
 
     local mode = symlinkattributes(path, 'mode')
+    if not mode then
+      parent[component] = false
+      return false
+    end
     if mode == 'link' then
       local target = symlinkattributes(path, 'target')
       local splitted_target = split_path(target)
-      local target_tree = lookup_split_path_in_tree(splitted_target, parent)
+      local target_tree = lookup_split_path_in_tree(splitted_target, parent) or false
       parent[component] = target_tree
       return target_tree
     end
 
-    local child = setmetatable({
+    local child = {
       [path_components] = components,
       [file_mode] = mode,
-    }, tree_meta)
-    -- if mode == 'directory' then
+    }
+    if mode == 'directory' then
+      setmetatable(child, tree_meta)
       child['.'] = child
       child['..'] = parent
-    -- end
+    end
     parent[component] = child
     return child
   end,
@@ -84,13 +93,14 @@ local function resolve_path_to_tree(path)
     return lookup_split_path_in_tree(splitted, tree_root)
   else
     local splitted_currentdir = split_path(currentdir())
-    local current_tree = lookup_split_path_in_tree(splitted_currentdir, tree_root)
+    local current_tree = assert(lookup_split_path_in_tree(splitted_currentdir, tree_root))
     return lookup_split_path_in_tree(splitted, current_tree)
   end
 end
 
 local function resolve_path(path)
-  local tree = resolve_path_to_tree(path)
+  local tree, err = resolve_path_to_tree(path)
+  if not tree then return tree, err end
   return concat(tree[path_components], '/'), tree[file_mode]
 end
 

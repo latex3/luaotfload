@@ -2,6 +2,7 @@
 
 local sub = string.sub
 local symlinkattributes = lfs.symlinkattributes
+local attributes = lfs.attributes
 local currentdir = lfs.currentdir
 local concat = table.concat
 local move = table.move
@@ -98,10 +99,19 @@ local function resolve_path_to_tree(path)
   end
 end
 
-local function resolve_path(path)
-  local tree, err = resolve_path_to_tree(path)
-  if not tree then return tree, err end
-  return concat(tree[path_components], '/'), tree[file_mode]
+local resolve_path = ({
+  unix = function(path)
+    local tree, err = resolve_path_to_tree(path)
+    if not tree then return tree, err end
+    return concat(tree[path_components], '/'), tree[file_mode]
+  end,
+})[os.type] or function(path)
+  local mode, err = attributes(path)
+  if mode then
+    return path, mode
+  else
+    return mode, err
+  end
 end
 
 return {

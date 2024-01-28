@@ -150,7 +150,6 @@ local kpsefind_file            = kpse.find_file
 local kpselookup               = kpse.lookup
 local kpsereadable_file        = kpse.readable_file
 local lfsattributes            = lfs.attributes
-local lfschdir                 = lfs.chdir
 local lfscurrentdir            = lfs.currentdir
 local lfsdir                   = lfs.dir
 local mathabs                  = math.abs
@@ -202,6 +201,7 @@ local resolversfindfile        = context_environment.resolvers.findfile
 --- some of our own
 local unicode                  = require'luaotfload-unicode'
 local casefold                 = require'lua-uni-case'.casefold
+local realpath                 = require'luaotfload-realpath'.realpath
 local alphnum_only             = unicode.alphnum_only
 
 local name_index               = nil --> upvalue for names.data
@@ -2181,17 +2181,19 @@ local function process_dir_tree (acc, dirs, done)
         return acc
     end
 
-    local pwd   = lfscurrentdir ()
     local dir   = dirs[#dirs]
     dirs[#dirs] = nil
 
-    if not lfschdir (dir) then
-        --- Cannot cd; skip.
+    local mode_or_err
+    dir, mode_or_err = realpath(dir)
+    if not dir then
+        logreport ("both", 1, "db", "Skipping font directory: %s", mode_or_err)
+        return process_dir_tree (acc, dirs, done)
+    elseif mode_or_err ~= 'directory' then
+        logreport ("both", 1, "db", "Skipping non-directory wile searching fonts: %q (%s)", dir, mode_or_err)
         return process_dir_tree (acc, dirs, done)
     end
 
-    dir = lfscurrentdir () --- resolve symlinks
-    lfschdir (pwd)
     if tablecontains (done, dir) then
         --- Already traversed. Note that it’d be unsafe to rely on the
         --- hash part above due to Lua only processing up to 32 bytes
@@ -2230,35 +2232,38 @@ local function process_dir_tree (acc, dirs, done)
 end
 
 local function process_dir (dir)
-    local pwd = lfscurrentdir ()
-    if lfschdir (dir) then
-        dir = lfscurrentdir () --- resolve symlinks
-        lfschdir (pwd)
+    local mode_or_err
+    dir, mode_or_err = realpath(dir)
+    if not dir then
+        logreport ("both", 1, "db", "Skipping font directory: %s", mode_or_err)
+        return process_dir_tree (acc, dirs, done)
+    elseif mode_or_err ~= 'directory' then
+        logreport ("both", 1, "db", "Skipping non-directory wile searching fonts: %q (%s)", dir, mode_or_err)
+        return process_dir_tree (acc, dirs, done)
+    end
 
-        local files = { }
-        local blacklist = names.blacklist
-        for ent in lfsdir (dir) do
-            if ent ~= "." and ent ~= ".." and not blacklist[ent] then
-                local fullpath = dir .. "/" .. ent
-                if lfsisfile (fullpath) then
-                    ent = stringlower (ent)
-                    if lpegmatch (p_font_filter, ent)
-                    then
-                        if filesuffix (ent) == "afm" then
-                            local pfbpath = locate_matching_pfb (ent, dir)
-                            if pfbpath then
-                                files[#files+1] = pfbpath
-                            end
-                        else
-                            files[#files+1] = fullpath
+    local files = { }
+    local blacklist = names.blacklist
+    for ent in lfsdir (dir) do
+        if ent ~= "." and ent ~= ".." and not blacklist[ent] then
+            local fullpath = dir .. "/" .. ent
+            if lfsisfile (fullpath) then
+                ent = stringlower (ent)
+                if lpegmatch (p_font_filter, ent)
+                then
+                    if filesuffix (ent) == "afm" then
+                        local pfbpath = locate_matching_pfb (ent, dir)
+                        if pfbpath then
+                            files[#files+1] = pfbpath
                         end
+                    else
+                        files[#files+1] = fullpath
                     end
                 end
             end
         end
-        return files
     end
-    return { }
+    return files
 end
 
 --- string -> bool -> string list

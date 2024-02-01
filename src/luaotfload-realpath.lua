@@ -15,14 +15,32 @@ local tree_root
 
 local split_path do
   local l = lpeg
-  local separator = l.S'/'
+  local separator = os.type == 'unix' and l.S'/' or l.S'/\\'
   -- We do not allow empty segments here because they get ignored.
   local segment = l.C((1 - separator)^1)
   -- Duplicate and trailing separators are dropped.
-  local path_pat = l.Ct((l.Cc'' * separator^1)^-1 * (segment * separator^1)^0 * segment^-1 * -1)
+  local unc = os.type == 'unix' and l.P(false) or separator * separator * l.Cg(l.P(1)^0 * -1, 'unc')
+  local drive_letter = os.type == 'unix' and l.P(false) or l.Cg(l.R('az', 'AZ') * ':', 'drive')
+  local path_pat = l.Ct(unc + drive_letter^-1 * (l.Cc'' * separator^1)^-1 * (segment * separator^1)^0 * segment^-1 * -1)
   function split_path(path)
-    return assert(path_pat:match(path))
+    local splitted = path_pat:match(path)
+    if not splitted then
+      error'Invalid path rejected'
+    elseif splitted.unc then
+      error'Unsupported UNC path encountered'
+    elseif splitted.drive and splitted[1] ~= '' then
+      error'Unsupported relative path with drive letter encountered'
+    end
+    return splitted
   end
+end
+
+local function recombine_path(components)
+  local joined = concat(components, '/')
+  if components.drive then
+    joined = components.drive .. joined
+  end
+  return joined
 end
 
 local function lookup_split_path_in_tree(components, tree)
@@ -32,7 +50,7 @@ local function lookup_split_path_in_tree(components, tree)
   for i=1, #components do
     local next_tree = tree[components[i]]
     if not next_tree then
-      return nil, string.format("Unable to find %q in %q", components[i], concat(tree[path_components], '/'))
+      return nil, string.format("Unable to find %q in %q", components[i], recombine_path(tree[path_components]))
     end
     tree = next_tree
   end
@@ -46,7 +64,7 @@ tree_meta = {
     local depth = #parent_components
     local components = move(parent[path_components], 1, depth, 1, newtable(depth + 1, 0))
     components[depth + 1] = component
-    local path = concat(components, '/')
+    local path = recombine_path(components)
 
     local mode = symlinkattributes(path, 'mode')
     if not mode then
@@ -76,17 +94,20 @@ tree_meta = {
 }
 
 -- We assume that the directory structure does not change during our run.
-tree_root = {
-  [''] = setmetatable({
-    [path_components] = {''},
+function build_root_dir(drive)
+  local root_dir = setmetatable({
+    [path_components] = {'', drive = drive},
     [file_mode] = 'directory', -- "If [your root is not a directory] you are having a bad problem and you will not go to space today".
   }, tree_meta)
-}
-do
-  local root_dir = tree_root['']
   root_dir['.'] = root_dir
   root_dir['..'] = root_dir
+  return root_dir
 end
+tree_root = os.type == 'unix' and build_root_dir() or setmetatable({}, {__index = function(t, drive)
+  local root_dir = build_root_dir(drive)
+  t[drive] = root_dir
+  return root_dir
+end})
 
 local function resolve_path_to_tree(path)
   local splitted = split_path(path)
@@ -103,7 +124,7 @@ local resolve_path = ({
   unix = function(path)
     local tree, err = resolve_path_to_tree(path)
     if not tree then return tree, err end
-    return concat(tree[path_components], '/'), tree[file_mode]
+    return recombine_path(tree[path_components]), tree[file_mode]
   end,
 })[os.type] or function(path)
   local mode, err = attributes(path)

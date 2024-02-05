@@ -120,19 +120,10 @@ local function resolve_path_to_tree(path)
   end
 end
 
-local resolve_path = ({
-  unix = function(path)
-    local tree, err = resolve_path_to_tree(path)
-    if not tree then return tree, err end
-    return recombine_path(tree[path_components]), tree[file_mode]
-  end,
-})[os.type] or function(path)
-  local mode, err = attributes(path)
-  if mode then
-    return path, mode
-  else
-    return mode, err
-  end
+local function resolve_path(path)
+  local tree, err = resolve_path_to_tree(path)
+  if not tree then return tree, err end
+  return recombine_path(tree[path_components]), tree[file_mode]
 end
 
 return {

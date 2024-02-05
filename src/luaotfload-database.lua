@@ -2190,7 +2190,7 @@ local function process_dir_tree (acc, dirs, done)
         logreport ("both", 1, "db", "Skipping font directory: %s", mode_or_err)
         return process_dir_tree (acc, dirs, done)
     elseif mode_or_err ~= 'directory' then
-        logreport ("both", 1, "db", "Skipping non-directory wile searching fonts: %q (%s)", dir, mode_or_err)
+        logreport ("both", 1, "db", "Skipping non-directory while searching fonts: %q (%s)", dir, mode_or_err)
         return process_dir_tree (acc, dirs, done)
     end
 

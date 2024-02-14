@@ -1,67 +1,29 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-Package fontspec Info: Font family 'STIXTwoText(2)' created for font 'STIX Two
-(fontspec)             Text' with options
-(fontspec)             [Ligatures=TeX,Color=00FF00,Color=FF0000].
+Package fontspec Info: Font family 'STIXTwoText(2)' created for font 'STIX Two Text' with options [Ligatures=TeX,Color=00FF00,Color=FF0000].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF
-(fontspec)             ;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF
-(fontspec)             ;"
-(fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF
-(fontspec)             ;"
-(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF
-(fontspec)             ;"
-(fontspec)             - 'italic' (m/it) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF
-(fontspec)             ;"
-(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF
-(fontspec)             ;"
-(fontspec)             - 'bold italic' (b/it) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF
-(fontspec)             ;"
-(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF
-(fontspec)             ;"
-Package fontspec Info: Font family 'STIXTwoText(3)' created for font 'STIX Two
-(fontspec)             Text' with options
-(fontspec)             [Ligatures=TeX,Color=00FF00,Color=FF0000,Color=0000FF].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF ;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF ;"
+(fontspec)             - 'bold' (b/n) with NFSS spec.: <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF ;"
+(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF ;"
+(fontspec)             - 'italic' (m/it) with NFSS spec.: <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF ;"
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF ;"
+(fontspec)             - 'bold italic' (b/it) with NFSS spec.: <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;color=FF0000FF ;"
+(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;+smcp;color=FF0000FF ;"
+Package fontspec Info: Font family 'STIXTwoText(3)' created for font 'STIX Two Text' with options [Ligatures=TeX,Color=00FF00,Color=FF0000,Color=0000FF].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF
-(fontspec)             ;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF
-(fontspec)             ;"
-(fontspec)             - 'bold' (b/n) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF
-(fontspec)             ;"
-(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF
-(fontspec)             ;"
-(fontspec)             - 'italic' (m/it) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF
-(fontspec)             ;"
-(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF
-(fontspec)             ;"
-(fontspec)             - 'bold italic' (b/it) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF
-(fontspec)             ;"
-(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.:
-(fontspec)             <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF
-(fontspec)             ;"
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF ;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"STIXTwoText:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF ;"
+(fontspec)             - 'bold' (b/n) with NFSS spec.: <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF ;"
+(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: <->"STIXTwoText/B:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF ;"
+(fontspec)             - 'italic' (m/it) with NFSS spec.: <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF ;"
+(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: <->"STIXTwoText/I:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF ;"
+(fontspec)             - 'bold italic' (b/it) with NFSS spec.: <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;color=0000FFFF ;"
+(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: <->"STIXTwoText/BI:mode=node;script=latn;language=dflt;+tlig;+smcp;color=0000FFFF ;"
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0

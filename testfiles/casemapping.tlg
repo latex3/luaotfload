@@ -2,278 +2,150 @@ This is a generated file for the l3build validation system.
 Don't change this file in any respect.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line ....
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(1)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={+lower}].
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(1)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={+lower}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+lower;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+lower;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(2)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={lower=de-alt}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+lower;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+lower;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(2)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={lower=de-alt}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=de-alt;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=de-alt;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(3)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={+upper}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=de-alt;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=de-alt;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(3)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={+upper}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+upper;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+upper;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(4)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={upper=de-alt}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+upper;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;+upper;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(4)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={upper=de-alt}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=de-alt;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=de-alt;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(5)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={lower=el}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=de-alt;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=de-alt;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(5)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={lower=el}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=el;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=el;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(6)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={upper=el}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=el;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=el;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(6)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={upper=el}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=el;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=el;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(7)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={lower=lt}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=el;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=el;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(7)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={lower=lt}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=lt;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=lt;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(8)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={upper=lt}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=lt;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;lower=lt;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(8)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={upper=lt}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=lt;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=lt;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(9)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Greek,RawFeature={language=ell}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=lt;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;upper=lt;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(9)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(10)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={+lower}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(10)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={+lower}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+lower;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+lower;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(11)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={lower=el-x-iota}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+lower;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+lower;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(11)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={lower=el-x-iota}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;lower=el-x-iota;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;lower=el-x-iota;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(12)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={+upper}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;lower=el-x-iota;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;lower=el-x-iota;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(12)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={+upper}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+upper;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+upper;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(13)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={upper=el-x-iota}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+upper;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;+upper;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(13)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},RawFeature={upper=el-x-iota}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;upper=el-x-iota;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;upper=el-x-iota;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(14)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={language=trk}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;upper=el-x-iota;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=grek;language=dflt;+tlig;language=ell;upper=el-x-iota;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(14)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(15)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={language=trk},RawFeature={+lower}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(15)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},RawFeature={+lower}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+lower;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+lower;+smcp;"
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it
-(fontspec)             probably doesn't exist).
-Package fontspec Info: Font family 'kpse:NotoSerif-Regular(16)' created for
-(fontspec)             font 'kpse:NotoSerif-Regular' with options
-(fontspec)             [Ligatures=TeX,Script=Latin,RawFeature={language=trk},RawFeature={+upper}].
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+lower;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+lower;+smcp;"
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/BI" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/B" (it probably doesn't exist).
+Package fontspec Info: Could not resolve font "kpse:NotoSerif-Regular/I" (it probably doesn't exist).
+Package fontspec Info: Font family 'kpse:NotoSerif-Regular(16)' created for font 'kpse:NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},RawFeature={+upper}].
 (fontspec)              
-(fontspec)              This font family consists of the following NFSS
-(fontspec)             series/shapes:
+(fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+upper;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.:
-(fontspec)             <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+upper;+smcp;"
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+upper;"
+(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular:mode=node;script=latn;language=dflt;+tlig;language=trk;+upper;+smcp;"
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0

@@ -13,38 +13,26 @@ jobs:
     steps:
       # Boilerplate
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - run: sudo apt-get install python3-docutils
       - name: Install TeX Live
-        uses: zauguin/install-texlive@v2
+        uses: zauguin/install-texlive@v3
         with:
           # Here we use the same list of packages as in the testing workflow.
           package_file: .github/tl_packages
-          cache_version: 0
       - name: Run l3build
         run: l3build ctan -H --show-log-on-error
       - name: Create GitHub release
-        uses: ncipollo/release-action@880be3d0a71bc0fa98db60201d2cbdc27324f547
+        uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
         id: release
         with:
           artifacts: "build/distrib/ctan/*.zip"
           prerelease: ${{ endsWith(github.ref, '-dev') }}
           token: ${{ secrets.GITHUB_TOKEN }}
-      # To get the name of the release, we need to remove a prefix from a variable.
-      # Sadly, this isn't supported by GitHub's *extremely* limited expression syntax
-      # and we have to use a separate action instead.
-      #
-      - name: Get name
-        uses: frabert/replace-string-action@9b62dfe3ae936b1cc380f2421c8ac9e63a4a3e85
-        id: name
-        with:
-          pattern: "^refs/tags/"
-          string: ${{ github.ref }}
-          replace-with: ""
       # If a test failed, we already notified in the other workflow. Here we notify
       # when a release has been created.
       - name: Send mail
-        uses: dawidd6/action-send-mail@6063705cefe50cb915fc53bb06d4049cae2953b2
+        uses: dawidd6/action-send-mail@dc13c734ff2b581c12c1b59958ba73d6fa95b371
         with:
           # Currently using my (Marcel's) mail server for sending mails.
           server_address: typesetting.eu
@@ -60,9 +48,9 @@ jobs:
           # to send from the mail address.
           from: LaTeX CI <github@latex-project.org>
           # Determine the subject and body of the mail.
-          subject: "New release for ${{github.repository}}: ${{steps.name.outputs.replaced}}"
+          subject: "New release for ${{github.repository}}: ${{github.ref_name}}"
           body: |
-            The release ${{steps.name.outputs.replaced}} has been created for ${{github.repository}}.
+            The release ${{github.ref_name}} has been created for ${{github.repository}}.
 
             More information can be found at
             ${{steps.release.outputs.html_url}}

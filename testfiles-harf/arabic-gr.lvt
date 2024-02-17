@@ -14,7 +14,7 @@
   end, 'luaotfload.glyphinfo -- testing variant')
 }
 
-\setmainfont{AwamiNastaliq-Regular.ttf}[Renderer=Harfbuzz, Script=Arabic]
+\setmainfont{AwamiNastaliq-Regular.ttf}[Renderer=Harfbuzz, Script=Arabic, KpseOnly]
 \begin{document}
 \showoutput
 \START

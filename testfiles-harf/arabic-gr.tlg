@@ -10,261 +10,233 @@ Completed box being shipped out [1]
 ....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
-..\vbox(550.0+0.0)x345.0, glue set 348.98032fil, direction TLT
+..\vbox(550.0+0.0)x345.0, glue set 343.228fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 0.0
-...\hbox(12.94922+5.41504)x345.0, glue set 0.30667, direction TRT
+...\hbox(12.94922+5.41504)x345.0, glue set - 0.56956, direction TRT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TRT
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "دف" 062F +960:+0
-....\kern-4.04785 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 1201D5 +161280:-196160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 -2560:+627200
-....\kern2.44629 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120236 +960:+1600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 -3840:+627200
+....\kern-1.60645 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201D5 +0:-196160
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1204E2 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120236 +0:+1600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1204E2 +0:+0
 ....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۱" 06F1 +960:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۱" 06F1 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
 ....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
-....\kern-3.06152 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1201A1 +201600:-30080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +117120:+447680
-....\kern3.06152 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120413 +960:-30400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +116160:+447680
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A1 +0:-30080
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120413 +0:-30400
 ....\kern0.00488 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +960:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +0:+0
 ....\glue(\spaceskip) 2.08008 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ان" 0627 +960:+0
-....\kern-2.29004 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1201A6 +171520:-190080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +113920:+705280
-....\kern2.60254 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202D6 +960:-27520
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +112960:+705280
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A6 +0:-190080
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202D6 +0:-27520
 ....\kern0.00488 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +960:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +0:+0
 ....\glue(\spaceskip) 2.1289 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "آ" 0622 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "آ" 0622 +0:+0
 ....\kern0.94727 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +0:+0
 ....\kern-1.16211 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +960:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.3125 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +960:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
 ....\glue(\spaceskip) 1.0791 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +960:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\kern-0.83496 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
 ....\glue(\spaceskip) -3.96484 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "حق" 12025A +640:+181120
-....\kern-2.95898 (font)
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ح" 12025A +0:+181120
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1201FF +194560:+40320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +16000:+686400
-....\kern2.9541 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120493 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +15360:+686400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201FF +0:+40320
 ....\pdfliteral page <lua data reference ...>
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120493 +0:+0
 ....\kern-0.31738 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 0642 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 0642 +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\glue(\spaceskip) 0.45898 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "عز" 120225 +640:+36480
-....\kern-2.3291 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120225 +0:+36480
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1204A0 +153280:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +133120:+338240
-....\kern2.82715 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 062A +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 1205C0 +132480:+338240
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +0:+0
 ....\pdfliteral page <lua data reference ...>
+....\kern0.49805 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 062A +0:+0
 ....\glue(\spaceskip) 2.08008 plus 0.84229 minus 0.56152
-....\kern-8.55469 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12034B +819840:+121600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +640:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern3.94531 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034B +0:+121600
 ....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 2.2998 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +640:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "عتب" 120216 +640:-45440
-....\kern-2.32422 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120216 +0:-45440
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 1201B1 +152960:-38720
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 -7360:+558080
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +324800:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +195520:-161600
-....\kern4.95117 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 -8000:+558080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B1 +0:-38720
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +42560:-161600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\kern-0.01465 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
 ....\glue(\spaceskip) 0.67871 plus 0.84229 minus 0.56152
 ....\kern5.93262 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C7 +640:+17920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C7 +0:+17920
 ....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 1.95801 plus 0.84229 minus 0.56152
-....\kern-2.80762 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1201A4 +184640:+16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +63360:+24000
-....\kern2.80762 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +62720:+24000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +0:+16960
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +0:+0
 ....\kern-1.31348 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اب" 0627 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +83200:+24000
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +0:+16960
 ....\pdfliteral page <lua data reference ...>
-....\kern-2.80762 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1201A4 +205120:+16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +83840:+24000
-....\kern3.12012 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +640:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +0:+0
 ....\glue(\spaceskip) 3.65234 plus 0.84229 minus 0.56152
-....\kern-2.9248 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120195 +192320:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +46720:-40000
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +364160:-4160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +231680:-136320
-....\kern5.53223 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120488 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "پ" 1205CE +46080:-40000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120195 +0:-21440
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-136320
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-4160
+....\pdfliteral page <lua data reference ...>
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120488 +0:+0
 ....\kern-1.15234 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +640:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\glue(\spaceskip) 2.50977 plus 0.84229 minus 0.56152
-....\kern-3.4961 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1204F8 +229760:-41920
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +94720:+54720
-....\kern3.57422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +94080:+54720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F8 +0:-41920
 ....\pdfliteral page <lua data reference ...>
+....\kern0.07813 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +617280:+276480
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +616640:+276480
 ....\kern6.46484 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120198 +640:+32640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120198 +0:+32640
 ....\pdfliteral page <lua data reference ...>
 ....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 1.89453 plus 0.84229 minus 0.56152
-....\kern-2.47559 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 1204EC +162880:-31680
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +119680:+86720
-....\kern-2.83203 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C5 +348480:-19520
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +160320:+0
-....\kern5.30762 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +119040:+86720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EC +0:-31680
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -2560:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C5 +0:-19520
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12042F +0:+0
 ....\kern-0.08301 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
 ....\glue(\spaceskip) 2.1582 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "انہی" 0627 +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +145280:+695360
+....\kern0.28809 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019E +0:+197760
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.35938 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12019E +239680:+197760
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +145920:+695360
-....\kern-3.92578 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120504 +496960:-39040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +366080:+76160
-....\kern-2.59766 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +667200:+21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +507200:+85120
-....\kern10.1709 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +126400:+76160
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120504 +0:-39040
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +10240:+85120
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +0:+21440
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12042F +0:+0
 ....\glue(\spaceskip) -1.37695 plus 0.84229 minus 0.56152
-....\kern-8.26172 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "می" 120295 +541760:+22080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +174400:+789760
-....\kern8.26172 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12041C +320:+5120
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ض" 1205C0 +173760:+789760
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120295 +0:+22080
 ....\pdfliteral page <lua data reference ...>
-....\kern-1.79688 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 12041C +0:+5120
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1201C9 +118080:+6400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +52160:-34880
-....\kern1.79688 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +51840:-34880
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C9 +0:+6400
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
 ....\glue(\spaceskip) 1.64551 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +320:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\kern-0.83008 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
 ....\glue(\spaceskip) -4.75586 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "عق" 12021C +0:+185280
-....\kern-2.48047 (font)
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 12021C +0:+185280
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 1201EC +168960:+186880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 -4800:+722240
-....\kern1.87988 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120304 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 -4800:+722240
+....\kern0.09766 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201EC +0:+186880
 ....\pdfliteral page <lua data reference ...>
+....\kern-0.69824 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120304 +0:+0
 ....\glue(\spaceskip) 2.0459 plus 0.84229 minus 0.56152
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\kern-1.01563 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "دی" 062F +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +140160:+80000
+....\kern1.19629 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120192 +0:-86400
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.97461 (font)
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 12022C +0:-1600
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "عت" 120192 +338880:-86400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +140160:+80000
-....\kern5.16602 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12022C +0:-1600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +368640:+285760
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\glue(\rightskip) 0.0
 ...\penalty 300
 ...\glue(\lineskip) 1.0
-...\hbox(14.32129+2.9541)x345.0, glue set 42.75879fil, direction TRT
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +368640:+285760
-....\kern11.72363 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +0:+0
-....\kern-3.4961 (font)
+...\hbox(14.32129+2.9541)x345.0, glue set 56.16699fil, direction TRT
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1204F8 +229120:-41920
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +94080:+54720
-....\kern3.57422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +94080:+54720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F8 +0:-41920
 ....\pdfliteral page <lua data reference ...>
+....\kern0.07813 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +222080:+376000
 ....\kern0.01953 (font)
@@ -272,18 +244,17 @@ Completed box being shipped out [1]
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +0:+0
 ....\glue(\spaceskip) 2.5 plus 0.84229 minus 0.56152
-....\kern-6.2793 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 1204EE +819200:+32000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +531840:-225280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +531840:-225280
+....\kern6.2207 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EE +0:+32000
 ....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\kern-0.09766 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
 ....\glue(\spaceskip) 2.1582 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
-....\pdfliteral page <lua data reference ...>
 ....\kern0.83008 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +0:+0
 ....\glue(\spaceskip) 2.08496 plus 0.84229 minus 0.56152
@@ -296,37 +267,31 @@ Completed box being shipped out [1]
 ....\kern-12.5 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 2.2998 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "انہی" 0627 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +145280:+695360
+....\kern0.28809 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019E +0:+197760
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.35938 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12019E +239040:+197760
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +145280:+695360
-....\kern-3.92578 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120504 +496320:-39040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +365440:+76160
-....\kern-2.59766 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +666560:+21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +506560:+85120
-....\kern10.1709 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +126400:+76160
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120504 +0:-39040
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +10240:+85120
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +0:+21440
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12042F +0:+0
 ....\glue(\spaceskip) 2.34863 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ای" 0627 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +165440:-104640
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:+38400
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 120191 +218560:+38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +165440:-104640
-....\kern3.33496 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12033F +0:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 12033F +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
-....\pdfliteral page <lua data reference ...>
 ....\kern-0.58105 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\kern-0.88379 (font)
@@ -335,33 +300,30 @@ Completed box being shipped out [1]
 ....\kern0.18555 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 06D2 +0:+0
 ....\glue(\spaceskip) 2.5 plus 0.84229 minus 0.56152
-....\kern-8.55469 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12034B +819200:+121600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +0:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern3.94531 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034B +0:+121600
 ....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 2.29004 plus 0.84229 minus 0.56152
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202BE +0:-36480
 ....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ات" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +119680:+560000
+....\kern0.62012 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019B +0:+49280
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.78418 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ھ" 12019B +288640:+49280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +119680:+560000
-....\kern4.38965 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120436 +0:+0
-....\pdfliteral page <lua data reference ...>
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ھ" 120436 +0:+0
 ....\glue(\spaceskip) 3.42773 plus 0.84229 minus 0.56152
-....\kern-3.78418 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ھ" 12019B +248000:+65600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +87040:-8960
-....\kern3.78418 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12044F +0:-71360
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +87040:-8960
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019B +0:+65600
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ھ" 12044F +0:-71360
 ....\kern0.00488 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\pdfliteral page <lua data reference ...>
@@ -371,25 +333,23 @@ Completed box being shipped out [1]
 ....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\kern-5.36621 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12024F +351680:-36800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +142080:-208640
-....\kern5.3711 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "چ" 1205CE +142080:-208640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024F +0:-36800
 ....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\kern-0.01465 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
 ....\kern-0.70801 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 06D2 +0:+0
 ....\glue(\spaceskip) 1.43066 plus 0.84229 minus 0.56152
-....\kern-4.44336 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120342 +291200:-38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +0:+0
-....\kern4.44824 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120342 +0:-38400
 ....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\glue(\spaceskip) 2.71484 plus 0.84229 minus 0.56152
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202BE +0:+204160
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120330 +0:+5760
@@ -398,42 +358,40 @@ Completed box being shipped out [1]
 ....\kern-4.96094 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 06A9 +0:+0
 ....\glue(\spaceskip) -1.875 plus 0.84229 minus 0.56152
-....\kern-6.7041 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "رن" 120359 +439040:+204160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +0:+0
-....\kern6.7041 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120359 +0:+204160
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.02246 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +165120:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +3840:+364480
-....\kern2.5293 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +4160:+364480
+....\kern-0.49805 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
 ....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\kern-5.36621 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اہیئ" 12024F +351360:-36800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +141760:-208640
-....\kern5.3711 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "چ" 1205CE +142080:-208640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024F +0:-36800
 ....\pdfliteral page <lua data reference ...>
-....\kern-2.89063 (font)
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 1204EA +445440:+130240
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +286720:-202880
-....\kern-1.43066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +539200:+76800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +560320:-98560
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0654 +784000:+16000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہیئ" 0654 +784320:+16000
 ....\kern-4.36523 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +825280:+22080
-....\kern0.09766 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +825600:+22080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +560640:-98560
+....\kern-1.43066 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +539520:+76800
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +287040:-202880
+....\kern3.91113 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EA +0:+130240
 ....\pdfliteral page <lua data reference ...>
-....\kern-0.10254 (font)
+....\kern-6.7041 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\kern-0.09766 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -441,1136 +399,1059 @@ Completed box being shipped out [1]
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\lineskip) 1.0
-...\hbox(17.17773+5.41504)x345.0, glue set 0.63689, direction TRT
+...\hbox(17.17773+5.41504)x345.0, glue set 0.22688, direction TRT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TRT
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "دف" 062F +6400:+0
-....\kern-4.04785 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 1201D5 +166720:-196160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +2560:+627200
-....\kern2.44629 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120236 +6400:+1600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 -3840:+627200
+....\kern-1.60645 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201D5 +0:-196160
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1204E2 +6400:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120236 +0:+1600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1204E2 +0:+0
 ....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۲" 06F2 +6400:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +6400:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۲" 06F2 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
 ....\glue(\spaceskip) 1.15234 plus 0.84229 minus 0.56152
-....\kern-3.93066 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204F9 +264000:+11840
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +224960:-99840
-....\kern3.93066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +6400:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +218560:-99840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F9 +0:+11840
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
 ....\glue(\spaceskip) -5.40039 plus 0.84229 minus 0.56152
-....\kern-6.09375 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ص" 12060D +405440:+232000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 +207040:+948160
-....\kern-4.02832 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12027D +669440:-19200
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +462080:+867840
-....\kern10.90332 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120284 +6080:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ش" 1205D0 +200640:+948160
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12060D +0:+232000
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "خ" 1205C0 +56640:+867840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12027D +0:-19200
+....\pdfliteral page <lua data reference ...>
+....\kern0.78125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ص" 120284 +0:+0
 ....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +6080:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +6080:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +0:+0
 ....\glue(\spaceskip) 1.5039 plus 0.84229 minus 0.56152
-....\kern-3.06152 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1201A1 +206720:-30080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +121920:+447680
-....\kern3.06152 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120413 +6080:-30400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +115840:+447680
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A1 +0:-30080
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120413 +0:-30400
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +0:+0
+....\glue(\spaceskip) 1.6748 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "آ" 0622 +0:+0
+....\kern0.95215 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +0:+0
+....\kern-1.16699 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -67840:-108480
+....\kern-1.60156 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A3 +0:-15680
+....\pdfliteral page <lua data reference ...>
+....\kern-0.00977 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\kern-0.72754 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 06BA +0:+0
+....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
+....\kern-0.83496 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
+....\glue(\spaceskip) -3.96484 plus 0.84229 minus 0.56152
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ح" 12025A +0:+181120
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +15360:+686400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201FF +0:+40320
+....\pdfliteral page <lua data reference ...>
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120493 +0:+0
+....\kern-0.32227 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 0642 +0:+0
+....\glue(\spaceskip) 1.43066 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120342 +0:-38400
 ....\pdfliteral page <lua data reference ...>
 ....\kern0.00488 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +6080:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +6080:+0
-....\glue(\spaceskip) 1.6748 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "آ" 0622 +6080:+0
-....\kern0.94727 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +6400:+0
-....\kern-1.16211 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +6080:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "دی" 062F +6080:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-2.34375 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1201A3 +54720:-15680
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 -61760:-108480
-....\kern0.73242 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +6080:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-0.72754 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 06BA +6080:+0
-....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +6080:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +6080:+0
-....\kern-0.83496 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +6080:+0
-....\glue(\spaceskip) -3.96484 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "حق" 12025A +5760:+181120
-....\kern-2.95898 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1201FF +199680:+40320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +21120:+686400
-....\kern2.9541 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120493 +5760:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-0.32227 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 0642 +5760:+0
-....\glue(\spaceskip) 1.43066 plus 0.84229 minus 0.56152
-....\kern-4.44336 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120342 +296960:-38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +5760:+0
-....\kern4.44824 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +5760:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\glue(\spaceskip) -4.35547 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120410 +5440:+366080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ست" 1202D8 +5440:+531200
-....\kern-3.47656 (font)
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120410 +0:+366080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202D8 +0:+531200
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "حق" 1201BD +233280:+75520
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +102400:+831680
-....\kern3.38379 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12027B +5440:+81920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +96960:+831680
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201BD +0:+75520
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +98560:+609280
-....\kern8.4375 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +5440:+0
-....\kern-6.2793 (font)
+....\kern-0.08789 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ح" 12027B +0:+81920
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 1204EE +824640:+32000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +537280:-225280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +5440:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +92800:+609280
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120206 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 1.89453 plus 0.84229 minus 0.56152
-....\kern-3.66699 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120262 +245760:-16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +100160:+88960
-....\kern3.64746 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +5440:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 1.55273 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +5440:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.83008 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +5440:+0
-....\glue(\spaceskip) 2.36328 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +5440:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +5440:+1280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +5440:-8000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12017A +5440:+0
-....\kern0.30273 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +5440:+0
-....\glue(\spaceskip) 0.52246 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "می" 120401 +5440:-31680
-....\kern-2.83203 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 1201C5 +191040:-19520
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +8320:+121600
-....\kern2.83203 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +5440:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 1.96777 plus 0.84229 minus 0.56152
-....\kern-2.9248 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120195 +197120:-38720
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +93120:-46080
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +368960:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +236480:-152640
-....\kern5.55176 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +5440:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +5440:+0
 ....\glue(\spaceskip) 2.5 plus 0.84229 minus 0.56152
-....\kern-6.5625 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 120345 +538560:+322560
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +5440:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0654 +783360:+16000
-....\kern8.13477 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +5440:+22080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +531840:-225280
+....\kern6.2207 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EE +0:+32000
 ....\pdfliteral page <lua data reference ...>
 ....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +5440:+0
-....\glue(\spaceskip) 1.53809 plus 0.84229 minus 0.56152
-....\kern-6.5625 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) 1.89453 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 12037C +538560:+322560
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +5440:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0654 +783360:+16000
-....\kern8.13477 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +5440:+22080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ج" 1205BE +94720:+88960
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120262 +0:-16960
 ....\pdfliteral page <lua data reference ...>
-....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +5440:+0
-....\glue(\spaceskip) 1.18164 plus 0.84229 minus 0.56152
-....\kern-2.47559 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 1204EC +167680:-31680
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +124160:+86720
-....\kern-2.83203 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C5 +353280:-19520
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +164800:+0
-....\kern5.30762 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +5440:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-0.0586 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +5440:+0
-....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +5440:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +5440:+0
-....\kern-0.83496 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +5440:+0
-....\glue(\spaceskip) 1.04004 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +5440:+0
-....\pdfliteral page <lua data reference ...>
+....\kern-0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\glue(\spaceskip) 1.55273 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.83008 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +5440:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +0:+0
+....\glue(\spaceskip) 2.36328 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +0:+1280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +0:-8000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12017A +0:+0
+....\kern0.30273 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +0:+0
+....\glue(\spaceskip) 0.52246 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120401 +0:-31680
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +2880:+121600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C5 +0:-19520
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12042F +0:+0
+....\glue(\spaceskip) 1.96777 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +87680:-46080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120195 +0:-38720
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-152640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +0:+0
+....\glue(\spaceskip) 2.5 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern1.57227 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120345 +0:+322560
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +244800:+16000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +0:+22080
+....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) 1.53809 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 1203F5 +0:+0
+....\kern1.57227 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12037C +0:+322560
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +244800:+16000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +0:+22080
+....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) 1.18164 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +118720:+86720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EC +0:-31680
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -2560:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C5 +0:-19520
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12042F +0:+0
+....\kern-0.0586 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
+....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
+....\kern-0.83496 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
+....\glue(\spaceskip) 1.04004 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.83008 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +0:+0
 ....\glue(\spaceskip) -0.31738 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "حق" 120262 +5120:+51520
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ح" 120262 +0:+51520
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +104000:+558720
+....\kern-0.00977 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120206 +0:+0
+....\pdfliteral page <lua data reference ...>
 ....\glue(\rightskip) 0.0
 ...\penalty 150
 ...\glue(\lineskip) 1.0
-...\hbox(17.63184+5.41504)x345.0, glue set - 0.14928, direction TRT
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +109120:+558720
-....\kern8.85742 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +5120:+0
-....\kern-2.80762 (font)
+...\hbox(17.63184+5.41504)x345.0, glue set 0.59743, direction TRT
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1201A4 +189120:+16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +41280:-52800
-....\kern2.80762 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +5120:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "پ" 1205CE +36160:-52800
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +0:+16960
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +0:+0
 ....\glue(\spaceskip) -3.53027 plus 0.84229 minus 0.56152
-....\kern-2.29004 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1201A6 +154880:+23680
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +97280:+919040
-....\kern2.29004 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202D6 +4800:+186240
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +92160:+919040
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A6 +0:+23680
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202D6 +0:+186240
 ....\kern-0.69824 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120304 +4800:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120304 +0:+0
 ....\kern-0.0586 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +4800:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
 ....\glue(\spaceskip) 1.86035 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "رن" 0631 +4800:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 -61120:+429760
+....\kern-1.49902 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:+38400
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 120191 +104640:+38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 -56320:+429760
-....\kern1.52344 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120340 +4800:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +4800:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 120340 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
 ....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
-....\kern-5.60547 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 120254 +372160:+281280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +155840:+339520
-....\kern-0.96191 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201CC +435200:+60800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +387200:+943360
-....\kern6.56738 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202BD +4800:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ج" 1205BE +151040:+339520
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120254 +0:+281280
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +15040:+943360
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201CC +0:+60800
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202BD +0:+0
 ....\kern-0.04395 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +4800:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
 ....\glue(\spaceskip) 2.34375 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "زب" 0632 +4800:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +148160:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +97280:-176960
-....\kern2.19238 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +4800:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +4800:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +4800:+0
-....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "مذہب" 1203FA +4800:-7040
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +37120:+482560
-....\kern-5.28809 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204E8 +506880:+6400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +354880:+5440
-....\kern-11.58203 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +1265920:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +876480:-181120
-....\kern19.91699 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +4800:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +4800:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +4800:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +92480:-176960
 ....\kern-0.83496 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +4800:+0
-....\glue(\spaceskip) -0.4248 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "سی" 1202C4 +4480:-38720
-....\kern-2.62207 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 1201A8 +176320:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +43840:-152640
-....\kern2.62695 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +4480:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.40039 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C8 +4480:+31040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +4480:+0
-....\glue(\spaceskip) 0.9082 plus 0.84229 minus 0.56152
-....\kern-3.98438 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ریق" 12019A +265600:+119040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +97600:+763200
-....\kern-2.54395 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120200 +432320:+23680
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +285760:+628480
-....\kern6.52832 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +4480:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +158400:+88000
-....\kern-7.63184 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120206 +829760:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +423040:+558720
-....\kern12.33398 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +4480:+0
-....\kern-4.44336 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120342 +295680:-38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +4480:+0
-....\kern4.44824 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +4480:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.13867 plus 0.84229 minus 0.56152
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +202560:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +149440:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +4480:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -2.16797 plus 0.84229 minus 0.56152
-....\kern-5.66406 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 12035B +375360:+443200
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +4160:+0
-....\kern5.66406 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202E0 +4160:+266560
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +4160:+0
-....\glue(\spaceskip) -2.11426 plus 0.84229 minus 0.56152
-....\kern-1.96289 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1201EA +132480:+97600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +104960:+944960
-....\kern1.96289 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202E6 +3840:+259520
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203F7 +3840:+0
-....\glue(\spaceskip) 2.0166 plus 0.84229 minus 0.56152
-....\kern-8.55469 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12034B +823040:+121600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +3840:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +3840:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -1.89453 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "عقی" 12021C +3520:+109760
-....\pdfliteral page <lua data reference ...>
-....\kern-2.74902 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 1201F2 +183680:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +23680:+615680
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +355520:-4160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +223040:-135360
-....\kern5.35645 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120488 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-0.69824 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 06D2 +3520:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +3520:+0
-....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
-....\kern-2.59277 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1201E7 +173440:-64000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +104960:+671360
-....\kern2.57324 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-1.17188 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +3520:+0
-....\kern-0.22461 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +3520:+0
-....\glue(\spaceskip) 1.32813 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FB +3520:-205440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120229 +3520:-38720
 ....\kern0.00488 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اش" 120179 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-6.10352 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1202D2 +436160:+8640
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 +219200:+440320
-....\kern6.60156 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.19043 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 06D2 +3520:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +3520:+0
-....\glue(\spaceskip) 2.18262 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-0.58105 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +3520:+0
-....\kern-1.51855 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "لت" 12030C +3520:-9600
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +371200:+285760
-....\kern12.03613 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +3520:+0
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +201600:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +148480:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\rightskip) 0.0
-...\glue(\lineskip) 1.0
-...\hbox(17.17773+2.9541)x345.0, glue set - 0.62924, direction TRT
-....\kern-5.36621 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ان" 12024F +355200:-36800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +173120:+447040
-....\kern5.3711 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120191 +240640:-9600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +79360:+381760
-....\kern3.60352 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120488 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-1.15234 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ان" 0627 +3520:+0
-....\kern-2.1875 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 120199 +192000:+16320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +168320:+845120
-....\kern2.87598 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202F9 +3520:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -0.01953 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "حیثیت" 120255 +3200:+213120
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 -72640:+159040
-....\kern-1.43066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +280000:+8000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 +180800:+714240
-....\kern-3.77441 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AE +527360:+8000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +341440:-21440
-....\kern-11.58203 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +1286400:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +896000:+285760
-....\kern20.04883 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +3200:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "وغی" 0648 +3200:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-5.28809 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 120219 +180480:+5120
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +1280:+653120
-....\kern-1.79688 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C9 +298240:+6400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +232320:-34880
-....\kern4.50195 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +3200:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.18066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +3200:+0
-....\glue(\spaceskip) 1.43066 plus 0.84229 minus 0.56152
-....\kern-4.44336 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120342 +294400:-38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +3200:+0
-....\kern4.44824 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +3200:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -1.83105 plus 0.84229 minus 0.56152
-....\kern-5.92773 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120358 +391360:+201280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +2880:+0
-....\kern5.9082 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +224960:+376000
-....\kern0.01953 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120199 +2880:+16320
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +2880:+0
-....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اث" 0627 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-2.80762 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1201A4 +259520:+16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 +181120:+451520
-....\kern3.91602 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 1.01563 plus 0.84229 minus 0.56152
-....\kern-3.31055 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 12019D +219840:+320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +174400:+347520
-....\kern3.31055 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204E2 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 3.88184 plus 0.84229 minus 0.56152
-....\kern-2.80762 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 1201A4 +186880:+16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +39040:-52800
-....\kern-3.53516 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +418560:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205DA +376640:+350400
-....\kern5.63965 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 06D2 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 1.43555 plus 0.84229 minus 0.56152
-....\kern-4.41406 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120379 +292160:-38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +2880:+0
-....\kern4.41895 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-0.44922 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +2880:+0
-....\glue(\spaceskip) 2.1582 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.83008 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +2880:+0
-....\glue(\spaceskip) 2.08496 plus 0.84229 minus 0.56152
-....\kern-8.55469 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12034B +822080:+121600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +2880:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.05078 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +2880:+1280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +2880:-8000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12017A +2880:+0
-....\kern0.30273 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +2880:+0
-....\kern-0.41992 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +2880:+0
-....\glue(\spaceskip) 1.61621 plus 0.84229 minus 0.56152
-....\kern-3.1836 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 120265 +211520:+60800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +110720:+306560
-....\kern3.1836 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202BD +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.15332 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +2880:+1280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +2880:-8000
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اق" 12017A +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-4.58496 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 1201DD +859520:+32000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +660160:+681920
-....\kern0.57129 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.09961 plus 0.84229 minus 0.56152
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +200960:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +147840:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +2880:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FA +0:-7040
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FA +2880:+95040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ذ" 1205C0 +32320:+482560
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120488 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120604 +2880:+35840
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 12033F +2880:+0
-....\glue(\spaceskip) 2.14355 plus 0.84229 minus 0.56152
-....\kern5.93262 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C7 +2880:+17920
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +97280:+5440
+....\kern-1.48438 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204E8 +0:+6400
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +369600:-181120
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) 2.3584 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
+....\kern-0.83496 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
+....\glue(\spaceskip) -0.4248 plus 0.84229 minus 0.56152
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C4 +0:-38720
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-152640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\kern0.40039 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C8 +0:+31040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
+....\glue(\spaceskip) 0.9082 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +93120:+763200
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019A +0:+119040
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 +20160:+628480
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120200 +0:+23680
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +153920:+88000
+....\kern2.61719 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A3 +0:+52800
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +93440:+558720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120206 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) 1.42578 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120342 +0:-38400
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) 2.13867 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) -2.16797 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12035B +0:+443200
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202E0 +0:+266560
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
+....\glue(\spaceskip) -2.11426 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +100800:+944960
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201EA +0:+97600
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202E6 +0:+259520
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203F7 +0:+0
+....\glue(\spaceskip) 2.0166 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern3.94531 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034B +0:+121600
+....\pdfliteral page <lua data reference ...>
 ....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +2880:+0
-....\glue(\spaceskip) 1.89453 plus 0.84229 minus 0.56152
-....\kern-3.66699 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) -1.89453 plus 0.84229 minus 0.56152
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 12021C +0:+109760
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120262 +243200:-16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +97600:+88960
-....\kern3.64746 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +2880:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -4.19434 plus 0.84229 minus 0.56152
-....\kern-6.09375 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ص" 12060D +401920:+232000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 +203520:+948160
-....\kern-4.02832 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12027D +665920:-19200
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +458560:+867840
-....\kern10.90332 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120284 +2560:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -2.59766 plus 0.84229 minus 0.56152
-....\kern-3.97461 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120192 +262720:+112320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +96320:+933120
-....\kern3.96973 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120229 +2240:+270400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +20160:+615680
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201F2 +0:-21440
 ....\pdfliteral page <lua data reference ...>
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "لق" 120330 +2240:+74240
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +64960:+557440
-....\kern7.99316 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +2240:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "رک" 0631 +2240:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-5.15137 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ھت" 12034F -56000:+305920
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 -393600:+0
-....\kern-0.89355 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120455 +2240:-38720
-....\pdfliteral page <lua data reference ...>
-....\kern-2.62207 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 1201A8 +174080:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +9280:+395200
-....\kern2.62695 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +2240:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.00195 plus 0.84229 minus 0.56152
-....\kern-6.2793 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 1204EE +821440:+32000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +534080:-225280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +2240:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.30469 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +2240:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.83008 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +2240:+0
-....\glue(\rightskip) 0.0
-...\glue(\lineskip) 1.0
-...\hbox(15.51758+2.92969)x345.0, glue set 0.1315, direction TRT
-....\kern-5.38086 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 12034C +354560:+304640
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +1920:+0
-....\kern5.38086 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202F9 +1920:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.1582 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "سی" 1202C4 +1920:-38720
-....\kern-2.62207 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 1201A8 +173760:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +41280:-152640
-....\kern2.62695 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +1920:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.40527 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C8 +1920:+31040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +1920:+0
-....\glue(\spaceskip) -2.74902 plus 0.84229 minus 0.56152
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +1600:+0
-....\kern-3.50586 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B6 +661440:+188800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +453760:+193600
-....\kern-2.56348 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201EE +829440:-206080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +681600:+701760
-....\kern-3.77441 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AE +1076800:+8000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +890880:-21440
-....\kern-11.58203 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +1835840:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +1445440:+285760
-....\kern28.45215 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-1.11328 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +242560:-13120
-....\kern0.5957 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +1600:+16960
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +1600:+0
-....\kern-0.49805 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +1600:+0
-....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اختی" 0627 +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-5.60547 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120254 +389440:-45440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +191040:+646400
-....\kern-2.32422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B1 +541760:-38720
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +381120:+557120
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +713600:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +581120:-152640
-....\kern10.86914 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +1600:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-135360
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-4160
 ....\pdfliteral page <lua data reference ...>
 ....\kern-0.01465 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +1600:+0
-....\glue(\spaceskip) 1.36719 plus 0.84229 minus 0.56152
-....\kern-3.02246 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120488 +0:+0
+....\kern-0.69824 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 06D2 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
+....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +199680:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +146560:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +1600:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +101440:+671360
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201E7 +0:-64000
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 3.57422 plus 0.84229 minus 0.56152
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE -24640:+144320
-....\kern-2.59766 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +366080:+21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +204160:+67200
-....\kern-7.32422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +846080:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +550720:+215680
-....\kern13.54492 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.15137 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120307 +1600:-8000
-....\kern0.00488 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اق" 12017A +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-2.59277 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1201E7 +191360:-64000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +122880:+671360
-....\kern2.87598 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-0.64453 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +1600:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120404 +1600:+31040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +1600:+0
-....\glue(\spaceskip) -0.01953 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "حیثیت" 120255 +1280:+213120
-....\glue(\spaceskip) 0.0 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 -74560:+159040
-....\kern-1.43066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +278080:+8000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 +178880:+714240
-....\kern-3.77441 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AE +525440:+8000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +339520:-21440
-....\kern-11.58203 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +1284480:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +894080:+285760
-....\kern16.43066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0020 +1280:+0
-....\kern-5.38086 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 12034C +353920:+304640
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +1280:+0
-....\kern5.38086 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202F9 +1280:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\kern-2.9248 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120195 +192960:-38720
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +88960:-46080
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +364800:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +200640:+361600
-....\kern5.55176 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +1280:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.60254 plus 0.84229 minus 0.56152
-....\kern-2.80762 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1201A4 +185280:+16960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +37440:-52800
-....\kern2.80762 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +1280:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 0.8789 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +1280:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.83008 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +1280:+0
-....\glue(\spaceskip) 2.08984 plus 0.84229 minus 0.56152
-....\kern5.93262 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C7 +1280:+17920
-....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +1280:+0
-....\glue(\spaceskip) -2.53906 plus 0.84229 minus 0.56152
-....\kern-5.92773 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120358 +389440:+201280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +960:+0
-....\kern5.9082 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +960:+0
-....\pdfliteral page <lua data reference ...>
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +223040:+376000
-....\kern0.01953 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120199 +960:+16320
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +960:+0
-....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +960:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "متی" 1203FF +960:-45440
-....\kern-2.32422 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 1201B1 +153280:-38720
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 -7040:+558080
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +325120:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +192640:-152640
-....\kern4.95117 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +960:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.36621 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +960:+0
-....\kern-1.20117 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 06CC +960:+0
-....\glue(\spaceskip) 0.46387 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202BE +960:+204160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120330 +960:+5760
 ....\kern-0.01953 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +960:+0
-....\kern-4.96094 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 06A9 +960:+0
-....\glue(\spaceskip) -0.58594 plus 0.84229 minus 0.56152
-....\kern-3.35938 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\kern-1.17188 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +0:+0
+....\kern-0.22461 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
+....\glue(\spaceskip) 1.32813 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FB +0:-205440
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120229 +0:-38720
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12019E +220800:+197760
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +127040:+695360
-....\kern-3.92578 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120504 +478080:-39040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +347200:+76160
-....\kern-2.59766 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +648320:+21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +488320:+85120
-....\kern9.88281 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +640:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ش" 1205D0 +215680:+440320
+....\kern0.49805 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202D2 +0:+8640
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -1.41602 plus 0.84229 minus 0.56152
-....\kern-6.83594 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
+....\kern0.19043 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 06D2 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "،" 060C +0:+0
+....\glue(\spaceskip) 2.18262 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
+....\kern-0.58105 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
+....\kern-1.51855 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12030C +0:-9600
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120348 +448320:+91520
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +320:+0
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +620160:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +487680:-152640
-....\kern9.46289 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +367680:+285760
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120188 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\kern-5.36621 (font)
+....\glue(\spaceskip) 2.15332 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12024F +352000:-36800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +138560:-155200
-....\kern5.3711 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
 ....\pdfliteral page <lua data reference ...>
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +691520:+276480
-....\kern7.60254 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120198 +320:+32640
-....\pdfliteral page <lua data reference ...>
-....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +320:+0
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\glue(\rightskip) 0.0
 ...\glue(\lineskip) 1.0
-...\hbox(17.63184+2.9541)x345.0, glue set 0.1901, direction TRT
-....\kern-4.41406 (font)
+...\hbox(17.17773+2.9541)x345.0, glue set 0.45714, direction TRT
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120379 +289600:-38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +320:+0
-....\kern4.41895 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "خ" 1205C0 +169600:+447040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024F +0:-36800
 ....\pdfliteral page <lua data reference ...>
-....\kern-0.44434 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +320:+0
-....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
-....\kern-5.36621 (font)
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اہ" 12024F +352000:-36800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +142400:-208640
-....\kern5.3711 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +75840:+381760
+....\kern0.5957 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-9600
 ....\pdfliteral page <lua data reference ...>
-....\kern-6.2793 (font)
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120488 +0:+0
+....\kern-1.15234 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 1204EE +844800:+32000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +557440:-225280
-....\kern0.38574 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +164800:+845120
+....\kern0.68848 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120199 +0:+16320
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.09473 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +0:+0
+....\glue(\spaceskip) -0.01953 plus 0.84229 minus 0.56152
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ح" 120255 +0:+213120
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -75840:+159040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B0 +0:+61440
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ث" 1205D0 -5120:+714240
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +0:+8000
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +61440:-21440
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AE +0:+8000
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +368640:+285760
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) 2.15332 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "غ" 1205C0 -1600:+653120
+....\kern-2.58301 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120219 +0:+5120
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +51840:-34880
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C9 +0:+6400
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
+....\kern0.18066 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +0:+0
+....\glue(\spaceskip) 1.43066 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120342 +0:-38400
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) -1.83105 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120358 +0:+201280
+....\pdfliteral page <lua data reference ...>
+....\kern-0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +222080:+376000
+....\kern0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120199 +0:+16320
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +0:+0
+....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ث" 1205D0 +178240:+451520
+....\kern1.1084 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +0:+16960
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +0:+0
+....\glue(\spaceskip) 1.01563 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +171520:+347520
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019D +0:+320
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1204E2 +0:+0
+....\glue(\spaceskip) 3.88184 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "پ" 1205CE +36160:-52800
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +0:+16960
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ڑ" 1205DA +189760:+350400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A2 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\kern-0.70313 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 06D2 +0:+0
+....\glue(\spaceskip) 1.43555 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120379 +0:-38400
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\kern-0.44922 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
+....\glue(\spaceskip) 2.1582 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.83008 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +0:+0
+....\glue(\spaceskip) 2.08496 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern3.94531 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034B +0:+121600
+....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) 2.05078 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +0:+1280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +0:-8000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12017A +0:+0
+....\kern0.30273 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\kern-0.41992 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +0:+0
+....\glue(\spaceskip) 1.61621 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ج" 1205BE +107840:+306560
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120265 +0:+60800
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202BD +0:+0
+....\glue(\spaceskip) 2.15332 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +0:+1280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +0:-8000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12017A +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +657280:+681920
+....\kern8.48633 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201DD +0:+32000
+....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) 2.09961 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FA +320:+95040
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120604 +320:+35840
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 12033F +320:+0
-....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\kern-3.02246 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +198400:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +145280:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +320:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +320:+1280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +320:-8000
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اق" 12017A +320:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-3.2959 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1201E1 +260160:+1600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +144960:+512320
-....\kern3.96484 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204E2 +320:+0
-....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 1.47949 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "آ" 0622 +320:+0
-....\kern0.94727 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +320:+0
-....\kern-1.16699 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +320:+0
-....\pdfliteral page <lua data reference ...>
-....\kern0.3125 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +320:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FA +0:+95040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120604 +0:+35840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 12033F +0:+0
+....\glue(\spaceskip) 2.14355 plus 0.84229 minus 0.56152
+....\kern5.93262 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C7 +0:+17920
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 1.89453 plus 0.84229 minus 0.56152
-....\kern-3.4961 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1204F8 +229440:-41920
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +94400:+54720
-....\kern3.57422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ج" 1205BE +94720:+88960
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120262 +0:-16960
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) 1.78223 plus 0.84229 minus 0.56152
-....\kern-3.02246 (font)
+....\kern-0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\glue(\spaceskip) -4.19434 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +198400:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +145280:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ش" 1205D0 +200640:+948160
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12060D +0:+232000
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "خ" 1205C0 +56640:+867840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12027D +0:-19200
+....\pdfliteral page <lua data reference ...>
+....\kern0.78125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ص" 120284 +0:+0
+....\glue(\spaceskip) -2.59766 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +93760:+933120
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120192 +0:+112320
+....\pdfliteral page <lua data reference ...>
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120229 +0:+270400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120330 +0:+74240
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +62720:+557440
+....\kern-0.00977 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120206 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) 2.05566 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 -395840:+0
+....\kern-6.04004 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034F +0:+305920
+....\pdfliteral page <lua data reference ...>
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ھ" 120455 +0:-38720
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +7040:+395200
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) 2.00195 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +531840:-225280
+....\kern6.2207 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EE +0:+32000
+....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\rightskip) 0.0
+...\glue(\lineskip) 1.0
+...\hbox(17.52441+2.92969)x345.0, glue set 0.7759, direction TRT
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.83008 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +0:+0
+....\glue(\spaceskip) -1.37695 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034C +0:+304640
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +0:+0
+....\glue(\spaceskip) 2.1582 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C4 +0:-38720
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-152640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\kern0.40527 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C8 +0:+31040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
+....\glue(\spaceskip) -2.74902 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120345 +0:+436160
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +22080:+193600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B6 +0:+188800
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ف" 1205C0 +20160:+701760
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201EE +0:-206080
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +61440:-21440
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AE +0:+8000
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +368640:+285760
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) 2.14844 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
+....\kern-1.11328 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +240960:-13120
+....\kern0.5957 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +0:+16960
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +0:+0
+....\kern-0.49805 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +0:+0
+....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "خ" 1205C0 +189440:+646400
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120254 +0:-45440
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 -8000:+557120
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B1 +0:-38720
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-152640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
+....\glue(\spaceskip) 1.36719 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) 3.57422 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE -26240:+144320
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120196 +0:-1920
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +8320:+67200
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +0:+21440
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +184640:+215680
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12042F +0:+0
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) 2.34375 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.15137 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120307 +0:-8000
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12017A +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +121280:+671360
+....\kern0.30273 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201E7 +0:-64000
+....\pdfliteral page <lua data reference ...>
+....\kern-0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\kern-0.64453 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120404 +0:+31040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
+....\glue(\spaceskip) -0.01953 plus 0.84229 minus 0.56152
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ح" 120255 +0:+213120
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -75840:+159040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B0 +0:+61440
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ث" 1205D0 -5120:+714240
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +0:+8000
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +61440:-21440
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AE +0:+8000
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +368640:+285760
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120187 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\glue(\spaceskip) -1.45996 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034C +0:+304640
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\kern-2.34375 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1201A3 +153920:-15680
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +83520:+703360
-....\kern2.33398 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +87680:-46080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120195 +0:-38720
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +7680:+361600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) 2.60254 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "پ" 1205CE +36160:-52800
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A4 +0:+16960
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A2 +0:+0
+....\glue(\spaceskip) 0.8789 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.83008 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 0633 +0:+0
+....\glue(\spaceskip) 2.08984 plus 0.84229 minus 0.56152
+....\kern5.93262 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C7 +0:+17920
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) -2.53906 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120358 +0:+201280
+....\pdfliteral page <lua data reference ...>
+....\kern-0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +222080:+376000
+....\kern0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120199 +0:+16320
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F9 +0:+0
+....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FF +0:-45440
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 -8000:+558080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B1 +0:-38720
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-152640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\kern0.36621 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +0:+0
+....\kern-1.20117 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 06CC +0:+0
+....\glue(\spaceskip) 0.46387 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202BE +0:+204160
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120330 +0:+5760
+....\kern-0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\kern-4.96094 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 06A9 +0:+0
+....\glue(\spaceskip) -0.58594 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +126080:+695360
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019E +0:+197760
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +126400:+76160
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120504 +0:-39040
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +10240:+85120
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C3 +0:+21440
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ں" 12042F +0:+0
+....\glue(\spaceskip) -1.41602 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120348 +0:+91520
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-152640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\rightskip) 0.0
+...\glue(\lineskip) 1.0
+...\hbox(17.63184+2.9541)x345.0, glue set 0.43579, direction TRT
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ج" 1205BE +138240:-155200
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024F +0:-36800
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +691200:+276480
+....\kern7.60254 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120198 +0:+32640
+....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) 1.33301 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120379 +0:-38400
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\kern-0.44434 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
+....\glue(\spaceskip) 1.09863 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "چ" 1205CE +142080:-208640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024F +0:-36800
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +557120:-225280
+....\kern6.60645 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204EE +0:+32000
+....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
+....\glue(\spaceskip) 2.09473 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
+....\kern-0.41992 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 06C1 +0:+0
+....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1203FA +0:+95040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120604 +0:+35840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 12033F +0:+0
+....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ع" 120211 +0:+1280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12031E +0:-8000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12017A +0:+0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +144640:+512320
+....\kern0.66895 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201E1 +0:+1600
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1204E2 +0:+0
+....\glue(\spaceskip) 1.47949 plus 0.84229 minus 0.56152
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "آ" 0622 +0:+0
+....\kern0.94727 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ز" 0632 +0:+0
+....\kern-1.16699 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
+....\glue(\spaceskip) 1.89453 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +94080:+54720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F8 +0:-41920
+....\pdfliteral page <lua data reference ...>
+....\kern0.07813 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\glue(\spaceskip) 1.78223 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +83200:+703360
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A3 +0:-15680
+....\pdfliteral page <lua data reference ...>
+....\kern-0.00977 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
 ....\kern-2.63184 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "لیت" 12030B +320:+241920
-....\kern-1.43066 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 12030B +0:+241920
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1201AD +94080:+188160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 -13440:+283840
-....\kern-3.28613 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B5 +309440:+16320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +184000:+630720
-....\kern4.7168 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202F8 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -13760:+283840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +0:+188160
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +89920:+630720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B5 +0:+16320
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
 ....\glue(\spaceskip) 2.5 plus 0.84229 minus 0.56152
-....\kern-3.4961 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1204F8 +229440:-41920
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +94400:+54720
-....\kern3.57422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +94080:+54720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F8 +0:-41920
 ....\pdfliteral page <lua data reference ...>
+....\kern0.07813 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
 ....\glue(\spaceskip) 1.78223 plus 0.84229 minus 0.56152
-....\kern-3.02246 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +198400:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +145280:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
 ....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\glue(\spaceskip) 2.19727 plus 0.84229 minus 0.56152
-....\kern-5.28809 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 120219 +346880:+5120
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +167680:+653120
-....\kern-1.79688 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C9 +464640:+6400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +398720:-34880
-....\kern7.08496 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "غ" 1205C0 +167360:+653120
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120219 +0:+5120
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +51840:-34880
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201C9 +0:+6400
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
 ....\glue(\spaceskip) -2.2461 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "مخت" 120409 +0:-86400
-....\kern-1.86035 (font)
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120409 +0:-86400
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 12026E +121920:+25280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +25920:+553920
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +293760:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +97600:+310080
-....\kern4.4873 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "خ" 1205C0 +25920:+553920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12026E +0:+25280
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 -24000:+310080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
+....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\kern-0.01465 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
 ....\glue(\spaceskip) 1.60645 plus 0.84229 minus 0.56152
-....\kern-3.4961 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1204F8 +229120:-41920
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +94080:+54720
-....\kern3.57422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +94080:+54720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F8 +0:-41920
 ....\pdfliteral page <lua data reference ...>
+....\kern0.07813 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
 ....\glue(\spaceskip) 1.78223 plus 0.84229 minus 0.56152
-....\kern-3.02246 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120191 +198080:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +144960:-169920
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +144960:-169920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
 ....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\glue(\spaceskip) 2.71484 plus 0.84229 minus 0.56152
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "سی" 1202C4 +0:-38720
-....\kern-2.62207 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C4 +0:-38720
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 1201A8 +171840:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +39360:-152640
-....\kern2.62695 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +39360:-152640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-21440
 ....\pdfliteral page <lua data reference ...>
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\kern0.40039 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202C8 +0:+31040
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
 ....\glue(\spaceskip) 2.40234 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اقت" 0627 +0:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-3.15918 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 1201DA +227520:-28160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +121600:+596800
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +399360:-4160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +306880:+428480
-....\kern6.0791 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120488 +0:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-1.15234 (font)
-....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ق" 1205C8 +121600:+596800
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201DA +0:-28160
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 +79360:+428480
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-4160
+....\pdfliteral page <lua data reference ...>
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120488 +0:+0
+....\kern-1.15234 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.29785 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 0631 +0:+0
 ....\glue(\spaceskip) 0.67383 plus 0.84229 minus 0.56152
-....\kern-8.55469 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12034B +819200:+121600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +0:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12020C +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern3.94531 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12034B +0:+121600
 ....\pdfliteral page <lua data reference ...>
+....\kern-12.5 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) 0.12207 plus 0.84229 minus 0.56152
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120315 +0:-172800
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ح" 120267 +0:-32960
@@ -1584,18 +1465,15 @@ Completed box being shipped out [1]
 ....\kern-12.5 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue(\spaceskip) -6.2207 plus 0.84229 minus 0.56152
-....\kern-5.66406 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 12035B +370880:+443200
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +0:+0
-....\kern5.66406 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202E0 +0:+266560
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12035B +0:+443200
 ....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "س" 1202E0 +0:+266560
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
 ....\glue(\spaceskip) 2.03125 plus 0.84229 minus 0.56152
-....\pdfliteral page <lua data reference ...>
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
-....\pdfliteral page <lua data reference ...>
 ....\kern-0.58105 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\kern-0.88379 (font)
@@ -1603,57 +1481,54 @@ Completed box being shipped out [1]
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
 ....\kern-0.28809 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 06CC +0:+0
-....\glue(\spaceskip) 1.94824 plus 0.84229 minus 0.56152
-....\kern-2.9248 (font)
+....\glue(\rightskip) 0.0
+...\penalty 150
+...\glue(\lineskip) 1.0
+...\hbox(12.16309+2.92969)x345.0, glue set 291.73828fil, direction TRT
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120195 +191360:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +87360:-28800
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +363200:-4160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +199040:+378880
-....\kern5.53223 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120488 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +87680:-28800
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120195 +0:-21440
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +7680:+378880
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-4160
+....\pdfliteral page <lua data reference ...>
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120488 +0:+0
 ....\kern-2.72949 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ش" 0634 +0:+0
 ....\glue(\spaceskip) 1.3916 plus 0.84229 minus 0.56152
-....\kern-4.44336 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120342 +290880:-38400
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +0:+0
-....\kern4.44824 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120342 +0:-38400
 ....\pdfliteral page <lua data reference ...>
-....\glue(\rightskip) 0.0
-...\penalty 150
-...\glue(\baselineskip) 0.55469
-...\hbox(8.49121+1.76758)x345.0, glue set 318.0957fil, direction TRT
-....\kern-3.02246 (font)
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
+....\glue(\spaceskip) 2.13379 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ابن" 120191 +197760:-26880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +144000:-229440
-....\kern3.02734 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "پ" 1205CE +144320:-229440
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120191 +0:-26880
 ....\pdfliteral page <lua data reference ...>
-....\kern-2.9248 (font)
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120195 +191360:-21440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +87360:-28800
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +363200:-4160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +199040:+378880
-....\kern5.53223 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120488 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +87680:-28800
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120195 +0:-21440
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +7680:+378880
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:-4160
+....\pdfliteral page <lua data reference ...>
+....\kern-0.01465 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 120488 +0:+0
 ....\glue(\spaceskip) 1.69922 plus 0.84229 minus 0.56152
-....\kern-3.4961 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1204F8 +228800:-41920
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +93760:+54720
-....\kern3.57422 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ہ" 1205D8 +94080:+54720
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F8 +0:-41920
 ....\pdfliteral page <lua data reference ...>
-....\kern-0.0293 (font)
+....\kern0.07813 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\kern-0.02441 (font)
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "۔" 06D4 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -1662,7 +1537,7 @@ Completed box being shipped out [1]
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\lineskip) 1.0
-...\hbox(22.30957+5.41504)x345.0, glue set 109.24316fil, direction TRT
+...\hbox(20.77637+5.41504)x345.0, glue set 123.10059fil, direction TRT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -1670,181 +1545,175 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TRT
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اُ" 0627 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اُ" 064F +140800:+635520
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "رْشَ" 064F +185280:+390080
-....\kern0.9082 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0631 +960:+0
-....\pdfliteral page <lua data reference ...>
-....\kern-6.15723 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "لی" 1202BE +114560:+515840
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0652 -84800:+1127040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 -81600:+879040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 064E +193600:+1134720
-....\kern1.7334 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120320 +960:+454400
-....\pdfliteral page <lua data reference ...>
-....\kern-3.1836 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 1201BF +209600:+130880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +28160:+319680
-....\kern3.1836 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120415 +960:-134080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "رْ" 0652 +128000:+412800
+....\kern1.16211 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0631 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +245760:+16000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +960:+22080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "شَ" 064E -24640:+1127040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 -82560:+879040
+....\kern-4.42383 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202BE +0:+515840
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120320 +0:+454400
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 +26880:+319680
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201BF +0:+130880
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120415 +0:-134080
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ئ" 0654 +244800:+16000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B4 +0:+22080
 ....\pdfliteral page <lua data reference ...>
 ....\kern-12.5 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ے" 12020C +0:+0
 ....\glue 10.0
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +960:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 0648 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "وتب" 0648 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ت" 1205C8 -230400:+966080
+....\kern-4.41895 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120195 +0:+508480
 ....\pdfliteral page <lua data reference ...>
-....\kern-2.9248 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "لیغ" 120195 -96960:+508480
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 -229440:+966080
-....\kern-2.62207 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +74560:+525760
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE -54400:+447360
-....\kern1.12305 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120320 +960:+449280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +42240:+447360
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:+525760
 ....\pdfliteral page <lua data reference ...>
-....\kern-4.15039 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ل" 120320 +0:+449280
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1201AB +272960:+114880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 -13120:+368640
-....\kern-3.0664 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120233 +473920:+3840
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +275840:+750080
-....\kern7.2168 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202F8 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -14080:+368640
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AB +0:+114880
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "غ" 1205C0 +2880:+750080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120233 +0:+3840
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
+....\glue 10.0
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 1203F5 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12038F +0:+201280
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "وَ" 064E +122880:+363520
+....\kern-0.01953 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +0:+0
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ش" 1205D0 +5440:+805440
+....\kern-2.92969 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202C3 +0:+281280
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "تِ" 0650 +32320:+233600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +15040:+939840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201CC +0:+60800
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ش" 1205D0 +157440:+634880
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202BD +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\glue 10.0
-....\kern-5.92773 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 0627 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "وَشتِش" 12038F +389440:+201280
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203F5 +960:+0
-....\kern5.9082 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "نَ" 064E +161600:+836160
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +103680:+706880
+....\kern0.3125 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A3 +0:-15680
 ....\pdfliteral page <lua data reference ...>
-....\glue 10.0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 064E +13440:+1053440
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 -44160:+805440
-....\kern-0.96191 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201CC +243520:+60800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C8 +195520:+939840
-....\kern-11.31348 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202BD +984960:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0650 +816000:-429120
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D0 +400960:+634880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "^^@" 0000 +0:+0
-....\kern14.6875 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120000 +960:+0
+....\kern-0.00977 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 120492 +0:+0
+....\kern-0.69824 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +0:+0
+....\glue(\spaceskip) -3.0127 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "انَ" 0627 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "بُ" 064F +104320:+961280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +87360:+533120
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120195 +0:+540480
 ....\pdfliteral page <lua data reference ...>
-....\kern-2.34375 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "و" 1201A3 +175040:-15680
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +104640:+706880
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 064E +344000:+427520
-....\kern2.64648 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120492 +960:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +7680:+940800
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A8 +0:+557760
 ....\pdfliteral page <lua data reference ...>
-....\kern-0.41504 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 0646 +960:+0
-....\glue(\spaceskip) -4.54102 plus 0.84229 minus 0.56152
-....\kern-2.9248 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ْ" 120195 +192320:+535040
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +88320:+527680
-....\kern-3.84277 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201A9 +444160:+552320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 064F +304960:+1008960
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +235200:+902400
-....\kern-2.39746 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203CC +601280:+600320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1203EA +492800:+605760
-....\kern-3.47656 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201BD +829120:-12800
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +484800:+350400
-....\kern-1.25488 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024E +911360:+0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +628160:+153920
-....\kern22.0752 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 0652 +640:-89280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "گ" 1203F5 -363200:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120397 +0:+600320
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -116160:+350400
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201BD +0:-12800
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "جْ" 0652 +10560:+551040
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE -200640:+153920
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12024E +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\glue 10.0
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 12040E +320:+38080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +320:+0
-....\kern-0.66895 (font)
-....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +320:+0
-....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 12040E +0:+38080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
+....\kern-0.56152 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "د" 062F +0:+0
 ....\kern-1.60156 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +320:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 0645 +0:+0
 ....\glue(\spaceskip) -4.75586 plus 0.84229 minus 0.56152
-....\kern-4.53613 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "مینچُ" 1204F5 +297280:+282240
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +86400:+499200
-....\kern4.56543 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120418 +0:+257280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ه" 1205D8 +86080:+499200
+....\kern-0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F5 +0:+282240
 ....\pdfliteral page <lua data reference ...>
-....\kern-1.43066 (font)
+....\kern0.0293 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "م" 120418 +0:+257280
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 1201AD +93760:+203840
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 -29440:+314880
-....\kern-3.47656 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201BD +321600:-115520
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +190720:+601280
-....\kern-0.97168 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120267 +385280:+32320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE +188800:-88000
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 064F +470720:+735680
-....\kern5.8789 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12033F +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -29440:+314880
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +0:+203840
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +96960:+601280
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201BD +0:-115520
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "چُ" 064F +59200:+432000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205CE -132480:-88000
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120267 +0:+32320
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ک" 12033F +0:+0
 ....\glue 10.0
-....\kern-5.96191 (font)
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "اه" 1204A7 +390720:-14080
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +84800:+486080
-....\kern5.9668 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120179 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ظ" 1205C0 +84800:+486080
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A7 +0:-14080
 ....\pdfliteral page <lua data reference ...>
-....\kern-3.93066 (font)
+....\kern0.00488 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ا" 120179 +0:+0
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204F9 +257600:+11840
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +218880:-99840
-....\kern3.93066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204A0 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ه" 1205D8 +218880:-99840
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1204F9 +0:+11840
 ....\pdfliteral page <lua data reference ...>
-....\glue(\spaceskip) -3.75488 plus 0.84229 minus 0.56152
-....\kern-3.35938 (font)
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ر" 1204A0 +0:+0
+....\glue(\spaceskip) -3.53027 plus 0.84229 minus 0.56152
 ....\pdfliteral page <lua data reference ...>
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 12019E +220160:+408320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205BE +37760:+425600
-....\kern-4.52637 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120502 +516800:+241600
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205D8 +346560:+249600
-....\kern-1.43066 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +610560:+188160
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C6 +500800:+260480
-....\kern-3.28613 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B5 +825920:+16320
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1205C0 +700480:+634240
-....\kern12.60254 (font)
-....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1202F8 +0:+0
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ب" 1205BE +37760:+425600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 12019E +0:+408320
 ....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ه" 1205D8 +126400:+249600
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 120502 +0:+241600
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1205C6 -15680:+260480
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201AD +0:+188160
+....\pdfliteral page <lua data reference ...>
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ن" 1205C0 +89920:+634240
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "" 1201B5 +0:+16320
+....\pdfliteral page <lua data reference ...>
+....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "ی" 1202F8 +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -1858,5 +1727,4 @@ Completed box being shipped out [1]
 ....\glue 0.0 plus 1.0fil
 ....\TU/AwamiNastaliq-Regular.ttf(0)/m/n/10 "1" 0031 +0:+0
 ....\glue 0.0 plus 1.0fil
-Missing character: There is no ^^@ (U+0000) in font kpse:AwamiNastaliq-Regular.ttf:mode=harf;language=dflt;+tlig;!
 2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (arabic-gr.aux)

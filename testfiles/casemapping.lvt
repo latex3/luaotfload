@@ -1,7 +1,7 @@
 \input{regression-test}
 \documentclass{article}
 \usepackage{fontspec}
-\setmainfont[Script=Latin]{kpse:NotoSerif-Regular}
+\setmainfont[Script=Latin,KpseOnly,Extension=.ttf]{NotoSerif-Regular}
 \ExplSyntaxOn
 \NewDocumentCommand\showMapping{o m}{
    #2%
@@ -29,7 +29,7 @@ Generic font:
 
 Greek font:
 
-\setmainfont[Script=Greek,RawFeature={language=ell}]{kpse:NotoSerif-Regular}
+\setmainfont[Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf]{NotoSerif-Regular}
 % Derived from ICU with some added cases
 \begin{tabular}{ccccc}
    \showMapping[el-x-iota]{Tschüß}\\
@@ -66,7 +66,7 @@ Greek font:
 
 Turkish font:
 
-\setmainfont[Script=Latin,RawFeature={language=trk}]{kpse:NotoSerif-Regular}
+\setmainfont[Script=Latin,RawFeature={language=trk},KpseOnly,Extension=.ttf]{NotoSerif-Regular}
 \begin{tabular}{ccccc}
    \showMapping{Informatika}\\
 \end{tabular}

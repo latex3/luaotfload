@@ -12,6 +12,8 @@ Package fontspec Info: Font family 'lmromanslant10-regular.otf(0)' created for f
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[lmromanslant10-regular.otf]:mode=harf;script=latn;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
+Package fontspec Info: lmroman12-regular scale = 1.2.
+Package fontspec Info: lmroman12-regular scale = 1.2.
 Package fontspec Info: Font family 'lmroman12-regular.otf(0)' created for font 'lmroman12-regular.otf' with options [Renderer=Harfbuzz,Script=Latin,Scale=1.2].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:

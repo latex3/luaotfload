@@ -14,7 +14,7 @@
   end, 'luaotfload.glyphinfo -- testing variant')
 }
 
-\setmainfont{NotoSerifCJK-Regular.ttc}[Renderer=Harfbuzz, Script=Latin]
+\setmainfont{NotoSerifCJK-Regular.ttc}[Renderer=Harfbuzz, Script=Latin, KpseOnly]
 \begin{document}
 \showoutput
 \START
@@ -41,7 +41,7 @@ offbeat office baffle coffee HAVANA\par
 offbeat office baffle coffee HAVANA\par
 \endgroup
 
-\fontspec{lmroman10-regular.otf}[Renderer=Harfbuzz, Script=Latin, Ligatures=Discretionary, Ligatures=TeX]
+\fontspec{lmroman10-regular.otf}[Renderer=Harfbuzz, Script=Latin, Ligatures=Discretionary, Ligatures=TeX, KpseOnly]
 \parindent=0pt
 
 \noindent

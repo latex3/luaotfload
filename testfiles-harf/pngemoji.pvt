@@ -8,6 +8,6 @@
 \begin{document}
 \showoutput
 \START
-\fontspec{NotoColorEmoji.ttf}
+\fontspec[KpseOnly]{NotoColorEmoji.ttf}
 💙💚💛💜💝🖤🧡😀😇🧔🏽🦆
 \end{document}

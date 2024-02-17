@@ -85,7 +85,7 @@ jobs:
       - name: Send mail
         # The explicit commit hash ensures that this can't be used by dawidd6 as a
         # backdoor to execute arbitrary code during our runs.
-        uses: dawidd6/action-send-mail@6063705cefe50cb915fc53bb06d4049cae2953b2
+        uses: dawidd6/action-send-mail@4226df7daafa6fc901a43789c49bf7ab309066e7
         with:
           # Currently using my (Marcel's) mail server for sending mails.
           server_address: typesetting.eu

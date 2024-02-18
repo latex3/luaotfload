@@ -10,11 +10,12 @@ tdsroot  = "luatex"
 -- load my personal data for the ctan upload
 local ok, mydata = pcall(require, "ulrikefischerdata.lua")
 if not ok then
-  mydata= {email="XXX",github="XXX",name="XXX"}
+  mydata = {
+    email = os.getenv'CTAN_EMAIL' or 'XXX',
+    name = os.getenv'CTAN_NAME' or 'XXX',
+    name = "XXX",
+  }
 end
-
--- test the email
-print(mydata.email)
 
 -- Allow for 'dev' release
 --

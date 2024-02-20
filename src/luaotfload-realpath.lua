@@ -9,18 +9,22 @@ local move = table.move
 local newtable = lua.newtable
 local setmetatable = setmetatable
 
+-- Windows should just adapt reasonable path conventions like every other operating system.
+-- But some people like to do their own thing, so we need lots of special casing here.
+local windows_style_paths = os.type ~= 'unix'
+
 -- Marker key for elements of result_tree to indicate the path components entry and the file mode
 local path_components, file_mode = {}, {}
 local tree_root
 
 local split_path do
   local l = lpeg
-  local separator = os.type == 'unix' and l.S'/' or l.S'/\\'
+  local separator = windows_style_paths and l.S'/\\' or l.S'/'
   -- We do not allow empty segments here because they get ignored.
   local segment = l.C((1 - separator)^1)
   -- Duplicate and trailing separators are dropped.
-  local unc = os.type == 'unix' and l.P(false) or separator * separator * l.Cg(l.P(1)^0 * -1, 'unc')
-  local drive_letter = os.type == 'unix' and l.P(false) or l.Cg(l.R('az', 'AZ') * ':', 'drive')
+  local unc = windows_style_paths and separator * separator * l.Cg(l.P(1)^0 * -1, 'unc') or l.P(false)
+  local drive_letter = windows_style_paths and l.Cg(l.R('az', 'AZ') * ':', 'drive') or l.P(false)
   local path_pat = l.Ct(unc + drive_letter^-1 * (l.Cc'' * separator^1)^-1 * (segment * separator^1)^0 * segment^-1 * -1)
   function split_path(path)
     local splitted = path_pat:match(path)
@@ -45,7 +49,13 @@ end
 
 local function lookup_split_path_in_tree(components, tree)
   if components[1] == '' then
-    tree = tree_root
+    if not windows_style_paths then
+      tree = tree_root
+    elseif components.drive then
+      tree = tree_root[components.drive]
+    else
+      tree = tree_root[tree[path_components].drive]
+    end
   end
   for i=1, #components do
     local next_tree = tree[components[i]]
@@ -101,17 +111,17 @@ function build_root_dir(drive)
   }, tree_meta)
   root_dir['.'] = root_dir
   root_dir['..'] = root_dir
-  return root_dir
+  return {[''] = root_dir}
 end
-tree_root = os.type == 'unix' and build_root_dir() or setmetatable({}, {__index = function(t, drive)
+tree_root = windows_style_paths and setmetatable({}, {__index = function(t, drive)
   local root_dir = build_root_dir(drive)
   t[drive] = root_dir
   return root_dir
-end})
+end}) or build_root_dir()
 
 local function resolve_path_to_tree(path)
   local splitted = split_path(path)
-  if splitted[1] == '' then -- Optimization to avoid currentdir lookup.
+  if splitted[1] == '' and (not windows_style_paths or splitted.drive) then -- Optimization to avoid currentdir lookup.
     return lookup_split_path_in_tree(splitted, tree_root)
   else
     local splitted_currentdir = split_path(currentdir())

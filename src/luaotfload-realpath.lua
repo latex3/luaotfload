@@ -49,12 +49,10 @@ end
 
 local function lookup_split_path_in_tree(components, tree)
   if components[1] == '' then
-    if not windows_style_paths then
-      tree = tree_root
-    elseif components.drive then
-      tree = tree_root[components.drive]
+    if windows_style_paths then
+      tree = tree_root[components.drive or tree[path_components].drive]
     else
-      tree = tree_root[tree[path_components].drive]
+      tree = tree_root
     end
   end
   for i=1, #components do
@@ -72,8 +70,8 @@ tree_meta = {
   __index = function(parent, component)
     local parent_components = parent[path_components]
     local depth = #parent_components
-    local components = move(parent[path_components], 1, depth, 1, newtable(depth + 1, 0))
-    components[depth + 1] = component
+    local components = move(parent_components, 1, depth, 1, newtable(depth + 1, 1))
+    components.drive, components[depth + 1] = parent_components.drive, component
     local path = recombine_path(components)
 
     local mode = symlinkattributes(path, 'mode')

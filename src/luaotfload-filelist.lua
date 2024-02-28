@@ -6,7 +6,7 @@
 
 if luaotfload_module then luaotfload_module {
     name          = "luaotfload-filelist",
-    version       = "3.28-dev",       --TAGVERSION
+    version       = "3.28",       --TAGVERSION
     date          = "2024-02-14", --TAGDATE
     description   = "luaotfload submodule / filelist",
     license       = "GPL v2.0"

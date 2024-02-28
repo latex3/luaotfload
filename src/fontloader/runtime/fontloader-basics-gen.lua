@@ -190,7 +190,7 @@ local readables = { }
 local usingjit  = jit
 
 if not caches.namespace or caches.namespace == "" or caches.namespace == "context" then
-    caches.namespace = 'generic-dev'
+    caches.namespace = 'generic'
 end
 
 do

@@ -9,7 +9,7 @@ on:
 jobs:
   # Mostly the same as the main.yaml workflow, but we only use a single job
   l3build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       # Boilerplate
       - name: Checkout repository
@@ -22,6 +22,30 @@ jobs:
           package_file: .github/tl_packages
       - name: Run l3build
         run: l3build ctan -H --show-log-on-error
+      - name: Upload package artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Package
+          path: |
+            build/distrib/ctan/*.zip
+            ctan.ann
+      - name: Validate CTAN package
+        uses: ./.github/actions/ctan-upload
+        with:
+          uploader: Dummy Name
+          email: dryrun@example.com
+          filename: "build/distrib/ctan/luaotfload-ctan.zip"
+          dry-run: true
+
+  github:
+    runs-on: ubuntu-22.04
+    needs:
+      - l3build
+    steps:
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Package
       - name: Create GitHub release
         uses: ncipollo/release-action@2c591bcc8ecdcd2db72b97d6147f871fcd833ba5
         id: release
@@ -29,6 +53,7 @@ jobs:
           artifacts: "build/distrib/ctan/*.zip"
           prerelease: ${{ endsWith(github.ref, '-dev') }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          bodyFile: ctan.ann
       # If a test failed, we already notified in the other workflow. Here we notify
       # when a release has been created.
       - name: Send mail
@@ -54,3 +79,26 @@ jobs:
 
             More information can be found at
             ${{steps.release.outputs.html_url}}
+
+  ctan-upload:
+    if: "${{ !endsWith(github.ref, '-dev') }}"
+    runs-on: ubuntu-22.04
+    environment: CTAN
+    needs:
+      - l3build
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github
+      - name: Download package artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: Package
+      - name: Upload CTAN package
+        uses: ./.github/actions/ctan-upload
+        with:
+          uploader: ${{ secrets.CTAN_NAME }}
+          email: ${{ secrets.CTAN_EMAIL }}
+          filename: "build/distrib/ctan/luaotfload-ctan.zip"
+          dry-run: false

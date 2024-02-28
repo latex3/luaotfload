@@ -1,7 +1,3 @@
-2024-02-14 luaotfload v3.27
+2024-02-28 luaotfload v3.28
 
-    *  Improved support for arabic mark rendering in \texttt{node} mode.
-    *  Better ordering of GSUB substitutions.
-    *  Avoid dropping hyphens in DVI mode
-    *  Compatibility with \identifier{luatex} 1.18
-    *  Various bug fixes
+    *  Improving compatibility with Windows paths

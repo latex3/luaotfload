@@ -1,5 +1,9 @@
 Change History
 --------------
+2024-02-28 luaotfload v3.28
+
+    *  Improving compatibility with Windows paths
+
 2024-02-14 luaotfload v3.27
 
     *  Improved support for arabic mark rendering in \texttt{node} mode.

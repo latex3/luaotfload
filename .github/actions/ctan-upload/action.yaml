@@ -32,7 +32,9 @@ runs:
         topic: font-use,luatex
         description: |
           The package adopts the TrueType/OpenType Font loader code provided in ConTeXt,
-          and adapts it to use in Plain TeX and LaTeX. It works under LuaLaTeX only.
+          and adapts it to use in Plain TeX and LaTeX.
+          It works under LuaLaTeX only.
         filename: ${{ inputs.filename }}
         dry-run: ${{ inputs.dry-run }}
         announcement-filename: ctan.ann
+        note: Uploaded automatically by GitHub Actions... authors are unchanged

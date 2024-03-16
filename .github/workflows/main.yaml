@@ -47,7 +47,7 @@ jobs:
       - if: ${{ matrix.kind == 'doc' }}
         run: sudo apt-get update && sudo apt-get install python3-docutils
       - name: Install TeX Live
-        uses: zauguin/install-texlive@v3
+        uses: zauguin/install-texlive@v3.6.0-alpha1
         with:
           # The list of packages to install is in a separate file under .github/tl_packages
           # to allow reuse.

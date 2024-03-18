@@ -270,6 +270,7 @@ local default_config = {
 
     hang = feature_presets.hang,
   },
+  status = luaotfloadstatus,
 }
 
 -------------------------------------------------------------------------------
@@ -990,7 +991,6 @@ local function apply (old, new)
       end
     end
   end
-  result.status = luaotfloadstatus
   return result
 end
 

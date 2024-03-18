@@ -336,7 +336,7 @@ local function version_msg ( )
 
     local runtime = luaotfload.runtime
     local notes   = config.luaotfload.status
-    local notes   = status and status.notes or { }
+    local notes   = notes and notes.notes or { }
 
     out (about, luaotfload.self)
     out ("%s version: %q", luaotfload.self, version)

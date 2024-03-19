@@ -40,7 +40,7 @@ local otf               = handlers.otf
 
 local config            = config or { luaotfload = { run = { } } }
 
-local as_script         = config.luaotfload.run.live
+local as_script         = not config.luaotfload.run.live
 local normalize
 
 if as_script then

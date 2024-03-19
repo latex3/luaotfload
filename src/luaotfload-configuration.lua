@@ -224,7 +224,8 @@ local default_config = {
     log_level          = 0,
     color_callback     = "post_linebreak_filter",
     fontloader         = default_fontloader (),
-    default_dvi_driver = "dvisvgm"
+    default_dvi_driver = "dvisvgm",
+    live               = true,
   },
   misc = {
     bisect         = false,

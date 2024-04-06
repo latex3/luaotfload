@@ -31,14 +31,14 @@ Completed box being shipped out [1]
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
 ....\TU/TeXGyreTermes(0)/m/n/10 A
-....\kern2.7
+....\kern2.7 (font)
 ....\TU/TeXGyreTermes(0)/m/n/10 u
 ....\kern3.0 (font)
 ....\TU/TeXGyreTermes(0)/m/n/10 f
 ....\pdfcolorstack 0 push {1 0 0 rg 1 0 0 RG}
 ....\kern3.0 (font)
 ....\TU/TeXGyreTermes(0)/m/n/10 g
-....\kern2.8
+....\kern2.8 (font)
 ....\TU/TeXGyreTermes(0)/m/n/10 a
 ....\kern3.0 (font)
 ....\TU/TeXGyreTermes(0)/m/n/10 b

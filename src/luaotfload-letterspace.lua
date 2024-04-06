@@ -352,7 +352,6 @@ kerncharacters = function (head)
             then
               -- keep
             else
-              setsubtype (prev, userkern_code)
               local prev_kern = getkern(prev)
               prev_kern = prev_kern + krn
               setkern (prev, prev_kern)

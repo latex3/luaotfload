@@ -252,11 +252,12 @@ end
 
 local function init_desired_permissions ()
     local paths = config.luaotfload.paths
+    local compress_db = config.luaotfload.db.compress
     return {
         { "d", {"r","w"}, function () return caches.getwritablepath ("", "") end },
         { "d", {"r","w"}, paths.prefix },
-        { "f", {"r","w"}, paths.index_path_lua .. ".gz" },
-        { "f", {"r","w"}, paths.index_path_luc },
+        { "f", {"r","w"}, paths.index_path_lua .. (compress_db and ".gz" or "") },
+        { "f", {"r","w"}, paths.index_path_luc .. (compress_db and ".gz" or "") },
         { "f", {"r","w"}, paths.lookup_path_lua },
         { "f", {"r","w"}, paths.lookup_path_luc },
     }

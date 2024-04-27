@@ -259,8 +259,6 @@ luaotfload.filelist.data =
     { name = "characters"        ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkcharacter" },
     { name = "glyphlist"         ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkglyphlist" },
     { name = "status"            ,kind = kind_generated, ext =".lua", gitdir=gitdirgen, texdir=texdirtex, gitpref = "luaotfload-", script="mkstatus",mkstatus="ignore" },
-     
-
 
 -- scripts
     { name = "mkimport"       ,kind = kind_script, gitdir = gitdirscr, gitpref = "", ext=""},
@@ -388,7 +386,6 @@ function luaotfload.filelist.selectlolcoreentries (filetable)
 end   
 
 -- core and lib  lua-files
-
 function luaotfload.filelist.selectlolsrcluaentries (filetable)
  local result = {}  
  for i,v in ipairs (filetable) do
@@ -399,10 +396,7 @@ function luaotfload.filelist.selectlolsrcluaentries (filetable)
  return result
 end   
 
-
-
--- luaoftload generated
-
+-- luaotfload generated
 function luaotfload.filelist.selectlolgeneentries (filetable)
  local result = {}  
  for i,v in ipairs (filetable) do
@@ -412,8 +406,6 @@ function luaotfload.filelist.selectlolgeneentries (filetable)
  end
  return result
 end   
-
-
 
 -- scripts
 function luaotfload.filelist.selectlolscrentries ( filetable )
@@ -425,9 +417,3 @@ function luaotfload.filelist.selectlolscrentries ( filetable )
   end
   return result
 end
-
-
-
-
-
-

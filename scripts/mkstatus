@@ -43,7 +43,6 @@ local filelist = "./src/auto/luaotfload-status.lua" --- result
 
 local srcdir    = "src"
 local builddir  = "src/auto"
-local scriptdir = "scripts"
 local loaderdir = "src/fontloader"
 local rtdir     = "src/fontloader/runtime"
 local miscdir   = "src/fontloader/misc"
@@ -67,11 +66,6 @@ for i,v in ipairs(t) do
    table.insert (names, {builddir, v.gitpref..v.name..v.ext} )
   end 
 end 
---- scripts
-local t = luaotfload.filelist.selectlolscrentries (luaotfload.filelist.data)
-for i,v in ipairs(t) do 
-   table.insert (names, {scriptdir , v.gitpref..v.name..v.ext} )
-end 
 
 --- fontloader runtimes
 local t = luaotfload.filelist.selectlolessentries (luaotfload.filelist.data)
@@ -93,117 +87,12 @@ local t = luaotfload.filelist.selectctxlibsentries (luaotfload.filelist.data)
 for i,v in ipairs(t) do 
   table.insert (names, {miscdir, (v.gitpref or "fontloader-")..(v.ours or v.name)..v.ext} )
 end 
-
-
--- print (table.serialize(names))
--- this is the old list
--- keep it for the moment 
-local oldnames = {
-
-  --- Luaotfload runtime files
-  { srcdir,       "luaotfload-auxiliary.lua",       },
-  { srcdir,       "luaotfload-colors.lua",          },
-  { srcdir,       "luaotfload-configuration.lua",   },
-  { srcdir,       "luaotfload-database.lua",        },
-  { srcdir,       "luaotfload-diagnostics.lua",     },
-  { srcdir,       "luaotfload-features.lua",        },
-  { srcdir,       "luaotfload-init.lua",            },
-  { srcdir,       "luaotfload-letterspace.lua",     },
-  { srcdir,       "luaotfload-loaders.lua",         },
-  { srcdir,       "luaotfload-log.lua",             },
-  { srcdir,       "luaotfload.lua",                 },
-  { srcdir,       "luaotfload-parsers.lua",         },
-  { srcdir,       "luaotfload-resolvers.lua",       },
-  { srcdir,       "luaotfload-tool.lua",            },
-
-  --- generated files
-  { builddir,     "luaotfload-characters.lua",      },
-  { builddir,     "luaotfload-glyphlist.lua",       },
-
-  --- scripts
---  { scriptdir,    "mkcharacters",                   },
---  { scriptdir,    "mkglyphlist",                    },
---  { scriptdir,    "mkimport",                       },
---  { scriptdir,    "mkstatus",                       },
---  { scriptdir,    "mktests",                        },
-
-  --- fontloader runtimes
-  { rtdir,        "fontloader-basics-gen.lua",      },
-  { rtdir,        "fontloader-reference.lua",       },
-
-  --- fontloader constituents
-  { miscdir,      "fontloader-basics-nod.lua",      },
-  { miscdir,      "fontloader-data-con.lua",        },
-  { miscdir,      "fontloader-font-afk.lua",        },
-  { miscdir,      "fontloader-font-onr.lua",        },
-  { miscdir,      "fontloader-font-one.lua",        },
-  { miscdir,      "fontloader-font-cid.lua",        },
-  { miscdir,      "fontloader-font-con.lua",        },
-  { miscdir,      "fontloader-font-def.lua",        },
-  { miscdir,      "fontloader-font-ini.lua",        },
-  { miscdir,      "fontloader-font-map.lua",        },
-  { miscdir,      "fontloader-font-oti.lua",        },
---  { miscdir,      "fontloader-font-gbn.lua",        }, -- renamed
-  { miscdir,      "fontloader-font-def.lua",        },
-  { miscdir,      "fontloader-fonts-enc.lua",       },
-  { miscdir,      "fontloader-fonts-ext.lua",       },
-  { miscdir,      "fontloader-fonts-def.lua",       }, -- NEW
-  { miscdir,      "fontloader-fonts-mis.lua",       }, -- NEW  
-  { miscdir,      "fontloader-fonts-gbn.lua",       }, -- NEW/Renamed
-  { miscdir,      "fontloader-fonts-lig.lua",       }, -- NEW
---  { miscdir,      "fontloader-fonts.lua",           },
-  { miscdir,      "fontloader-font-lua.lua",        },
-  { miscdir,      "fontloader-fonts-syn.lua",       },
-  { miscdir,      "fontloader-fonts-tfm.lua",       }, -- changed 13.04.2019
-  { miscdir,      "fontloader-font-otr.lua",        },
-  { miscdir,      "fontloader-font-cff.lua",        },
-  { miscdir,      "fontloader-font-shp.lua",        }, -- NEW
-  { miscdir,      "fontloader-font-ttf.lua",        },
-  { miscdir,      "fontloader-font-dsp.lua",        },
-  { miscdir,      "fontloader-font-oup.lua",        },
-  { miscdir,      "fontloader-font-otl.lua",        },
-  { miscdir,      "fontloader-font-oto.lua",        },
-  { miscdir,      "fontloader-font-otj.lua",        },
-  { miscdir,      "fontloader-font-ota.lua",        },
-  { miscdir,      "fontloader-font-vfc.lua",        }, -- NEW
-  { miscdir,      "fontloader-font-ott.lua",        }, -- NEW
-  { miscdir,      "fontloader-font-ots.lua",        },
-  { miscdir,      "fontloader-font-osd.lua",        },
-  { miscdir,      "fontloader-font-ocl.lua",        },
-  { miscdir,      "fontloader-font-otc.lua",        },
-  { miscdir,      "fontloader-font-imp-tex.lua",    }, -- NEW
-  { miscdir,      "fontloader-font-imp-ligatures.lua",}, -- NEW
-  { miscdir,      "fontloader-font-imp-italics.lua",}, -- NEW
-  { miscdir,      "fontloader-font-imp-effects.lua",}, -- NEW
-
-  --- lua libraries
---  { miscdir,      "fontloader-languages.lua",       },
-  { miscdir,      "fontloader-l-boolean.lua",       },
-  { miscdir,      "fontloader-l-file.lua",          },
-  { miscdir,      "fontloader-l-function.lua",      },
-  { miscdir,      "fontloader-l-io.lua",            },
-  { miscdir,      "fontloader-l-lpeg.lua",          },
-  { miscdir,      "fontloader-l-lua.lua",           },
-  { miscdir,      "fontloader-l-math.lua",          },
-  { miscdir,      "fontloader-l-string.lua",        },
-  { miscdir,      "fontloader-l-table.lua",         },
-  { miscdir,      "fontloader-l-unicode.lua",       },
---  { miscdir,      "fontloader-math.lua",            },
---  { miscdir,      "fontloader-mplib.lua",           },
---  { miscdir,      "fontloader-preprocessor.lua",    },
---  { miscdir,      "fontloader-swiglib.lua",         },
---  { miscdir,      "fontloader-swiglib-test.lua",    },
-  { miscdir,      "fontloader-util-str.lua",        },
-  { miscdir,      "fontloader-util-fil.lua",        },
-
-} --[[local names]]
-
--- print (table.serialize(oldnames))
+--
 -----------------------------------------------------------------------
 -- helpers
 -----------------------------------------------------------------------
 
-local die = function (...)
+local function die(...)
   io.stderr:write "[fatal error]: "
   io.stderr:write (stringformat (...))
   io.stderr:write "\naborting.\n"

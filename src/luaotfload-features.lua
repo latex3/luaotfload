@@ -927,6 +927,20 @@ fonts.constructors.features.otf.register {
     },
 }
 
+local function unset_designsize(tfmdata)
+    tfmdata.designsize = 0
+end
+fonts.constructors.features.otf.register {
+    name = 'no_designsize',
+    description = 'Set designsize to zero to ensure round-tripping in \\fontsize',
+    default = true,
+    manipulators = {
+        base = unset_designsize,
+        node = unset_designsize,
+        plug = unset_designsize,
+    },
+}
+
 return function ()
     if not fonts and fonts.handlers then
         report ("log", 0, "features",

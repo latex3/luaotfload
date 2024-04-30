@@ -56,7 +56,8 @@ local get_designsize do
   --   local first, second = string.byte(s)
   --   return (first << 8) | second
   -- end
-  local factor = 6578.176 -- =803/125*2^10=7227/7200/10*2^16
+  -- local factor = 6578.176 -- =803/125*2^10=7227/7200/10*2^16
+  local factor = 6553.6 -- =2^16/10
   function get_designsize(face)
     local buf = face:get_table(gpostag):get_data()
     if #buf == 0 then return 655360 end

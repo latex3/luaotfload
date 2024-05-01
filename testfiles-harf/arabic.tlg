@@ -1176,12 +1176,18 @@ Completed box being shipped out [1]
 ....\glue 0.0 plus 1.0fil
 ....\TU/Amiri(0)/m/n/10 "1" 0031 +0:+0
 ....\glue 0.0 plus 1.0fil
-Package fontspec Info: Amiri scale = 1.6.
-Package fontspec Info: Amiri scale = 1.6.
-Package fontspec Info: Amiri/B scale = 1.6.
-Package fontspec Info: Amiri/I scale = 1.6.
-Package fontspec Info: Amiri/BI scale = 1.6.
-Package fontspec Info: Font family 'Amiri(1)' created for font 'Amiri' with options [Renderer=Harfbuzz,Script=Arabic,Scale=1.6].
+Package fontspec Info: 
+(fontspec)             Amiri scale = 1.6.
+Package fontspec Info: 
+(fontspec)             Amiri scale = 1.6.
+Package fontspec Info: 
+(fontspec)             Amiri/B scale = 1.6.
+Package fontspec Info: 
+(fontspec)             Amiri/I scale = 1.6.
+Package fontspec Info: 
+(fontspec)             Amiri/BI scale = 1.6.
+Package fontspec Info: 
+(fontspec)             Font family 'Amiri(1)' created for font 'Amiri' with options [Renderer=Harfbuzz,Script=Arabic,Scale=1.6].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
@@ -2268,9 +2274,12 @@ Completed box being shipped out [2]
 ....\glue 0.0 plus 1.0fil
 ....\TU/Amiri(0)/m/n/10 "2" 0032 +0:+0
 ....\glue 0.0 plus 1.0fil
-Package fontspec Info: ArefRuqaa-Regular scale = 1.2.
-Package fontspec Info: ArefRuqaa-Regular scale = 1.2.
-Package fontspec Info: Font family 'ArefRuqaa-Regular.ttf(0)' created for font 'ArefRuqaa-Regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Scale=1.2].
+Package fontspec Info: 
+(fontspec)             ArefRuqaa-Regular scale = 1.2.
+Package fontspec Info: 
+(fontspec)             ArefRuqaa-Regular scale = 1.2.
+Package fontspec Info: 
+(fontspec)             Font family 'ArefRuqaa-Regular.ttf(0)' created for font 'ArefRuqaa-Regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Scale=1.2].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
@@ -4522,7 +4531,8 @@ Completed box being shipped out [3]
 ....\glue 0.0 plus 1.0fil
 ....\TU/Amiri(0)/m/n/10 "3" 0033 +0:+0
 ....\glue 0.0 plus 1.0fil
-Package fontspec Info: Font family 'NotoNastaliqUrdu-Regular.ttf(0)' created for font 'NotoNastaliqUrdu-Regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoNastaliqUrdu-Regular.ttf(0)' created for font 'NotoNastaliqUrdu-Regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              

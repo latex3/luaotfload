@@ -1,7 +1,8 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
 luaotfload | aux : font no 19 (nil) does not define feature smcp for script latn with language dflt
-Package fontspec Info: Font family 'DejaVuSans.ttf(1)' created for font 'DejaVuSans.ttf' with options [Ligatures=TeX,RawFeature=+vircase].
+Package fontspec Info: 
+(fontspec)             Font family 'DejaVuSans.ttf(1)' created for font 'DejaVuSans.ttf' with options [Ligatures=TeX,RawFeature=+vircase].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              

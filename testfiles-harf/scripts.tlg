@@ -1,33 +1,39 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-Package fontspec Warning: Font "amiri-regular" does not contain requested Script "Greek".
-Package fontspec Info: Font family 'amiri-regular.ttf(1)' created for font 'amiri-regular.ttf' with options [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin,Script=Greek].
+Package fontspec Warning: 
+(fontspec)                Script 'Greek' not explicitly supported within font 'amiri-regular'. Check the typeset output, and if it is okay then ignore this warning. Otherwise a different font should be chosen.
+Package fontspec Info: 
+(fontspec)             Font family 'amiri-regular.ttf(1)' created for font 'amiri-regular.ttf' with options [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin,Script=Greek].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
-(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;"
+(fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 LaTeX Font Warning: Font shape `TU/amiri-regular.ttf(0)/m/it' undefined
 (Font)              using `TU/amiri-regular.ttf(0)/m/n' instead on input line ....
-Package fontspec Info: Font family 'amiri-regular.ttf(2)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Arabic].
+Package fontspec Info: 
+(fontspec)             Font family 'amiri-regular.ttf(2)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Arabic].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=arab;language=ARA;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-Package fontspec Info: Font family 'amiri-regular.ttf(3)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Urdu].
+Package fontspec Info: 
+(fontspec)             Font family 'amiri-regular.ttf(3)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Urdu].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=arab;language=URD;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-Package fontspec Info: Font family 'amiri-regular.ttf(4)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Sindhi].
+Package fontspec Info: 
+(fontspec)             Font family 'amiri-regular.ttf(4)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Sindhi].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=arab;language=SND;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-Package fontspec Info: Font family 'amiri-regular.ttf(5)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Kashmiri].
+Package fontspec Info: 
+(fontspec)             Font family 'amiri-regular.ttf(5)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Kashmiri].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
@@ -53,14 +59,14 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(1)/m/n/10 "T" 0054 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "T" 0054 +0:+0
 ....\kern-1.66702
 ....\hbox(6.48+0.04)x5.73, shifted 2.165, direction TLT
-.....\TU/amiri-regular.ttf(1)/m/n/10 "E" 0045 +0:+0
+.....\TU/amiri-regular.ttf(0)/m/n/10 "E" 0045 +0:+0
 ....\kern-1.25
-....\TU/amiri-regular.ttf(1)/m/n/10 "X" 0058 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "X" 0058 +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/amiri-regular.ttf(1)/m/n/10 "=" 003D +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "=" 003D +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
 ....\TU/amiri-regular.ttf(1)/m/n/10 "τ" 03C4 +0:+0
 ....\TU/amiri-regular.ttf(1)/m/n/10 "τ" 120000 +0:+0
@@ -73,15 +79,15 @@ Completed box being shipped out [1]
 ....\TU/amiri-regular.ttf(1)/m/n/10 "χ" 120000 +0:+0
 ....\pdfliteral page <lua data reference ...>
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/amiri-regular.ttf(1)/m/n/10 "i" 0069 +0:+0
-....\TU/amiri-regular.ttf(1)/m/n/10 "n" 006E +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "i" 0069 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "n" 006E +0:+0
 ....\glue(\spaceskip) 2.92 plus 1.46 minus 0.97333
-....\TU/amiri-regular.ttf(1)/m/n/10 "G" 0047 +0:+0
-....\TU/amiri-regular.ttf(1)/m/n/10 "r" 0072 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "G" 0047 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "r" 0072 +0:+0
 ....\kern-0.04 (font)
-....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
-....\TU/amiri-regular.ttf(1)/m/n/10 "e" 0065 +0:+0
-....\TU/amiri-regular.ttf(1)/m/n/10 "k" 006B +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "e" 0065 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "k" 006B +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -95,11 +101,11 @@ Completed box being shipped out [1]
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/amiri-regular.ttf(1)/m/n/10 "(" 1219DC +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "(" 1219DC +0:+0
 ....\kern0.0 (italic)
-....\TU/amiri-regular.ttf(1)/m/n/10 "f" 0066 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "f" 0066 +0:+0
 ....\kern0.0 (italic)
-....\TU/amiri-regular.ttf(1)/m/n/10 ")" 1219DD +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 ")" 1219DD +0:+0
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -226,11 +232,11 @@ Completed box being shipped out [1]
 ..\hbox(6.27+0.03)x345.0, direction TLT
 ...\hbox(6.27+0.03)x345.0, glue set 169.84fil, direction TLT
 ....\glue 0.0 plus 1.0fil
-....\TU/amiri-regular.ttf(1)/m/n/10 "1" 0031 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "1" 0031 +0:+0
 ....\glue 0.0 plus 1.0fil
-Missing character: There is no τ (U+03C4) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
-Missing character: There is no ε (U+03B5) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
-Missing character: There is no χ (U+03C7) in font [amiri-regular.ttf]:mode=harf;script=latn;language=dflt;+tlig;!
+Missing character: There is no τ (U+03C4) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
+Missing character: There is no ε (U+03B5) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
+Missing character: There is no χ (U+03C7) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
 Completed box being shipped out [2]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0
@@ -382,7 +388,7 @@ Completed box being shipped out [2]
 ..\hbox(6.27+0.0)x345.0, direction TLT
 ...\hbox(6.27+0.0)x345.0, glue set 169.84fil, direction TLT
 ....\glue 0.0 plus 1.0fil
-....\TU/amiri-regular.ttf(1)/m/n/10 "2" 0032 +0:+0
+....\TU/amiri-regular.ttf(0)/m/n/10 "2" 0032 +0:+0
 ....\glue 0.0 plus 1.0fil
 2 hlist, 1 rule, 1 dir, 3 kern, 1 glyph, 2 attribute, 48 glue_spec, 2 attribute_list (scripts.aux)
 LaTeX Font Warning: Some font shapes were not available, defaults substituted.

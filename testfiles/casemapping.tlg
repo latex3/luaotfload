@@ -2,97 +2,113 @@ This is a generated file for the l3build validation system.
 Don't change this file in any respect.
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <5> on input line ....
-Package fontspec Info: Font family 'NotoSerif-Regular(1)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={+lower}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(1)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={+lower}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;+lower;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;+lower;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(2)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={lower=de-alt}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(2)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={lower=de-alt}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;lower=de-alt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;lower=de-alt;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(3)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={+upper}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(3)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={+upper}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;+upper;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;+upper;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(4)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={upper=de-alt}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(4)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={upper=de-alt}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;upper=de-alt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;upper=de-alt;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(5)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={lower=el}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(5)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={lower=el}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;lower=el;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;lower=el;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(6)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={upper=el}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(6)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={upper=el}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;upper=el;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;upper=el;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(7)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={lower=lt}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(7)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={lower=lt}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;lower=lt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;lower=lt;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(8)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={upper=lt}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(8)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,KpseOnly,Extension=.ttf,RawFeature={upper=lt}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;upper=lt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;upper=lt;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(9)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(9)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(10)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={+lower}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(10)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={+lower}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;+lower;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;+lower;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(11)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={lower=el-x-iota}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(11)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={lower=el-x-iota}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;lower=el-x-iota;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;lower=el-x-iota;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(12)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={+upper}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(12)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={+upper}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;+upper;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;+upper;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(13)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={upper=el-x-iota}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(13)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Greek,RawFeature={language=ell},KpseOnly,Extension=.ttf,RawFeature={upper=el-x-iota}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;upper=el-x-iota;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=grek;language=dflt;+tlig;language=ell;upper=el-x-iota;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(14)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},KpseOnly,Extension=.ttf].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(14)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},KpseOnly,Extension=.ttf].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;language=trk;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;language=trk;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(15)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},KpseOnly,Extension=.ttf,RawFeature={+lower}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(15)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},KpseOnly,Extension=.ttf,RawFeature={+lower}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;language=trk;+lower;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"kpse:NotoSerif-Regular.ttf:mode=node;script=latn;language=dflt;+tlig;language=trk;+lower;+smcp;"
-Package fontspec Info: Font family 'NotoSerif-Regular(16)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},KpseOnly,Extension=.ttf,RawFeature={+upper}].
+Package fontspec Info: 
+(fontspec)             Font family 'NotoSerif-Regular(16)' created for font 'NotoSerif-Regular' with options [Ligatures=TeX,Script=Latin,RawFeature={language=trk},KpseOnly,Extension=.ttf,RawFeature={+upper}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              

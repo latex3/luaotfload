@@ -1,6 +1,7 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-Package fontspec Info: Font family 'texgyretermes(1)' created for font 'texgyretermes' with options [Ligatures=TeX,RawFeature={embolden=2}].
+Package fontspec Info: 
+(fontspec)             Font family 'texgyretermes(1)' created for font 'texgyretermes' with options [Ligatures=TeX,RawFeature={embolden=2}].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              

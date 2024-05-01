@@ -1,20 +1,25 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-Package fontspec Info: Font family 'lmroman10-bold.otf(0)' created for font 'lmroman10-bold.otf' with options [Renderer=Harfbuzz,Script=Latin].
+Package fontspec Info: 
+(fontspec)             Font family 'lmroman10-bold.otf(0)' created for font 'lmroman10-bold.otf' with options [Renderer=Harfbuzz,Script=Latin].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[lmroman10-bold.otf]:mode=harf;script=latn;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-Package fontspec Info: Font family 'lmromanslant10-regular.otf(0)' created for font 'lmromanslant10-regular.otf' with options [Renderer=Harfbuzz,Script=Latin].
+Package fontspec Info: 
+(fontspec)             Font family 'lmromanslant10-regular.otf(0)' created for font 'lmromanslant10-regular.otf' with options [Renderer=Harfbuzz,Script=Latin].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[lmromanslant10-regular.otf]:mode=harf;script=latn;language=dflt;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
-Package fontspec Info: lmroman12-regular scale = 1.2.
-Package fontspec Info: lmroman12-regular scale = 1.2.
-Package fontspec Info: Font family 'lmroman12-regular.otf(0)' created for font 'lmroman12-regular.otf' with options [Renderer=Harfbuzz,Script=Latin,Scale=1.2].
+Package fontspec Info: 
+(fontspec)             lmroman12-regular scale = 1.2.
+Package fontspec Info: 
+(fontspec)             lmroman12-regular scale = 1.2.
+Package fontspec Info: 
+(fontspec)             Font family 'lmroman12-regular.otf(0)' created for font 'lmroman12-regular.otf' with options [Renderer=Harfbuzz,Script=Latin,Scale=1.2].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
@@ -387,7 +392,8 @@ Completed box being shipped out [1]
 ....\glue 0.0 plus 1.0fil
 ....\TU/lmroman10-regular.otf(0)/m/n/10 "1" 0031 +0:+0
 ....\glue 0.0 plus 1.0fil
-Package fontspec Info: Font family 'lmroman10-regular.otf(1)' created for font 'lmroman10-regular.otf' with options [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin].
+Package fontspec Info: 
+(fontspec)             Font family 'lmroman10-regular.otf(1)' created for font 'lmroman10-regular.otf' with options [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              

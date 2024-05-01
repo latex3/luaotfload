@@ -7,19 +7,22 @@ LaTeX Font Info:    External font `cmex10' loaded for size
 (../mt-cmr.cfg
 File: mt-cmr.cfg ....-..-.. v... microtype config. file: Computer Modern Roman (RS)
 )
-Package fontspec Info: Font family 'LinLibertine_R.otf(1)' created for font 'LinLibertine_R.otf' with options [Ligatures=TeX,LetterSpace=50,Ligatures=Historic].
+Package fontspec Info: 
+(fontspec)             Font family 'LinLibertine_R.otf(1)' created for font 'LinLibertine_R.otf' with options [Ligatures=TeX,LetterSpace=50,Ligatures=Historic].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+hlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+hlig;+smcp;"
-Package fontspec Info: Font family 'LinLibertine_R.otf(2)' created for font 'LinLibertine_R.otf' with options [Ligatures=TeX,LetterSpace=50,Ligatures=Rare].
+Package fontspec Info: 
+(fontspec)             Font family 'LinLibertine_R.otf(2)' created for font 'LinLibertine_R.otf' with options [Ligatures=TeX,LetterSpace=50,Ligatures=Rare].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+dlig;"
 (fontspec)             - 'small caps'  (m/sc) with NFSS spec.: <->"[LinLibertine_R.otf]:mode=node;script=latn;language=dflt;letterspace=50;+tlig;+dlig;+smcp;"
-Package fontspec Info: Font family 'LinLibertine_R.otf(3)' created for font 'LinLibertine_R.otf' with options [Ligatures=TeX,LetterSpace=50,Ligatures=NoCommon].
+Package fontspec Info: 
+(fontspec)             Font family 'LinLibertine_R.otf(3)' created for font 'LinLibertine_R.otf' with options [Ligatures=TeX,LetterSpace=50,Ligatures=NoCommon].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              

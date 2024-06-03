@@ -103,7 +103,7 @@ local function dofallback(head, _, _, _, direction)
 end
 
 function luaotfload.add_fallback(name, fonts)
-  define_font = define_font or luaotfload.define_font -- Lazy loading because this file get's loaded before define_font is defined
+  define_font = define_font or luaotfload.define_font -- Lazy loading because this file gets loaded before define_font is defined
   if fonts == nil then
     fonts = name
     name = #fallback_table_fontnames + 1

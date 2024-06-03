@@ -238,7 +238,7 @@ local function parse_glyf(loca, glyf, gid)
         end
         last = last + value
         point.y = last
-        point.flags = flags & 0xC1 -- Discard all flags we aready used
+        point.flags = flags & 0xC1 -- Discard all flags we already used
       end
       -- assert (i == total_points)
     end

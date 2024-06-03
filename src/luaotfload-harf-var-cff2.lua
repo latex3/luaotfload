@@ -85,7 +85,7 @@ end
 
 local function do_blend(result, vstore)
   if not vstore then
-    error'blend operator only allowed in Private disctionary of variable fonts'
+    error'blend operator only allowed in Private dictionary of variable fonts'
   end
   local vsindex = (result.vsindex or 0) + 1
   local factors = vstore[vsindex]

@@ -182,7 +182,7 @@ local p_cheapxml          = header * root
 
 --[[doc--
       fonts_conf_scanner() handles configuration files.
-      It is called on an abolute path to a config file (e.g.
+      It is called on an absolute path to a config file (e.g.
       /home/luser/.config/fontconfig/fonts.conf) and returns a list
       of the nodes it managed to extract from the file.
 --doc]]--
@@ -431,7 +431,7 @@ local splitcomma        = Ct((C(noncomma^1) + comma)^1)
     where
       <csname> is the control sequence that activates the font
       <prefix> is either “file” or “name”, determining the lookup
-      <identifer> is either a file name (no path) or a font
+      <identifier> is either a file name (no path) or a font
                   name, depending on the lookup
       <features> is a list of switches or options, separated by
                  semicolons or commas; a switch is of the form “+” foo

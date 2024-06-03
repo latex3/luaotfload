@@ -155,7 +155,7 @@ local function sanitize_color_expression (digits)
 end
 
 local color_stack = 0
--- Beside maybe allowing {transpareny} package compatibility at some
+-- Beside maybe allowing {transparency} package compatibility at some
 -- point, this ensures that the stack is only created if it is actually
 -- needed. Especially important because it adds /TransGs1 gs to every page
 local function transparent_stack()

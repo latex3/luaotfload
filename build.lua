@@ -102,7 +102,7 @@ typesetsuppfiles = {"texmf.cnf"}
 
 maxprintline=9999
 
--- exclude some text temporarly or in certain systems ...
+-- exclude some text temporarily or in certain systems ...
 if os.env["CONTEXTPATH"] then
   -- local system
   --   excludetests = {"math"} -- because of adjdemerits bug

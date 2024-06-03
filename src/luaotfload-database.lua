@@ -122,7 +122,7 @@ local lpeg                     = require "lpeg"
 local P, lpegmatch         = lpeg.P, lpeg.match
 
 local log                      = luaotfload.log
-local logreport                = log and log.report or print -- overriden later on
+local logreport                = log and log.report or print -- overridden later on
 local report_status            = log.names_status
 local report_status_start      = log.names_status_start
 local report_status_stop       = log.names_status_stop
@@ -786,7 +786,7 @@ end
 
     get_font_file -- Look up the file of an entry in the mappings
     table. If the index is valid, pass on the name and subfont index
-    after verifing the existence of the resolved file. This
+    after verifying the existence of the resolved file. This
     verification differs depending the index entry’s ``location``
     field:
 
@@ -821,7 +821,7 @@ end
 --[[doc--
 We need to verify if the result of a cached lookup actually exists in
 the texmf or filesystem. Again, due to the schizoprenic nature of the
-font managment we have to check both the system path and the texmf.
+font management we have to check both the system path and the texmf.
 --doc]]--
 
 local function verify_font_file (basename)
@@ -1395,7 +1395,7 @@ local function find_closest (name, limit)
     for n = 1, n_fonts do
         local current    = mappings[n]
         --[[
-            This is simplistic but surpisingly fast.
+            This is simplistic but surprisingly fast.
             Matching is performed against the “fullname” field
             of a db record in preprocessed form. We then store the
             raw “fullname” at its edit distance.
@@ -1979,7 +1979,7 @@ do
 
     --- windows and dos
     if os_type == "windows" or os_type == "msdos" then
-        --- ms platfom specific stuff
+        --- ms platform specific stuff
         function path_normalize (path)
             path = stringgsub(path, '\\', '/')
             path = stringlower(path)

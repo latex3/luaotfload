@@ -1,4 +1,4 @@
--- Suport for parsing BCP47 based language tags into components
+-- Support for parsing BCP47 based language tags into components
 local normalize_case, language_tag do
   local l = lpeg or require'lpeg'
   local function rep(base, num, max)

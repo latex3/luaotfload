@@ -30,7 +30,7 @@ texlua scripts/mkimport news "" %CONTEXTPATH%
 texlua scripts/mkimport import "" %CONTEXTPATH%
 
 
--- This also imports the merged orginal file and saves it as
+-- This also imports the merged original file and saves it as
 -- fontloader-reference.lua in src/fontloader/runtime
 
 -- Merged with the call

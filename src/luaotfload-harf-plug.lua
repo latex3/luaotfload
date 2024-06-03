@@ -912,7 +912,7 @@ local function tonodes(head, node, run, glyphs)
               -- fonts, so we don't want them to reach the backend as it will cause
               -- a fatal error. We use `nullfont` instead.  That is a hack, but I
               -- think it is good enough for now. We could make the glyph virtual
-              -- with empty commands suh that LuaTeX ignores it, but we still want
+              -- with empty commands such that LuaTeX ignores it, but we still want
               -- a missing glyph warning.
               -- We insert the glyph node and move on, no further work is needed.
               setfont(node, 0)

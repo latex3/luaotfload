@@ -14,7 +14,7 @@ assert(luaotfload_module, "This is a part of luaotfload and should not be loaded
 }
 
 local overloads = {
-  -- rougly based on texglyphlist-g2u.txt
+  -- roughly based on texglyphlist-g2u.txt
 
   -- ff = { unicode = {0x0066, 0x0066} },
   -- ffi = { unicode = {0x0066, 0x0066, 0x0069} },

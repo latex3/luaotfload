@@ -24,7 +24,7 @@ luaotfload v3.25 has been skipped
        precedence.
     *  Support xdvipsk in DVI mode
     *  Preserve soft-hyphens when dropping default ignorable characters
-    *  Hash cache keys to better support certain rather unflexible operating
+    *  Hash cache keys to better support certain rather inflexible operating
        systems
     *  Various bug fixes
 
@@ -159,7 +159,7 @@ luaotfload v3.25 has been skipped
 2019-11-04 luaotfload v3.1
     * added code to use the harfbuzz library of luahbtex ("mode=harf")
     * fonts in ttc can now be indexed by name
-    * remove a number of lua tables from the global enviroment (_G) to reduce the polution. 
+    * remove a number of lua tables from the global environment (_G) to reduce the pollution. 
       Kept there are only the tables luaotfload, fonts and nodes.
     * sync with context files from 2019-10-29
 
@@ -253,7 +253,7 @@ luaotfload v3.25 has been skipped
     * Add ``--dumpconf`` option to luaotfload-tool for generating configuration
       files.
     * Move fontloader files to subtree src/fontloader.
-    * New script ``mkimport`` facilitates maintainance of code imported from
+    * New script ``mkimport`` facilitates maintenance of code imported from
       Context.
     * Revised letterspacing, now utilizing the ``node.direct`` interface.
     * Revized colorization of fonts, utilizing ``node.direct`` (Dohyun Kim).
@@ -333,7 +333,7 @@ luaotfload v3.25 has been skipped
       backward-incompatible changes in the font structure. A
       backward-compatibility layer has been added for the current
       versions of fontspec, unicode-math and microtype, but it should
-      disapear in a future version.
+      disappear in a future version.
     * Synchronisation with ConTeXt is now easier and can be done by just
       updating luaotfload-merged.lua (<= luatex-fonts-merged.lua from
       the LuaTeX-Plain format)
@@ -372,7 +372,7 @@ luaotfload v3.25 has been skipped
 2013/04/11, luaotfload v1.28:
     * Adapting to LuaTeX 0.75
     * Fix small documentation issues in mkluatexfontdb
-    * Fix possible infite loop with fontconfig config files references
+    * Fix possible infinite loop with fontconfig config files references
     * Adding semibold synonym for bold
     * file:xxx syntax now uses the same search function as name: which
       make more fonts recognized
@@ -475,7 +475,7 @@ luaotfload v3.25 has been skipped
 
 2010/05/28, luaotfload v1.08:
     * fix misc. bugs with system fonts scanning
-    * parse fontconfig configuration directly, no longer dependant on 'fc-list'
+    * parse fontconfig configuration directly, no longer dependent on 'fc-list'
     * now if no font names database is found, luaotfload will generate it, also
       it will force an update of the database if the asked font can not be
       found

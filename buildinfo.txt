@@ -17,7 +17,7 @@ bash-->  texlua scripts/mkimport news "" $CONTEXTPATH
 cmd -->   texlua scripts/mkimport import "" %CONTEXTPATH%
 bash-->   texlua scripts/mkimport import "" $CONTEXTPATH
 
-This also imports the merged orginal file and saves it as
+This also imports the merged original file and saves it as
 fontloader-reference.lua in src/fontloader/runtime
 
 !! Check if luatex-fonts.lua has changed (indicates new files ...)
@@ -30,7 +30,7 @@ requirements char-def.lua and char-ini.lua
 the file is created in src/auto by default!
 
 25.12.2018: in the new code luaotfload-character.lua is no longer used.
-Perhaps it will be dropped completly.
+Perhaps it will be dropped completely.
 
 cmd -->   texlua scripts/mkcharacters %CONTEXTPATH%/tex/context/base/mkiv/
 bash-->   texlua scripts/mkcharacters $CONTEXTPATH/tex/context/base/mkiv/

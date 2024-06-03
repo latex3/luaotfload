@@ -74,7 +74,7 @@ Supported is the \identifier{luatex} versions of a current TeXLive 2019 (and a c
     precedence.
   \item Support xdvipsk in DVI mode
   \item Preserve soft-hyphens when dropping default ignorable characters
-  \item Hash cache keys to better support certain rather unflexible operating
+  \item Hash cache keys to better support certain rather inflexible operating
     systems
   \item Various bug fixes
 \end{itemize}
@@ -239,7 +239,7 @@ for more than one script, see page~\pageref{multiscript}
         officially by the LaTeX3 Project team.
 \item   Code to use the harfbuzz library of luahbtex has been added. See the description of the harf mode.
 \item   fonts in ttc-collections can now be indexed by name.
-\item   To reduce the polution of the global lua enviroment a number of lua tables have been removed.
+\item   To reduce the pollution of the global lua environment a number of lua tables have been removed.
         Only the tables \identifier{luaotfload}, \identifier{fonts} and \identifier{nodes} have been kept there.
 \item   The fontloader has been synched with the context files from 2019-10-29.
 
@@ -346,7 +346,7 @@ On the other side there is a lot new:
   \beginaltitem {Lualibs} The update of the fontloader files also required an update of the \identifier{Lualibs} package. This \identifier{Luaotfload} version needs version 2.6 of \identifier{Lualibs}.
   \endaltitem
 
-  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LuaTeX\ 1.08/1.09 maintenance has been transfered to Ulrike Fischer and Marcel Krüger. The package was maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload}.
+  \beginaltitem {Maintenance} As the current maintainer wasn't available and it was urgent to get a \identifier{Luaotfload} compatible with \LuaTeX\ 1.08/1.09 maintenance has been transferred to Ulrike Fischer and Marcel Krüger. The package was maintained and developed at \hyperlink{https://github.com/u-fischer/luaotfload}.
   \endaltitem
 
   \beginaltitem {Documentation}
@@ -409,7 +409,7 @@ system conveniently by indexing the metadata.
 
 \identifier{Luaotfload} is part of \hologo{LuaLaTeX}, the community-driven
 project to provide a foundation for using the \LaTeX\ format with the
-full capabilites of the \LuaTeX\ engine.
+full capabilities of the \LuaTeX\ engine.
 %
 As such, the distinction between end users, contributors, and project
 maintainers is intentionally kept less strict, lest we unduly
@@ -696,7 +696,7 @@ fall back to a \inlinecode {file:} lookup.
 Lastly, if none of the above succeeded, attempt to resolve the request as a
 \inlinecode {name:} lookup by searching the font index for \meta{font name}.
 %
-The behavior of this “anonymous” lookup is configurable, see the configuation
+The behavior of this “anonymous” lookup is configurable, see the configuration
 manpage for details.
 
 Furthermore, \identifier{luaotfload} supports the slashed (shorthand)
@@ -1023,7 +1023,7 @@ obviously, \inlinecode{random}.
 
           The keys in such a table are like above RGB colors with an optional transparency setting.
           The values are either lists of glyph names or GID numbers.
-          Both types are font dependant! Not every font use the same
+          Both types are font dependent! Not every font use the same
           glyph names (or even glyph names at all). GID number are font specific anyway. The GID can be found
           by looking up the \verb+["index"]+ entry in the lua file of a font.
 
@@ -1566,7 +1566,7 @@ Combinations are created by defining a font using the \luaident{combo:} prefix.
 
 For example, the \identifier{Latin Modern} family of fonts does, as indicated
 in the name, not provide Cyrillic glyphs. If Latin script dominates in the copy
-with interspersed Cyrillic, a fallback can be created from a similiar looking
+with interspersed Cyrillic, a fallback can be created from a similar looking
 font like \identifier{Computer Modern Unicode}, taking advantage of the fact
 that it too derives from Knuth’s original \identifier{Computer Modern} series:
 
@@ -2512,7 +2512,7 @@ callback functions:
 
 When these functions aren't used, then the color is set based on colorstack 0.
 By default a new colorstack is allocated for transparency, but alternatively an
-existsing colorstack for this prpose can be set:
+existing colorstack for this purpose can be set:
 
 \beginfunctionlist
 

@@ -57,7 +57,7 @@ local logreport           = luaotfload.log.report
     this is still short of the goal »\emphasis{it just works!}«.
     When building the font database \identifier{luaotfload} scans
     system font directories anyways, so we already have all the
-    information for looking sytem fonts.
+    information for looking system fonts.
     With the release version 2.2 the file names are indexed in the
     database as well and we are ready to resolve \verb|file:| lookups
     this way.

@@ -586,7 +586,7 @@ function aux.provides_language(font_id, asked_script, asked_language)
 end
 
 --[[doc--
-A function to check if a font is a variabe font with a given axis.
+A function to check if a font is a variable font with a given axis.
 --doc]]--
 
 function aux.provides_axis(font_id, asked_axis)

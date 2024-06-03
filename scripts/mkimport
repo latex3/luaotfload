@@ -119,7 +119,7 @@ local hmm = function (...)
   --[[ sorta like an error but non-fatal ]]
   io.stderr:write "[\x1b[1;31merror\x1b[0m] "
   io.stderr:write (stringformat (...))
-  io.stderr:write "; continuing nontheless.\n"
+  io.stderr:write "; continuing nonetheless.\n"
 end
 
 local emphasis = function (txt)
@@ -476,7 +476,7 @@ local strip_prefix = function (fname, prefix)
   if not pfxlen[prefix] then pfxlen[prefix] = #prefix end
   local len = pfxlen[prefix]
   if #fname <= len + 2 then
-    --- too short to accomodate prefix + basename
+    --- too short to accommodate prefix + basename
     return
   end
   if string.sub (fname, 1, len) == prefix then
@@ -789,7 +789,7 @@ local search = function (target)
     look_for = search_paths (target)
     if look_for then goto found end
 
-    --- seach the definitions
+    --- search the definitions
     look_for = search_defs (target)
     if look_for then goto found end
 

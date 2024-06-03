@@ -214,7 +214,7 @@ local function is_dominant_script(scripts, script, first, ...)
 end
 
 local function makecombifont(tfmdata, _, additional_scripts)
-  define_font = define_font or luaotfload.define_font -- Lazy loading because this file get's loaded before define_font is defined
+  define_font = define_font or luaotfload.define_font -- Lazy loading because this file gets loaded before define_font is defined
   local has_auto
   additional_scripts = tostring(additional_scripts)
   if additional_scripts:sub(1, 5) == "auto+" then
@@ -230,7 +230,7 @@ local function makecombifont(tfmdata, _, additional_scripts)
     for k, v in next, t do if type(k) == "string" then
       local l = string.lower(k)
       if lower_t[l] ~= nil and lower_t[l] ~= v then
-        error(string.format("Inconsistant multiscript table %q for script %s", additional_scripts, l))
+        error(string.format("Inconsistent multiscript table %q for script %s", additional_scripts, l))
       end
       lower_t[l] = v
     end end
@@ -287,7 +287,7 @@ local function makecombifont(tfmdata, _, additional_scripts)
           additional_scripts[iso_script] = spec.specification .. ';-multiscript;script=' .. script
           ---- FIXME: IMHO the following which just modiefies the spec
           --   would be nicer, but it breaks font patching callbacks
-          --   (except if we ignore them, but that would be inconsistant to
+          --   (except if we ignore them, but that would be inconsistent to
           --    other fonts)
           -- local new_raw_features = {}
           -- local new_features = { raw = new_raw_features, normal = new_raw_features }

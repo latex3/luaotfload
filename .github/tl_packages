@@ -37,7 +37,7 @@ luatexja arabluatex babel babel-english
 amsmath lualatex-math latex-amsmath-dev
 #
 # a few more packages
-luacode environ adjustbox collectbox ms varwidth geometry url ulem
+luacode environ adjustbox collectbox varwidth geometry url ulem
 lua-ul
 #
 # some packages for the documentation

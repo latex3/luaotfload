@@ -3,8 +3,8 @@ Don't change this file in any respect.
 TU/EBGaramond-Italic.otf(0)/m/n:
   [EBGaramond-Italic.otf]:mode=node;script=latn;language=dflt; at 10.0pt
 TU/EBGaramond-Italic.otf(1)/m/n:
-  [EBGaramond-Italic.otf]:mode=node;script=latn;language=dflt; at 10.0pt
+  [EBGaramond-Italic.otf]:mode=node;script=latn;language=dflt;+cv04=0; at 10.0pt
 TU/EBGaramond-Italic.otf(2)/m/n:
-  [EBGaramond-Italic.otf]:mode=node;script=latn;language=dflt; at 10.0pt
+  [EBGaramond-Italic.otf]:mode=node;script=latn;language=dflt;+cv05=2; at 10.0pt
 TU/EBGaramond-Italic.otf(3)/m/n:
-  [EBGaramond-Italic.otf]:mode=node;script=latn;language=dflt; at 10.0pt
+  [EBGaramond-Italic.otf]:mode=node;script=latn;language=dflt;+cv04=0;+cv05=2; at 10.0pt

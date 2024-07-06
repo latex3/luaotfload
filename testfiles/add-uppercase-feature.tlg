@@ -1,13 +1,17 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
 luaotfload | aux : font no 19 (nil) does not define feature smcp for script latn with language dflt
+luaotfload | aux : font no 19 (nil) does not define feature smcp for script latn with language dflt
+luaotfload | aux : font no 19 (nil) does not define feature smcp for script dflt with language dflt
+luaotfload | aux : font no 19 (nil) does not define feature smcp for script latn with language dflt
+luaotfload | aux : font no 19 (nil) does not define feature smcp for script latn with language dflt
+luaotfload | aux : font no 19 (nil) does not define feature smcp for script dflt with language dflt
 Package fontspec Info: 
 (fontspec)             Font family 'DejaVuSans.ttf(1)' created for font 'DejaVuSans.ttf' with options [Ligatures=TeX,RawFeature=+vircase].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[DejaVuSans.ttf]:mode=node;script=latn;language=dflt;+tlig;+vircase;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0

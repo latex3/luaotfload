@@ -1,6 +1,7 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-(../../supporttexmf/tex/latex/testluaotfloadtexmfinput.tex) [1
+(../../supporttexmf/tex/latex/testluaotfloadtexmfinput.tex)
+[1
 Missing character: There is no a (U+0061) in font file:LuaotfloadDummyFont.otf:mode=node!
 Missing character: There is no b (U+0062) in font file:LuaotfloadDummyFont.otf:mode=node!
 Missing character: There is no c (U+0063) in font file:LuaotfloadDummyFont.otf:mode=node!

@@ -1,14 +1,13 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
-Package fontspec Warning: 
-(fontspec)                Script 'Greek' not explicitly supported within font 'amiri-regular'. Check the typeset output, and if it is okay then ignore this warning. Otherwise a different font should be chosen.
+Package fontspec Info: 
+(fontspec)             Script 'Greek' not explicitly supported within font 'amiri-regular'. Check the typeset output, and if it is okay then ignore this warning. Otherwise a different font should be chosen.
 Package fontspec Info: 
 (fontspec)             Font family 'amiri-regular.ttf(1)' created for font 'amiri-regular.ttf' with options [Ligatures=TeX,Renderer=Harfbuzz,Script=Latin,Script=Greek].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 LaTeX Font Warning: Font shape `TU/amiri-regular.ttf(0)/m/it' undefined
 (Font)              using `TU/amiri-regular.ttf(0)/m/n' instead on input line ....
 Package fontspec Info: 
@@ -17,28 +16,24 @@ Package fontspec Info:
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=arab;language=ARA;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Package fontspec Info: 
 (fontspec)             Font family 'amiri-regular.ttf(3)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Urdu].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=arab;language=URD;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Package fontspec Info: 
 (fontspec)             Font family 'amiri-regular.ttf(4)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Sindhi].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=arab;language=SND;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Package fontspec Info: 
 (fontspec)             Font family 'amiri-regular.ttf(5)' created for font 'amiri-regular.ttf' with options [Renderer=Harfbuzz,Script=Arabic,Language=Kashmiri].
 (fontspec)              
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=arab;language=KSH;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [1]
 \vbox(633.0+0.03)x407.0, direction TLT
 .\glue 16.0

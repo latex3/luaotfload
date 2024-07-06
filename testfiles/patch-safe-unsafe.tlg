@@ -2,5 +2,6 @@ This is a generated file for the l3build validation system.
 Don't change this file in any respect.
 patch_fontname:texgyreheros2
 patch_font_unsafecmr100
-patch_font_unsafe, no table! [1
+patch_font_unsafe, no table!
+[1
 ] (patch-safe-unsafe.aux)

@@ -1192,13 +1192,9 @@ Package fontspec Info:
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->s*[1.6]"name:Amiri:mode=harf;script=arab;language=dflt;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 (fontspec)             - 'bold' (b/n) with NFSS spec.: <->s*[1.6]"name:Amiri/B:mode=harf;script=arab;language=dflt;"
-(fontspec)             - 'bold small caps'  (b/sc) with NFSS spec.: 
 (fontspec)             - 'italic' (m/it) with NFSS spec.: <->s*[1.6]"name:Amiri/I:mode=harf;script=arab;language=dflt;"
-(fontspec)             - 'italic small caps'  (m/scit) with NFSS spec.: 
 (fontspec)             - 'bold italic' (b/it) with NFSS spec.: <->s*[1.6]"name:Amiri/BI:mode=harf;script=arab;language=dflt;"
-(fontspec)             - 'bold italic small caps'  (b/scit) with NFSS spec.: 
 LaTeX Font Info:    Font shape `TU/Amiri(1)/m/n' will be
 (Font)              scaled to size 16.00006pt on input line ....
 Completed box being shipped out [2]
@@ -2284,7 +2280,6 @@ Package fontspec Info:
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->s*[1.2]"[ArefRuqaa-Regular.ttf]:mode=harf;script=arab;language=dflt;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 LaTeX Font Info:    Font shape `TU/ArefRuqaa-Regular.ttf(0)/m/n' will be
 (Font)              scaled to size 11.99997pt on input line ....
 Completed box being shipped out [3]
@@ -4537,7 +4532,6 @@ Package fontspec Info:
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[NotoNastaliqUrdu-Regular.ttf]:mode=harf;script=arab;language=dflt;"
-(fontspec)             - 'small caps'  (m/sc) with NFSS spec.: 
 Completed box being shipped out [4]
 \vbox(633.0+0.06)x407.0, direction TLT
 .\glue 16.0

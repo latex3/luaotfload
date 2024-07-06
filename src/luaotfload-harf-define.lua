@@ -18,6 +18,8 @@ local unpack = string.unpack
 local stringlower = string.lower
 local stringupper = string.upper
 local gsub = string.gsub
+local find = string.find
+local format = string.format
 
 local hb = luaotfload.harfbuzz
 local scriptlang_to_harfbuzz = require'luaotfload-scripts'.to_harfbuzz
@@ -80,7 +82,6 @@ end
 local keyhash do
   local formatstring = string.rep('%02x', 256/8)
   local sha256 = sha2.digest256
-  local format = string.format
   local byte = string.byte
   keyhash = setmetatable({}, {__index = function(t, k)
     local h = format(formatstring, byte(sha256(k), 1, -1))
@@ -106,7 +107,7 @@ end
 local function loadfont(spec)
   local path, sub = spec.resolved, spec.sub or 1
 
-  local key = string.format("%s:%d:%s", path, sub, instance)
+  local key = format("%s:%d:%s", path, sub, instance)
 
   local attributes = lfs.attributes(path)
   if not attributes then return end
@@ -427,8 +428,13 @@ local function scalefont(data, spec)
     end
   end
 
+  local texname = spec.specification
+  if find(texname, ' ') then
+    texname = format('"%s"', texname) -- Not %q since we do not want escape sequences inside the string
+  end
+
   local tfmdata = {
-    name = spec.specification,
+    name = texname,
     filename = 'harfloaded:' .. spec.resolved,
     subfont = spec.sub or 1,
     designsize = data.designsize,

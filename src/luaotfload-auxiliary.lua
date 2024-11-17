@@ -486,6 +486,7 @@ function aux.provides_script(font_id, asked_script)
     end
     return false
   else
+    local fontname = tfmdata.fontname
     local features = get_features (tfmdata)
     if features == false then
       logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
@@ -556,6 +557,7 @@ function aux.provides_language(font_id, asked_script, asked_language)
     asked_language  = stringlower(asked_language)
     local tfmdata = identifiers[font_id]
     if not tfmdata then return false end
+    local fontname = tfmdata.fontname
     local features = get_features (tfmdata)
     if features == false then
       logreport ("log", 1, "aux", "font no %d lacks a features table", font_id)
@@ -712,6 +714,7 @@ function aux.provides_feature(font_id,        asked_script,
     end
     return false
   else
+    local fontname = tfmdata.fontname
     asked_language  = stringlower(asked_language)
     local features = get_features (tfmdata)
     if features == false then

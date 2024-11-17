@@ -496,14 +496,14 @@ function aux.provides_script(font_id, asked_script)
       --- where method: "gpos" | "gsub"
       for feature, data in next, featuredata do
         if data[asked_script] then
-          logreport ("log", 1, "aux",
+          logreport ("log", 2, "aux",
                      "font no %d (%s) defines feature %s for script %s",
                      font_id, fontname, feature, asked_script)
           return true
         end
       end
     end
-    logreport ("log", 0, "aux",
+    logreport ("log", 2, "aux",
                "font no %d (%s) defines no feature for script %s",
                font_id, fontname, asked_script)
   end
@@ -568,7 +568,7 @@ function aux.provides_language(font_id, asked_script, asked_language)
       for feature, data in next, featuredata do
         local scriptdata = data[asked_script]
         if scriptdata and scriptdata[asked_language] then
-          logreport ("log", 1, "aux",
+          logreport ("log", 2, "aux",
                      "font no %d (%s) defines feature %s "
                      .. "for script %s with language %s",
                      font_id, fontname, feature,
@@ -577,7 +577,7 @@ function aux.provides_language(font_id, asked_script, asked_language)
         end
       end
     end
-    logreport ("log", 0, "aux",
+    logreport ("log", 2, "aux",
                "font no %d (%s) defines no feature "
                .. "for script %s with language %s",
                font_id, fontname, asked_script, asked_language)
@@ -727,7 +727,7 @@ function aux.provides_feature(font_id,        asked_script,
       if feature then
         local scriptdata = feature[asked_script]
         if scriptdata and scriptdata[asked_language] then
-          logreport ("log", 1, "aux",
+          logreport ("log", 2, "aux",
                      "font no %d (%s) defines feature %s "
                      .. "for script %s with language %s",
                      font_id, fontname, asked_feature,
@@ -736,7 +736,7 @@ function aux.provides_feature(font_id,        asked_script,
         end
       end
     end
-    logreport ("log", 0, "aux",
+    logreport ("log", 2, "aux",
                "font no %d (%s) does not define feature %s for script %s with language %s",
                font_id, fontname, asked_feature, asked_script, asked_language)
   end

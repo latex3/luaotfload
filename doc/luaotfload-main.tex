@@ -1045,9 +1045,10 @@ obviously, \inlinecode{random}.
 
 
   \beginaltitem {axis\&instance}
-    Experimental!\marginpar{\mbox{}\hfill NEW in v3.15!} Support for \OpenType\ variable fonts. \emph{Varible fonts are only
-    supported in \texttt{base} and \texttt{node} mode, not in \texttt{harf}
-    mode.}
+    Experimental!\marginpar{\mbox{}\hfill NEW in v3.15!} Support for \OpenType\
+    variable fonts. \emph{Variable fonts use very different implementations in
+      \texttt{harf} compared to \texttt{base} and \texttt{node} mode, so in
+      case of unexpected behavior it can make sense to try the other mode.}
 
     To specify the parameters of a variable font, you can either specify a
     predefined instance of the font by passing the associated

@@ -1,5 +1,12 @@
 Change History
 --------------
+2024-12-03 luaotfload v3.29
+
+    *  Preserve subtypes while letterspacing.
+    *  Improve logging for auxiliary functions.
+    *  Improve cache path selection when parts of cache path are not writable.
+    *  Fix broken luaotfload-tool.
+
 2024-02-28 luaotfload v3.28
 
     *  Improving compatibility with Windows paths

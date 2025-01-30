@@ -18933,6 +18933,7 @@ function readers.gdef(f,fontdata,specification)
      local class=classes[readushort(f)]
      if class=="mark" then
       marks[index]=true
+      glyphs[index].width=0
      end
      glyphs[index].class=class
     end
@@ -18947,6 +18948,7 @@ function readers.gdef(f,fontdata,specification)
        glyphs[index].class=class
        if class=="mark" then
         marks[index]=true
+        glyphs[index].width=0
        end
       end
      end

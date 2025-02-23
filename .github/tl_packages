@@ -28,7 +28,7 @@ sourcecodepro asana-math ebgaramond tex-gyre amsfonts gnu-freefont
 opensans fira tex-gyre-math lm lm-math amiri ipaex xits
 libertine coelacanth fontawesome stix2-otf dejavu luatexko
 unfonts-core cjk-ko iwona libertinus-fonts fandol cm-unicode noto
-cuprum
+cuprum gentium-tug
 #
 # languages
 luatexja arabluatex babel babel-english

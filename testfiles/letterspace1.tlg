@@ -63,56 +63,62 @@ Completed box being shipped out [1]
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.90001
-...\hbox(6.98+0.12)x345.0, glue set 255.37997fil, direction TLT
+...\hbox(6.98+0.12)x345.0, glue set 255.50497fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern0.25
+....\kern0.00005
+....\kern-0.00005
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls a
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls b
 ....\kern5.1 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls c
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls –
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls i
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls i
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.90001
-...\hbox(6.98+0.12)x345.0, glue set 259.58997fil, direction TLT
+...\hbox(6.98+0.12)x345.0, glue set 260.21497fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern0.25
+....\kern0.00005
+....\kern-0.00005
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls a
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls b
 ....\kern5.1 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
-....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
-....\kern5.5
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls c
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls –
+....\glue(\spaceskip) 2.625 plus 1.25 minus 0.83333
+....\kern5.25
 ....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
-....\kern0.5
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern0.25
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -301,62 +307,68 @@ Completed box being shipped out [1]
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.90001
-...\hbox(6.98+0.12)x345.0, glue set 249.09996fil, direction TLT
+...\hbox(6.98+0.12)x345.0, glue set 249.22496fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern0.25
+....\kern0.00005
+....\kern-0.00005
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls a
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls b
 ....\kern5.1 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls c
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls -
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls -
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls i
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls i
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.90001
-...\hbox(6.98+0.12)x345.0, glue set 248.09996fil, direction TLT
+...\hbox(6.98+0.12)x345.0, glue set 248.72496fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern0.25
+....\kern0.00005
+....\kern-0.00005
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls a
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls b
 ....\kern5.1 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls c
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls -
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls -
-....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
-....\kern5.5
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls -
+....\glue(\spaceskip) 2.625 plus 1.25 minus 0.83333
+....\kern5.25
 ....\TU/LinLibertine_R.otf(0)/m/n/10 f
 ....\kern5.0 (font)
 ....\TU/LinLibertine_R.otf(0)/m/n/10 i
-....\kern0.5
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\kern0.25
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls f
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls f
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
@@ -565,50 +577,56 @@ Completed box being shipped out [1]
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.90001
-...\hbox(6.98+0.12)x345.0, glue set 265.96997fil, direction TLT
+...\hbox(6.98+0.12)x345.0, glue set 266.09497fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern0.25
+....\kern0.00005
+....\kern-0.00005
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls a
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls b
 ....\kern5.1 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬁ
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls c
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls –
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls ﬁ
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls ﬀ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0
 ...\glue(\parskip) 0.0 plus 1.0
 ...\glue(\parskip) 0.0
 ...\glue(\baselineskip) 4.90001
-...\hbox(6.98+0.12)x345.0, glue set 264.96997fil, direction TLT
+...\hbox(6.98+0.12)x345.0, glue set 265.59497fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
 .....\localleftbox=null
 .....\localrightbox=null
 ....\hbox(0.0+0.0)x15.0, direction TLT
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls a
+....\kern0.25
+....\kern0.00005
+....\kern-0.00005
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls a
 ....\kern5.0 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls b
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls b
 ....\kern5.1 (font)
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls c
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls –
-....\glue(\spaceskip) 2.75 plus 1.25 minus 0.83333
-....\kern5.5
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls c
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls –
+....\glue(\spaceskip) 2.625 plus 1.25 minus 0.83333
+....\kern5.25
 ....\TU/LinLibertine_R.otf(0)/m/n/10 ﬁ
-....\kern0.5
-....\glue(\spaceskip) 7.75 plus 3.52272 minus 2.34846
-....\TU/LinLibertine_R.otf(0)/m/n/10/100ls ﬀ
+....\kern0.25
+....\glue(\spaceskip) 7.625 plus 3.63095 minus 2.42062
+....\TU/LinLibertine_R.otf(0)/m/n/10/50ls ﬀ
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
 ....\glue(\rightskip) 0.0

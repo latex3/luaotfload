@@ -29,7 +29,7 @@ jobs:
         # to generate the artifact when the run is successful, not when it fails.
         kind: [test]
         platform: [Linux, Windows, macOS]
-        texlive_version: ["2024", "2025"]
+        texlive_version: ["2024"]
         include:
           - kind: doc
             platform: Linux

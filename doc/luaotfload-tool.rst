@@ -6,9 +6,9 @@
          generate and query the Luaotfload font names database
 -----------------------------------------------------------------------
 
-:Date:                  2024-02-14
+:Date:                  2024-12-03
 :Copyright:             GPL v2.0
-:Version:               3.29-dev
+:Version:               3.29
 :Manual section:        1
 :Manual group:          text processing
 

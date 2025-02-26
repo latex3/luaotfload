@@ -1,8 +1,8 @@
 # The Luaotfload Package
 
-VERSION: 3.29-dev
+VERSION: 3.29
 
-DATE: 2024-02-14
+DATE: 2024-12-03
 
 
 ## Description

@@ -129,27 +129,6 @@ local function lookup_units(fontdata)
   return units
 end
 
---[[doc--
-This callback corrects some values of the Cambria font.
---doc]]--
---- fontobj -> unit
-local function patch_cambria_domh(fontdata)
-  local mathconstants = fontdata.MathConstants
-  if mathconstants and fontdata.psname == "CambriaMath" then
-    --- my test Cambria has 2048
-    local units = fontdata.units or lookup_units(fontdata)
-    local sz    = fontdata.parameters.size or fontdata.size
-    local mh    = 2800 / units * sz
-    if mathconstants.DisplayOperatorMinHeight < mh then
-      mathconstants.DisplayOperatorMinHeight = mh
-    end
-  end
-end
-
-luaotfload_callbacks [#luaotfload_callbacks + 1] = {
-  "patch_font", patch_cambria_domh, "patch_cambria_domh",
-}
-
 
 --[[doc--
 

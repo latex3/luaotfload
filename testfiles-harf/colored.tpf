@@ -1,4 +1,4 @@
-%PDF-1.5
+%PDF-1.7
 %Ã’¡‘≈ÿ–ƒ∆
 3 0 obj
 << /Length 31436 >>      
@@ -2251,7 +2251,7 @@ endobj
 << /Type /FontDescriptor /FontName /DXDOON+BungeeColor-Regular /Flags 4 /FontBBox [ 0 0 1000 720 ] /Ascent 720 /CapHeight 720 /Descent 0 /ItalicAngle 0 /StemV 86 /XHeight 500 /FontFile2 10 0 R /CIDSet 9 0 R >>
 endobj
 11 0 obj
-<< /Length 983 >>        
+<< /Length 957 >>        
 stream
 %!PS-Adobe-3.0 Resource-CMap
 %%DocumentNeededResources: ProcSet (CIDInit)
@@ -2273,8 +2273,6 @@ begincmap
 1 begincodespacerange
 <0000> <FFFF>
 endcodespacerange
-0 beginbfrange
-endbfrange
 21 beginbfchar
 <002B> <0061>
 <002C> <0062>
@@ -2327,7 +2325,7 @@ endobj
 << /Type /FontDescriptor /FontName /IZEZWI+AmiriQuranColored-Regular /Flags 4 /FontBBox [ 0 0 1000 1 ] /Ascent 0 /CapHeight 0 /Descent 0 /ItalicAngle 0 /StemV 86 /XHeight 907 /FontFile2 16 0 R /CIDSet 15 0 R >>
 endobj
 17 0 obj
-<< /Length 3181 >>       
+<< /Length 3155 >>       
 stream
 %!PS-Adobe-3.0 Resource-CMap
 %%DocumentNeededResources: ProcSet (CIDInit)
@@ -2349,8 +2347,6 @@ begincmap
 1 begincodespacerange
 <0000> <FFFF>
 endcodespacerange
-0 beginbfrange
-endbfrange
 100 beginbfchar
 <0008> <0031>
 <0026> <0623>
@@ -2558,25 +2554,25 @@ xref
 0000031628 00000 n 
 0000031515 00000 n 
 0000000020 00000 n 
-0000078775 00000 n 
-0000040794 00000 n 
-0000079167 00000 n 
+0000078723 00000 n 
+0000040768 00000 n 
+0000079115 00000 n 
 0000031707 00000 n 
 0000039526 00000 n 
 0000031857 00000 n 
 0000031961 00000 n 
 0000039751 00000 n 
-0000040949 00000 n 
-0000041172 00000 n 
-0000075307 00000 n 
-0000043046 00000 n 
-0000043388 00000 n 
-0000075534 00000 n 
-0000078936 00000 n 
-0000079227 00000 n 
-0000079277 00000 n 
+0000040923 00000 n 
+0000041146 00000 n 
+0000075281 00000 n 
+0000043020 00000 n 
+0000043362 00000 n 
+0000075508 00000 n 
+0000078884 00000 n 
+0000079175 00000 n 
+0000079225 00000 n 
 trailer
 << /Size 21 /Root 19 0 R /Info 20 0 R >>
 startxref
-79349
+79297
 %%EOF

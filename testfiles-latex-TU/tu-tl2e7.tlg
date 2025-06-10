@@ -813,6 +813,8 @@ Completed box being shipped out [1]
 ....\glue 0.0 plus 1.0fil
 ....\TU/lmr/m/n/10 1
 ....\glue 0.0 plus 1.0fil
+Missing character: There is no ̧ (U+0327) in font [lmroman10-regular]:+tlig;!
+Missing character: There is no ̧ (U+0327) in font [lmroman10-regular]:+tlig;!
 LaTeX Font Info:    External font `cmex10' loaded for size
 (Font)              <7> on input line ....
 LaTeX Font Info:    External font `cmex10' loaded for size
@@ -1387,6 +1389,6 @@ Completed box being shipped out [2]
 Missing character: There is no ̧ (U+0327) in font [lmroman10-regular]:+tlig;!
 (tu-tl2e7.aux)
  ***********
-LaTeX2e <2024-11-01> patch level 2
-L3 programming layer <2025-01-18>
+LaTeX2e <2025-06-01>
+L3 programming layer <2025-05-26>
  ***********

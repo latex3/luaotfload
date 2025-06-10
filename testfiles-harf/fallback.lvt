@@ -15,6 +15,7 @@
                    utf8.char(char), char, font.getfont(id).specification.specification:gsub(";fallback=\csstring\%d*",";fallback=...")))
   end, 'Harf glyph_not_found callback -- testing variant')
 }
+\tracinglostchars=1
 
 \directlua{luaotfload.add_fallback("myfallback", {
     "Noto Color Emoji:mode=harf","kpse:DejaVuSans.ttf:mode=harf","Siddhanta:mode=harf","kpse:NotoSansTibetan-Regular.ttf:mode=node"

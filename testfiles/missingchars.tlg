@@ -1,5 +1,11 @@
 This is a generated file for the l3build validation system.
 Don't change this file in any respect.
+Missing character: There is no ẞ (U+1E9E) in font file:lmroman10-regular.otf:mode=node;-szss;!
+Missing character: There is no ẞ (U+1E9E) in font file:lmroman10-regular.otf:mode=node;-szss;!
+Missing character: There is no ➍ (U+278D) in font "name:Libertinus Serif:mode=node;script=latn;language=dflt;+tlig;"!
+Missing character: There is no ➍ (U+278D) in font "name:Libertinus Serif:mode=node;script=latn;language=dflt;+tlig;"!
+Missing character: There is no ➍ (U+278D) in font "name:Libertinus Serif:mode=node;script=latn;language=dflt;notdef=false;"!
+Missing character: There is no ➍ (U+278D) in font "name:Libertinus Serif:mode=node;script=latn;language=dflt;notdef=false;"!
 Completed box being shipped out [1]
 \vbox(633.0+0.0)x407.0, direction TLT
 .\glue 16.0

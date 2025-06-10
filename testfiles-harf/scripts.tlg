@@ -8,6 +8,12 @@ Package fontspec Info:
 (fontspec)              This font family consists of the following NFSS series/shapes:
 (fontspec)              
 (fontspec)             - 'normal' (m/n) with NFSS spec.: <->"[amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;"
+Missing character: There is no τ (U+03C4) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
+Missing character: There is no ε (U+03B5) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
+Missing character: There is no χ (U+03C7) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
+Missing character: There is no τ (U+03C4) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
+Missing character: There is no ε (U+03B5) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
+Missing character: There is no χ (U+03C7) in font [amiri-regular.ttf]:mode=harf;script=grek;language=dflt;+tlig;!
 LaTeX Font Warning: Font shape `TU/amiri-regular.ttf(0)/m/it' undefined
 (Font)              using `TU/amiri-regular.ttf(0)/m/n' instead on input line ....
 Package fontspec Info: 

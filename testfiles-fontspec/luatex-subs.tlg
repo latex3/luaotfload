@@ -7,7 +7,7 @@ Don't change this file in any respect.
 .\TU/texgyrepagella-regualr.otf(0)/m/n/10 2
 ! OK.
 <to be read again> 
-\begingroup 
+                   \begingroup 
 l. ...\TIMO\showbox1\OMIT
 > \box...=
 \hbox(7.0+0.2)x17.78, direction TLT
@@ -16,5 +16,5 @@ l. ...\TIMO\showbox1\OMIT
 .\TU/texgyrepagella-regular.otf(0)/m/n/10 2
 ! OK.
 <to be read again> 
-\begingroup 
+                   \begingroup 
 l. ...\TIMO\showbox1\OMIT

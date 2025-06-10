@@ -13,7 +13,7 @@ Completed box being shipped out [1]
 ..\vbox(550.0+0.0)x345.0, glue set 539.94232fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 2.43164
-...\hbox(7.56836+2.4414)x345.0, glue set 206.12793fil, direction TLT
+...\hbox(7.56836+2.4414)x345.0, glue set 206.22559fil, direction TLT
 ....\localpar
 .....\localinterlinepenalty=0
 .....\localbrokenpenalty=0
@@ -45,10 +45,13 @@ Completed box being shipped out [1]
 ....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405
 ....\gentium p
 ....\gentium q
-....\gentium r
 ....\discretionary (penalty 50)
+.....< \gentium r
 .....< \gentium -
-....\gentium s
+.....> \gentium s
+.....= \gentium r
+.....= \kern-0.09766 (font)
+.....= \gentium s
 ....\gentium t
 ....\gentium u
 ....\glue(\spaceskip) 2.20215 plus 1.10107 minus 0.73405

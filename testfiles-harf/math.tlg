@@ -14,7 +14,7 @@ Completed box being shipped out [1]
 ....\hbox(0.0+0.0)x345.0, direction TLT
 ..\glue 25.0
 ..\glue(\lineskip) 0.0
-..\vbox(550.0+0.0)x345.0, glue set 509.94553fil, direction TLT
+..\vbox(550.0+0.0)x345.0, glue set 509.83554fil, direction TLT
 ...\write-{}
 ...\glue(\topskip) 1.85997
 ...\hbox(8.14003+2.23)x345.0, glue set 0.78197, direction TLT
@@ -163,7 +163,6 @@ Completed box being shipped out [1]
 .....\TU/Amiri(0)/m/n/10 "e" 0065 +0:+0
 ...\penalty 0
 ...\glue(\belowdisplayshortskip) 6.0 plus 3.0 minus 3.0
-...\glue -0.11
 ...\glue 0.0 plus 1.0fil
 ...\glue 0.0
 ...\glue 0.0 plus 0.0001fil

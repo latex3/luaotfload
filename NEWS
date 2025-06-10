@@ -1,5 +1,8 @@
 Change History
 --------------
+2025-??-?? luaotfload v3.30
+    *  Support expansion and protrusion font features also in harf mode.
+
 2024-12-03 luaotfload v3.29
 
     *  Preserve subtypes while letterspacing.

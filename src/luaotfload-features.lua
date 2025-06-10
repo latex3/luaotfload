@@ -941,6 +941,102 @@ fonts.constructors.features.otf.register {
     },
 }
 
+-- Protrusion for HarfBuzz fonts, based on the `node` feature in fonts-ext
+local protrusion_setups = fonts.protrusions.setups
+
+local function initializeprotrusion(tfmdata, value)
+    local setup = protrusion_setups[value]
+    if not setup then
+        if value then
+            texio.write_nl('term and log', string.format('unknown protrusion setup %q ignored', value))
+        end
+        return
+    end
+    local lookup = {}
+    local name_to_index = tfmdata.resources.unicodes
+    for k, v in next, setup do
+        local ktype = type(k)
+        if ktype == 'number' then
+            lookup[k] = v
+        elseif ktype == 'string' then
+            local index = name_to_index[k]
+            if index then
+                lookup[index] = v
+            end
+        end
+    end
+    local quad = tfmdata.parameters.quad
+    local factor = setup.factor or 1
+    if quad ~= 0 then
+        factor = factor * 1000/quad
+    end
+    local left = factor * (setup.left or 1)
+    local right = factor * (setup.right or 1)
+    for i, chr in next, tfmdata.characters do
+        local width = chr.width or 0
+        local v, pl, pr = lookup[i], nil, nil
+        if v then
+            pl, pr = v[1], v[2]
+        end
+        if pl and pl ~= 0 then chr.left_protruding = left * pl * width end
+        if pr and pr ~= 0 then chr.right_protruding = right * pr * width end
+    end
+end
+
+fonts.constructors.features.otf.register {
+    name        = "protrusion",
+    description = "shift characters into the left and or right margin",
+    initializers = {
+        plug = initializeprotrusion,
+    }
+}
+
+-- Expansion for HarfBuzz fonts, based on the `node` feature in fonts-ext
+local expansion_setups = fonts.expansions.setups
+
+local function initializeexpansion(tfmdata, value)
+    local setup = expansion_setups[value]
+    if not setup then
+        if value then
+            texio.write_nl('term and log', string.format('unknown expansion setup %q ignored', value))
+        end
+        return
+    end
+    local lookup = {}
+    local name_to_index = tfmdata.resources.unicodes
+    for k, v in next, setup do
+        local ktype = type(k)
+        if ktype == 'number' then
+            lookup[k] = v
+        elseif ktype == 'string' then
+            local index = name_to_index[k]
+            if index then
+                lookup[index] = v
+            end
+        end
+    end
+    local factor = 1000 * (setup.factor or 1)
+    tfmdata.stretch = 10 * (setup.stretch or 0)
+    tfmdata.shrink = 10 * (setup.shrink or 0)
+    tfmdata.step = 10 * (setup.step or 0)
+    for i, chr in next, tfmdata.characters do
+        local v = lookup[i]
+        if v and v ~= 0 then
+            chr.expansion_factor = v * factor
+        elseif factor ~= 1000 then
+            chr.expansion_factor = factor
+        end
+    end
+end
+
+fonts.constructors.features.otf.register {
+    name        = "expansion",
+    description = "apply hz optimization",
+    initializers = {
+        plug = initializeexpansion,
+    }
+}
+
 return function ()
     if not fonts and fonts.handlers then
         report ("log", 0, "features",

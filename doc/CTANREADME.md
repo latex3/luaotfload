@@ -35,7 +35,7 @@ The development for LuaLaTeX is discussed on the lualatex-dev mailing list. See
 
 The following people have contributed to this package.
 
-- Khaled Hosny             <khaledhosny@eglug.org>
+- Khaled Hosny             <khaled@aliftype.com>
 - Elie Roux                <elie.roux@telecom-bretagne.eu>
 - Will Robertson           <will.robertson@latex-project.org>
 - Philipp Gesang           <phg@phi-gamma.net>

@@ -60,7 +60,7 @@ The following people have contributed to this package.
 
 |name |contact |
 |---|---|
-|Khaled Hosny      |       <khaledhosny@eglug.org>            |
+|Khaled Hosny      |       <khaled@aliftype.com>              |
 |Elie Roux         |       <elie.roux@telecom-bretagne.eu>    |
 |Will Robertson    |       <will.robertson@latex-project.org> | 
 |Philipp Gesang    |       <phg@phi-gamma.net>                |

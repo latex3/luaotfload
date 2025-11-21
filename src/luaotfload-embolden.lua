@@ -15,7 +15,12 @@ assert(luaotfload_module, "This is a part of luaotfload and should not be loaded
 local otffeatures        = fonts.constructors.newfeatures "otf"
 
 local function enableembolden(tfmdata, _, embolden)
-  tfmdata.mode, tfmdata.width = 2, tfmdata.size*embolden/6578.176
+  tfmdata.mode = 2
+  local width = math.round(tfmdata.size*embolden/6578.176)
+  if width == 0 and embolden ~= 0 then
+    width = 1
+  end
+  tfmdata.width = width
 end
 
 otffeatures.register {

@@ -1107,7 +1107,32 @@ obviously, \inlinecode{random}.
   \endaltitem
 
    \beginaltitem {embolden}
-         A factor, defined as a decimal number.
+         A factor, defined as a decimal number. This fakes a bold font by
+         stroking the glyph outlines with an outline of a constant width. This
+         is typographically not ideal, but can give acceptable output when the
+         factor and is rendered correctly by the PDF viewer. However, many PDF
+         viewers---most notably Chrome---completely misrender the effect at low
+         zoom levels, so you should only use this feature on fonts typeset at
+         large sizes, if you know for certain which PDF viewers will be used to
+         view the document, or if you're printing to paper.
+
+         \identifier{luaotfload} defines the \identifier{embolden} feature to
+         give the same results as the same feature in \XeTeX, so its definition
+         is rather obscure: internally, the \identifier{embolden} parameter is
+         divided by~10, multiplied by the font size in \TeX{} points
+         (\verb|pt|), and then directly written to the PDF file as the stroke
+         width (therefore treating \TeX{} points as PostScript points
+         (\verb|bp|)). As an additional feature not present in \XeTeX, if you
+         set the \identifier{embolden} parameter to exactly~0, \LuaTeX{} will
+         stroke the font without setting the stroke width, meaning that the
+         stroke width will be inherited from the outer PDF graphics state.
+
+         Setting \identifier{embolden} to values below~0.5 is only useful for
+         print documents, since many PDF viewers will always render the stroke
+         widths at some greater minimum value; setting \identifier{embolden} to
+         values above~20 is rarely useful since if the stroke overlaps with
+         itself, there will be significant visual artifacts. Useful values are
+         generally between~1 and~10.
 
          For example
 

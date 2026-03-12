@@ -546,7 +546,7 @@ local cb = luatexbase.remove_from_callback('glyph_stream_provider', 'luaotfload.
 luatexbase.add_to_callback('glyph_stream_provider', function(fid, cid, kind, ocid)
   if cid == 0 then -- Always the first call for a font
     glyph_stream_data, extents_hbfont = nil
-    collectgarbage()
+    collectgarbage 'step'
     local fontdir = font.getfont(fid)
     if fontdir and fontdir.hb then
       if kind == 3 then

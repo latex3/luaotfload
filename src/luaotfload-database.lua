@@ -1700,18 +1700,13 @@ local function ot_fullinfo (filename,
                         format,
                         info)
 
-    local metadata = load_font_file (filename, subfont)
-    if not metadata then
-        return nil
-    end
-
-    local rawinfo       = get_raw_info (metadata, basename)
-    local nametable     = get_english_names (metadata)
+    local rawinfo       = get_raw_info (info, basename)
+    local nametable     = get_english_names (info)
     local namedata      = organize_namedata (rawinfo,
                                              nametable,
                                              basename,
                                              info)
-    local style         = organize_styledata (metadata,
+    local style         = organize_styledata (info,
                                               rawinfo)
     local res = {
         file            = { base        = basename,

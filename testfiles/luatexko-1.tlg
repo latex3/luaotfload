@@ -85,6 +85,8 @@ Completed box being shipped out [1]
 ....\penalty 1000
 ....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 다
+....\penalty 10000
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnBatang(0)/m/n/10 .
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil
@@ -164,6 +166,8 @@ Completed box being shipped out [1]
 ....\penalty 1000
 ....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 다
+....\penalty 10000
+....\glue 0.0 plus 0.25 minus 0.15
 ....\TU/UnDotum(0)/m/n/10 .
 ....\penalty 10000
 ....\glue(\parfillskip) 0.0 plus 1.0fil

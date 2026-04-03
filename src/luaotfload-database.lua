@@ -1458,16 +1458,6 @@ local function read_font_file (filename, subfont)
     return true, fontdata
 end
 
-local function load_font_file (filename, subfont)
-    local err, ret = read_font_file (filename, subfont)
-    if err == false then
-        logreport ("both", 1, "db", "ERROR: failed to open %q: %q.",
-                   tostring (filename), tostring (ret))
-        return
-    end
-    return ret
-end
-
 --- Design sizes in the fonts are specified in decipoints. For the
 --- index these values are prescaled to sp which is what we’re dealing
 --- with at the TeX end.
@@ -1733,13 +1723,12 @@ end
 
 --- string -> int -> bool -> string -> fontentry
 
-local function t1_fullinfo (filename, _subfont, location, basename, format)
+local function t1_fullinfo (filename, _subfont, location, basename, format, info)
     local sanitized
-    local metadata      = load_font_file (filename)
-    local fontname      = metadata.fontname
-    local fullname      = metadata.fullname
-    local familyname    = metadata.familyname
-    local italicangle   = metadata.italicangle
+    local fontname      = info.fontname
+    local fullname      = info.fullname
+    local familyname    = info.familyname
+    local italicangle   = info.italicangle
     local style         = ""
     local weight
 
@@ -1747,7 +1736,7 @@ local function t1_fullinfo (filename, _subfont, location, basename, format)
         fontname              = fontname,
         psname                = fullname,
         familyname            = familyname,
-        weight                = metadata.weight, --- string identifier
+        weight                = info.weight, --- string identifier
         typographicsubfamily  = style,
     })
 
@@ -1772,10 +1761,10 @@ local function t1_fullinfo (filename, _subfont, location, basename, format)
         familyname            = sanitized.familyname,
         plainname             = fullname,
         psname                = sanitized.fontname,
-        version               = metadata.version,
+        version               = info.version,
         size                  = false,
         typographicsubfamily  = style ~= "" and style or weight,
-        weight                = metadata.pfminfo and pfminfo.weight or 400,
+        weight                = info.pfminfo and pfminfo.weight or 400,
         italicangle           = italicangle,
     }
 end

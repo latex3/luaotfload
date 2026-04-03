@@ -16,7 +16,7 @@ jobs:
   # The l3build job contains the actual work. We misuse the matrix mechanism to
   # create three jobs which only differ in minimal elements.
   l3build:
-    runs-on: ${{(matrix.platform == 'Linux' && 'ubuntu-22.04') || (matrix.platform == 'Windows' && 'windows-2022') || (matrix.platform == 'macOS' && 'macos-13')}}
+    runs-on: ${{(matrix.platform == 'Linux' && 'ubuntu-24.04') || (matrix.platform == 'Windows' && 'windows-2025') || (matrix.platform == 'macOS' && 'macos-26')}}
     strategy:
       matrix:
         # include indicates that we want to set explicitly these combinations

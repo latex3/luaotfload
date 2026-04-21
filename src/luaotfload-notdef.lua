@@ -340,6 +340,7 @@ local function ignorablehandler(head, fid, ...) -- FIXME: The arguments are prob
   return head
 end
 
+local hb_invisible_initializer
 if harfbuzz then
   local harf_settings = luaotfload.harf
   local preserve_flag = harfbuzz.Buffer.FLAG_PRESERVE_DEFAULT_IGNORABLES or 0
@@ -350,6 +351,11 @@ if harfbuzz then
     if not tfmdata.hb then return end
     local hb = tfmdata.hb
     hb.buf_flags = hb.buf_flags & ~dotted_circle_flag
+  end
+  function hb_invisible_initializer(tfmdata, value)
+    if not tfmdata.hb then return end
+    local hb = tfmdata.hb
+    hb.buf_flags = (hb.buf_flags & ~preserve_flag) | remove_flag
   end
   otfregister {
     name = 'dottedcircle',
@@ -364,9 +370,11 @@ otfregister {
   name = 'invisible',
   description = 'Remove invisible control characters',
   default = true,
+  initializers = {
+    plug = hb_invisible_initializer,
+  },
   processors = {
     node = ignorablehandler,
-    plug = ignorablehandler,
   },
 }
 

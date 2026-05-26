@@ -511,6 +511,13 @@ fonts.readers.harf = function(spec)
     spec.script = invalid_s
     spec.language = invalid_l
   end
+  
+  if rawfeatures.letterspace or rawfeatures.kernfactor then
+    if rawfeatures.kern == nil then
+      hb_features[#hb_features + 1] = hb.Feature.new("-kern")
+    end
+  end
+  
   for key, val in next, rawfeatures do
     if key:len() == 4 then
       -- 4-letter options are likely font features, but not always, so we do

@@ -279,7 +279,7 @@ kerncharacters = function (head)
         goto nextnode
       elseif firstkern then
         firstkern = false
-        if (id ~= disc_code) and (not getfield(start, "components")) then
+        if (not getfield(start, "components")) then
           --- not a ligature, skip node
           goto nextnode
         end
@@ -382,77 +382,6 @@ kerncharacters = function (head)
           else
             insert_node_before(head,start,kern_injector(fillup,krn))
           end
-
-        elseif pid == disc_code then
-          local disc = prev -- disc
-          local pre, post, replace = getdisc (disc)
-          local prv = getprevreal(disc)
-          local nxt = getnextreal(disc)
-
-          if pre and prv then -- must pair with start.prev
-            -- this one happens in most cases
-            local before = copy_node(prv)
-            setprev(pre,    before)
-            setnext(before, pre)
-            setprev(before, nil)
-            pre = kerncharacters (before)
-            pre = getnext(pre)
-            setprev(pre, nil)
-            setfield(disc, "pre", pre)
-            free_node(before)
-          end
-
-          if post and nxt then  -- must pair with start
-            local after = copy_node(nxt)
-            local tail = find_node_tail(post)
-            setnext(tail,  after)
-            setprev(after, tail)
-            post = kerncharacters (post)
-            setnext(getprev(after), nil)
-            setfield(disc, "post", post)
-            free_node(after)
-          end
-
-          if replace and prv and nxt then -- must pair with start and start.prev
-            local before = copy_node(prv)
-            local after = copy_node(nxt)
-            local tail = find_node_tail(replace)
-            setprev(replace, before)
-            setnext(before,  replace)
-            setprev(before,  nil)
-            setnext(tail,    after)
-            setprev(after,   tail)
-            setnext(after,   nil)
-            replace = kerncharacters (before)
-            replace = getnext(replace)
-            setprev(replace, nil)
-            setnext(getprev(after), nil)
-            setfield(disc, "replace", replace)
-            free_node(after)
-            free_node(before)
-
-          elseif identifiers[lastfont] then
-            if    prv
-              and getid(prv)   == glyph_code
-              and getfont(prv) == lastfont
-            then
-              local kern     = 0
-              local prevchar = getchar(prv)
-              local lastchar = getchar(start)
-              local lastfontchars = chardata[lastfont]
-              if lastfontchars then
-                local prevchardata = lastfontchars[prevchar]
-                if not prevchardata then
-                  --- font doesn’t contain the glyph
-                else
-                  local kerns = prevchardata.kerns
-                  if kerns then kern = kerns[lastchar] or kern end
-                end
-              end
-              krn = kern + (markdata[lastfont][lastchar] and 0 or krn) -- here
-            end
-            setfield(disc, "replace", kern_injector(false, krn))
-          end --[[if replace and prv and nxt]]
         end --[[if not pid]]
         local attr_list = getattributelist(start)
         local new_attr_list = attribute_table[attr_list]
@@ -464,7 +393,97 @@ kerncharacters = function (head)
           attribute_table[attr_list] = getattributelist(start)
         end
       end --[[if prev]]
-    end --[[if id == glyph_code]]
+            
+    elseif id == disc_code then
+      if not hasattribute(start, attr, 1) then
+        setattribute(start, attr, 1)
+        local disc = start
+        local pre, post, replace = getdisc(disc)
+        local prv = getprevreal(disc)
+        local nxt = getnextreal(disc)
+
+        local currentfont = lastfont
+        if not currentfont and prv and getid(prv) == glyph_code then
+          currentfont = getfont(prv)
+        end
+        if not currentfont and nxt and getid(nxt) == glyph_code then
+          currentfont = getfont(nxt)
+        end
+
+        if currentfont then
+          local krn, fillup = unpack(kernamounts[currentfont])
+          if krn and krn ~= 0 then
+            
+            local function process_disc_field(list, use_prv, use_nxt)
+              if not list then return nil end
+              local before = use_prv and copy_node(use_prv) or nil
+              local after  = use_nxt and copy_node(use_nxt) or nil
+              local tail   = find_node_tail(list)
+              
+              if before then
+                setattribute(before, attr, 0)
+                setprev(list, before)
+                setnext(before, list)
+                setprev(before, nil)
+              end
+              if after then
+                setattribute(after, attr, 0)
+                setnext(tail, after)
+                setprev(after, tail)
+                setnext(after, nil)
+              end
+              
+              local run_head = before or list
+              run_head = kerncharacters(run_head)
+              
+              if before then
+                list = getnext(before)
+                if list then setprev(list, nil) end
+                free_node(before)
+              else
+                list = run_head
+              end
+              
+              if after then
+                local p = getprev(after)
+                if p then setnext(p, nil) end
+                if list == after then list = nil end
+                free_node(after)
+              end
+              return list
+            end
+
+            if pre then
+              setfield(disc, "pre", process_disc_field(pre, prv, nil))
+            end
+
+            if post then
+              setfield(disc, "post", process_disc_field(post, nil, nxt))
+            end
+
+            if replace then
+              setfield(disc, "replace", process_disc_field(replace, prv, nxt))
+            elseif identifiers[currentfont] then
+              local kern = 0
+              if prv and nxt and getid(prv) == glyph_code and getid(nxt) == glyph_code and getfont(prv) == currentfont then
+                local prevchar = getchar(prv)
+                local lastchar = getchar(nxt)
+                local lastfontchars = chardata[currentfont]
+                if lastfontchars then
+                  local prevchardata = lastfontchars[prevchar]
+                  if prevchardata then
+                    local kerns = prevchardata.kerns
+                    if kerns then kern = kerns[lastchar] or kern end
+                  end
+                end
+                krn = kern + (markdata[currentfont][lastchar] and 0 or krn)
+              end
+              setfield(disc, "replace", kern_injector(fillup, krn))
+            end
+          end
+        end
+      end
+    end
 
     ::nextnode::
     if start then

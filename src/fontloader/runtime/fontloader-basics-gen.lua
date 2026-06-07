@@ -253,7 +253,7 @@ do
     end
 
     if not writable then
-        logs.report("system","no writeable cache path, quiting")
+        logs.report("system","no writeable cache path, quiting. Try setting TEXMFCACHE or TEXMFVAR and reading https://www.tug.org/texinfohtml/kpathsea.html#Safe-filenames")
         os.exit()
     elseif #readables == 0 then
         logs.report("system","no readable cache path, quiting")

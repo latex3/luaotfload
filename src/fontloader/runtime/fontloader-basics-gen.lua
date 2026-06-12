@@ -197,18 +197,18 @@ do
 
     -- standard context tree setup
 
-    local cachepaths = kpse.expand_var('$TEXMFCACHE') or ""
+    local cachepaths = kpse.expand_braces('$TEXMFCACHE') or ""
 
     -- quite like tex live or so (the weird $TEXMFCACHE test seems to be needed on miktex)
 
     if cachepaths == "" or cachepaths == "$TEXMFCACHE" then
-        cachepaths = kpse.expand_var('$TEXMFVAR') or ""
+        cachepaths = kpse.expand_braces('$TEXMFVAR') or ""
     end
 
     -- this also happened to be used (the weird $TEXMFVAR test seems to be needed on miktex)
 
     if cachepaths == "" or cachepaths == "$TEXMFVAR" then
-        cachepaths = kpse.expand_var('$VARTEXMF') or ""
+        cachepaths = kpse.expand_braces('$VARTEXMF') or ""
     end
 
     -- and this is a last resort (hm, we could use TEMP or TEMPDIR)

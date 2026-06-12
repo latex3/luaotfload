@@ -4637,12 +4637,12 @@ if not caches.namespace or caches.namespace=="" or caches.namespace=="context" t
  caches.namespace='generic'
 end
 do
- local cachepaths=kpse.expand_var('$TEXMFCACHE') or ""
+ local cachepaths=kpse.expand_braces('$TEXMFCACHE') or ""
  if cachepaths=="" or cachepaths=="$TEXMFCACHE" then
-  cachepaths=kpse.expand_var('$TEXMFVAR') or ""
+  cachepaths=kpse.expand_braces('$TEXMFVAR') or ""
  end
  if cachepaths=="" or cachepaths=="$TEXMFVAR" then
-  cachepaths=kpse.expand_var('$VARTEXMF') or ""
+  cachepaths=kpse.expand_braces('$VARTEXMF') or ""
  end
  if cachepaths=="" then
   local fallbacks={ "TMPDIR","TEMPDIR","TMP","TEMP","HOME","HOMEPATH" }

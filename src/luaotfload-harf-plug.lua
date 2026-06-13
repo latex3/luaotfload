@@ -240,7 +240,6 @@ local function itemize(head, fontid, direction)
       local dir, cancel = getdirection(n)
       local direction, kind = getdirection(n)
       if cancel then
-        assert(currdir == dir)
         -- Pop the last direction from the stack.
         currdir = tableremove(dirstack)
       else

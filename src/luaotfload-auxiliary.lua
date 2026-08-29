@@ -826,7 +826,7 @@ aux.resolve_fontname = resolve_fontname
 --- string list -> (string * int)
 function aux.resolve_fontlist(names)
   for n = 1, #names do
-    local foundname, subfont = resolve_fontname(this)
+    local foundname, subfont = resolve_fontname(names[n])
     if foundname then
       return foundname, subfont
     end

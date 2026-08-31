@@ -66,7 +66,12 @@ local script_extensions do
     * entry^0
   , multirawset)
 
-  local f = io.open(kpse.find_file"ScriptExtensions.txt")
+  local script_extensions_file = kpse.find_file"ScriptExtensions.txt"
+  if not script_extensions_file then
+    error("luaotfload: Cannot find ScriptExtensions.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(script_extensions_file)
   script_extensions = file:match(f:read'*a')
   f:close()
   for cp,t in next, script_extensions do
@@ -131,7 +136,12 @@ local script_mapping do
     * entry^0
   , multirawset)
 
-  local f = io.open(kpse.find_file"Scripts.txt")
+  local scripts_file = kpse.find_file"Scripts.txt"
+  if not scripts_file then
+    error("luaotfload: Cannot find Scripts.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(scripts_file)
   script_mapping = file:match(f:read'*a')
   f:close()
 

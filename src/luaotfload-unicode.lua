@@ -31,7 +31,12 @@ local alphnum_only do
     * entry^0
   , rawset)
 
-  local f = io.open(kpse.find_file"UnicodeData.txt")
+  local unicode_data_file = kpse.find_file"UnicodeData.txt"
+  if not unicode_data_file then
+    error("luaotfload: Cannot find UnicodeData.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(unicode_data_file)
   local data = file:match(f:read'*a')
   f:close()
   function alphnum_only(s)
@@ -104,7 +109,12 @@ local uppercase, lowercase, ccc, cased, case_ignorable, titlecase = {}, {}, {}, 
     end
   local file = entry^0 * -1
 
-  local f = io.open(kpse.find_file"UnicodeData.txt")
+  local unicode_data_file2 = kpse.find_file"UnicodeData.txt"
+  if not unicode_data_file2 then
+    error("luaotfload: Cannot find UnicodeData.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(unicode_data_file2)
   assert(file:match(f:read'*a'))
   f:close()
 end
@@ -129,7 +139,12 @@ local props do
     return t
   end) * -1
 
-  local f = io.open(kpse.find_file"PropList.txt")
+  local proplist_file = kpse.find_file"PropList.txt"
+  if not proplist_file then
+    error("luaotfload: Cannot find PropList.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(proplist_file)
   props = file:match(f:read'*a')
   f:close()
 end
@@ -143,7 +158,12 @@ do
     end
   end + (1-lpeg.P'\n')^0 * '\n')^0 * -1
 
-  local f = io.open(kpse.find_file"WordBreakProperty.txt")
+  local wbp_file = kpse.find_file"WordBreakProperty.txt"
+  if not wbp_file then
+    error("luaotfload: Cannot find WordBreakProperty.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(wbp_file)
   assert(file:match(f:read'*a'))
   f:close()
 end
@@ -187,7 +207,12 @@ do
               end
   local file = (entry + nl)^0 * -1
 
-  local f = io.open(kpse.find_file"SpecialCasing.txt")
+  local special_casing_file = kpse.find_file"SpecialCasing.txt"
+  if not special_casing_file then
+    error("luaotfload: Cannot find SpecialCasing.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(special_casing_file)
   assert(file:match(f:read'*a'))
   f:close()
 end

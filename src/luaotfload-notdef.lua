@@ -65,7 +65,12 @@ local ignorable_codepoints do
       lpeg.Ct''
     * entry^0
   , rawset)
-  local f = io.open(kpse.find_file"UnicodeData.txt")
+  local unicode_data_file = kpse.find_file"UnicodeData.txt"
+  if not unicode_data_file then
+    error("luaotfload: Cannot find UnicodeData.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  local f = io.open(unicode_data_file)
   ignorable_codepoints = file:match(f:read'*a')
   f:close()
   entry = lpeg.Cg(codepoint_range * sep * ('Other_Default_Ignorable_Code_Point' * lpeg.Cc(true)
@@ -77,7 +82,12 @@ local ignorable_codepoints do
       lpeg.Carg(1)
     * entry^0
   , multirawset)
-  f = io.open(kpse.find_file"PropList.txt")
+  local proplist_file = kpse.find_file"PropList.txt"
+  if not proplist_file then
+    error("luaotfload: Cannot find PropList.txt. "
+      .. "Install the 'unicode-data' TeX package (tlmgr install unicode-data).")
+  end
+  f = io.open(proplist_file)
   ignorable_codepoints = file:match(f:read'*a', 1, ignorable_codepoints)
   f:close()
   for i = 0xFFF9,0xFFFB do

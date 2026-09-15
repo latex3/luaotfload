@@ -1970,7 +1970,7 @@ end
                     local s = p_blend() or 0
                     i = i + s + 1
                 -- cff 1: (when cff2 strip them)
-                elseif t == 1 or t == 3 or t == 18 or operation == 23 then
+                elseif t == 1 or t == 3 or t == 18 or t == 23 then
                     p_getstem() -- at the start
                     if version == "cff" then
 --                     if true then

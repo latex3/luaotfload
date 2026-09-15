@@ -1,6 +1,6 @@
 return {
  ["hashes"]={
-  { "fontloader-2023-12-28.lua", "f33a8946b4d6a005e76276706db83059" },
+  { "fontloader-2023-12-28.lua", "96efe50efa31e373f9fdd59eabbdf09e" },
   { "fontloader-util-fil.lua", "d0accf4180201efd567816a25ad5e037" },
   { "fontloader-util-str.lua", "f9cf43057eb25bbf466821908686fc3d" },
   { "fontloader-l-unicode.lua", "f368874f11f3c525de5864fd413e4b24" },
@@ -45,7 +45,7 @@ return {
   { "fontloader-font-oti.lua", "309a75f9c14b77d87e94eba827dc4e71" },
   { "fontloader-font-dsp.lua", "d07a0663bafeb7603c5456639afaf2e8" },
   { "fontloader-font-ttf.lua", "ff94e130d7c71edd899c4bae7745b7db" },
-  { "fontloader-font-cff.lua", "999da544079698ce70178fd84bcdd67a" },
+  { "fontloader-font-cff.lua", "9743312bfa1069f1c1b9f25a3927aa27" },
   { "fontloader-font-otr.lua", "2958a21bebcf0579f4e11f0646d1b402" },
   { "fontloader-font-vfc.lua", "a81c29eda98cd62cbebdb6c93544b50d" },
   { "fontloader-font-map.lua", "b1444428c238a17d2a998ff1a4769183" },
@@ -53,7 +53,7 @@ return {
   { "fontloader-font-con.lua", "ebdd0ca857deafdc0152c7a4f1ed2490" },
   { "fontloader-font-ini.lua", "16b855c98602e4a3e9df39512916a427" },
   { "fontloader-data-con.lua", "b4ab51aaeab872d86d827f3e216bf05e" },
-  { "fontloader-reference.lua", "23d03b682af6417aa08995f2ec10de22" },
+  { "fontloader-reference.lua", "bae1350974c5c5e918c6e0b61ccada28" },
   { "fontloader-basics-gen.lua", "a506fcee90c14e628036968f82aa3b56" },
   { "luaotfload-glyphlist.lua", "318f90335db5b786ea0454d973ed5460" },
   { "luaotfload-characters.lua", "76415ca3ede312cad6e09038323489ae" },

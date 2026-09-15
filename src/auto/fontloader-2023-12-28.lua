@@ -11308,7 +11308,7 @@ end
      i=i+1
     elseif t==19 or t==20 then
      local s=p_getmask() or 0
-     if true then
+     if version=="cff" then
       if top>0 then
        for i=1,top do
         r=r+1;result[r]=encode[stack[i]]

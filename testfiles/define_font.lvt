@@ -1,0 +1,26 @@
+\input{regression-test}
+\documentclass{article}
+\begin{document}
+\START
+  \BEGINBOXTEST{By string}
+    \directlua{
+      tex.definefont("ByString",
+        luaotfload.define_font("texgyrepagella-regular", tex.sp "10pt")
+      )
+    }
+    \ByString The quick brown fox jumps over the lazy dog.
+  \ENDBOXTEST
+
+  \BEGINBOXTEST{By table}
+    \directlua{
+      tex.definefont("ByTable", luaotfload.define_font {
+        lookup   = "file",
+        name     = "texgyrepagella-italic",
+        size     = tex.sp "12pt",
+        features = {},
+      })
+    }
+    \ByTable The quick brown fox jumps over the lazy dog.
+  \ENDBOXTEST
+\END
+\end{document}

@@ -1,0 +1,116 @@
+This is a generated file for the l3build validation system.
+Don't change this file in any respect.
+============================================================
+TEST 1: By string
+============================================================
+luaotfload | cache : Lookup cache loaded from ../luaotfload-lookup-cache.luc.
+> \box...=
+\hbox(7.28+2.83)x202.16002, direction TLT
+.\ByString T
+.\ByString h
+.\ByString e
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString q
+.\ByString u
+.\ByString i
+.\ByString c
+.\ByString k
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString b
+.\ByString r
+.\ByString o
+.\kern-0.25 (font)
+.\ByString w
+.\ByString n
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString f
+.\kern-0.15 (font)
+.\ByString o
+.\kern-0.3 (font)
+.\ByString x
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString j
+.\ByString u
+.\ByString m
+.\kern-0.2 (font)
+.\ByString p
+.\ByString s
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString o
+.\kern-0.25 (font)
+.\ByString v
+.\kern-0.4 (font)
+.\ByString e
+.\ByString r
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString t
+.\kern0.15 (font)
+.\ByString h
+.\ByString e
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString l
+.\ByString a
+.\ByString z
+.\ByString y
+.\glue(\spaceskip) 2.5 plus 1.25 minus 0.83333
+.\ByString d
+.\ByString o
+.\ByString g
+.\ByString .
+! OK.
+<argument> \TESTBOX 
+l. ...  \ENDBOXTEST
+============================================================
+============================================================
+TEST 2: By table
+============================================================
+> \box...=
+\hbox(8.796+3.312)x218.988, direction TLT
+.\ByTable T
+.\ByTable h
+.\ByTable e
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable q
+.\ByTable u
+.\ByTable i
+.\ByTable c
+.\ByTable k
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable b
+.\ByTable r
+.\ByTable o
+.\ByTable w
+.\ByTable n
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable f
+.\ByTable o
+.\ByTable x
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable j
+.\ByTable u
+.\ByTable m
+.\ByTable p
+.\ByTable s
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable o
+.\ByTable v
+.\ByTable e
+.\ByTable r
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable t
+.\ByTable h
+.\ByTable e
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable l
+.\ByTable a
+.\ByTable z
+.\ByTable y
+.\glue(\spaceskip) 3.0 plus 1.5 minus 1.0
+.\ByTable d
+.\ByTable o
+.\ByTable g
+.\ByTable .
+! OK.
+<argument> \TESTBOX 
+l. ...  \ENDBOXTEST
+============================================================

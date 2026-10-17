@@ -53,7 +53,9 @@ local luaotfload_callbacks  = { }
 
 local function rewrite_fontname(tfmdata, specification)
   local format = tfmdata.format or tfmdata.properties.format
-  if stringfind (specification, " ") then
+  if type(specification) == "table" then
+    tfmdata.name = specification.name
+  elseif stringfind (specification, " ") then
     tfmdata.name = stringformat ("%q", specification)
   else
     --- other specs should parse just fine
